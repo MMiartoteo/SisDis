@@ -12,7 +12,7 @@ public class Word {
 	}
 	
 	private boolean isVowel(char c) {
-		return ("AEIOUçƒêîòËéíñô".indexOf(c) != -1);
+		return ("AEIOUÃÃ‰ÃÃ“ÃšÃ€ÃˆÃŒÃ’Ã™".indexOf(c) != -1);
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class Word {
 				} else {
 					result.append(word.substring(s,s+2) + "-"); s+=2;
 				}
-			} else if (s+1 < a.length() && "Iêí".indexOf(a.charAt(s+1)) != -1) {
+			} else if (s+1 < a.length() && "IÃÃŒ".indexOf(a.charAt(s+1)) != -1) {
 				if (s>1 && a.substring(s-1,s+1)=="QU" && isVowel(a.charAt(s+2))) {
 					result.append(word.substring(s,s+2)); s += 2;
 				} else if (s+2 < a.length() && isVowel(a.charAt(s+2))) {
@@ -47,7 +47,7 @@ public class Word {
 				} else {
 					result.append(word.charAt(s)); s++;
 				}
-			} else if ("IêíUòô".indexOf(a.charAt(s))!=-1) {
+			} else if ("IÃÃŒUÃšÃ™".indexOf(a.charAt(s))!=-1) {
 				result.append(word.charAt(s)); s++;
 			} else {
 				result.append(word.charAt(s) + "-"); s++;
