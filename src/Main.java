@@ -8,7 +8,7 @@ public class Main {
 	public static void main(String[] args) {
 		
 		/*
-		 * Qui si dovrebbe chiamare il server per dargli la disponibilitˆ,
+		 * Qui si dovrebbe chiamare il server per dargli la disponibilita',
 		 * aspettare la risposta e poi avviare il gioco
 		 * */
 
