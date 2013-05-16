@@ -1,4 +1,4 @@
-<project name="Peersim" default="compile" basedir=".">
+<project name="Roundword" default="build" basedir=".">
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
@@ -13,11 +13,11 @@
 		
 	</path>
 
-	<target name="compile">
+	<target name="build">
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${build}" />
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" classpathref="compile.path" />
+		<javac srcdir="${src}" destdir="${build}" classpathref="compile.path" debug="true" debuglevel="lines,vars,source" />
 	</target>
 
 	<target name="doc">

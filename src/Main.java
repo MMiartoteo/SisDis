@@ -9,6 +9,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		
+		Peer p = new Peer("p1", "100", "9000", null);
+		
 		/*
 		 * Qui si dovrebbe chiamare il server per dargli la disponibilita',
 		 * aspettare la risposta e poi avviare il gioco
