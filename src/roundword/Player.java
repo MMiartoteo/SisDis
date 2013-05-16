@@ -9,5 +9,22 @@ public class Player {
 	
 	//IP Address, or other information to contact him
 	
+	public Player(String nickname) {
+		this.nickName = nickname;
+		points = 0;
+	}
+	
+	public void setPoints(int points) {
+		this.points = points;
+	}
+	
+	public int getPoints() {
+		return points;
+	}
+	
+	@Override
+	public String toString() {
+		return nickName;
+	}
 	
 }

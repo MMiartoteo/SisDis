@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class Dictionary {
 	
-	private Set<String> dictionary;
+	private Set<String> wordSet;
 	
 	public Dictionary(String path) throws FileNotFoundException, IOException {
 		loadDictionary(path);
@@ -24,23 +24,22 @@ public class Dictionary {
 	 * @throws IllegalArgumentException if the file doesn't exists
 	 */
 	private void loadDictionary(String path) throws FileNotFoundException, IOException {
-		dictionary = new HashSet<String>();
+		wordSet = new HashSet<String>();
 		BufferedReader br = new BufferedReader(new FileReader(path));
 		String word = br.readLine();
 		while(word != null) {
-			dictionary.add(word.toUpperCase());
+			wordSet.add(word.toUpperCase());
 			word = br.readLine();
 		}
 		br.close();
-		
-		for (String w : dictionary) {
-			Word w2 = new Word(w);
-			System.out.println(w2.getLastSyllable());
-		}
+	}
+	
+	public Set<String> getWordSet() {
+		return wordSet;
 	}
 	
 	public boolean contains(String word) {
-		return dictionary.contains(word);
+		return wordSet.contains(word);
 	}
 
 }
