@@ -2,6 +2,9 @@ package roundword.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -9,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
 import roundword.GameTable;
+import roundword.Word;
 
 public class GameFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -23,6 +27,7 @@ public class GameFrame extends JFrame {
 	public GameFrame(GameTable gameTable) {
 		this.gameTable = gameTable;
 		initialize();
+		pack();
 	}
 	
 	/**
@@ -43,7 +48,7 @@ public class GameFrame extends JFrame {
 		contentPane.add(infoBar, BorderLayout.NORTH);
 		infoBar.setLayout(new BorderLayout(0, 0));
 		
-		JPanel panPlayerInfo = new PlayerInfoPanel();
+		JPanel panPlayerInfo = new PlayerInfoPanel(gameTable);
 		infoBar.add(panPlayerInfo, BorderLayout.WEST);
 		panPlayerInfo.setBorder(new EmptyBorder(10, 10, 10, 10));
 		
@@ -71,8 +76,16 @@ public class GameFrame extends JFrame {
 		controlsBar.setLayout(new BorderLayout(0, 0));
 		
 		JButton btnExit = new JButton("Esci");
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent actionEvent) { exit(); }
+		});
 		btnExit.setAlignmentX(Component.CENTER_ALIGNMENT);
 		controlsBar.add(btnExit, BorderLayout.EAST);
+
+	}
+
+	void exit() {
+		this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 
 }

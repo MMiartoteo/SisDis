@@ -1,4 +1,4 @@
-package roundword.peer;
+package roundword.net;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

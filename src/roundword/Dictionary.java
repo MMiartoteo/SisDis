@@ -11,9 +11,18 @@ import java.util.*;
  * separated by the '\n' character
  */
 public class Dictionary {
-	
+
+	// ------------------------------------------------------------------------
+	// FIELDS
+	// ------------------------------------------------------------------------
+
 	private Set<String> wordSet;
-	
+
+
+	// ------------------------------------------------------------------------
+	// METHODS
+	// ------------------------------------------------------------------------
+
 	public Dictionary(String path) throws FileNotFoundException, IOException {
 		loadDictionary(path);
 	}

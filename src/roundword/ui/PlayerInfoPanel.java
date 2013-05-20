@@ -1,5 +1,8 @@
 package roundword.ui;
 
+import roundword.GameTable;
+import roundword.Word;
+
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
@@ -8,13 +11,22 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Component;
 import javax.swing.Box;
 
-public class PlayerInfoPanel extends JPanel {
+public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 	private static final long serialVersionUID = 1L;
+
+	GameTable gameTable;
+
+	JLabel lblPoints;
+	JLabel lblNickname;
 
 	/**
 	 * Create the panel.
 	 */
-	public PlayerInfoPanel() {
+	public PlayerInfoPanel(GameTable gameTable) {
+
+		this.gameTable = gameTable;
+		gameTable.addEventListener(this);
+
 		setBackground(UIConstants.InfoBarBackgroundColor);
 		setLayout(new BorderLayout(0, 0));
 		
@@ -28,7 +40,7 @@ public class PlayerInfoPanel extends JPanel {
 		add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
-		JLabel lblNickname = new JLabel("Nickname");
+		lblNickname = new JLabel(gameTable.getOwnPlayer().toString());
 		lblNickname.setForeground(UIConstants.TextColor);
 		lblNickname.setFont(UIConstants.TextNormalFont.deriveFont(30f));
 		panel.add(lblNickname);
@@ -42,7 +54,7 @@ public class PlayerInfoPanel extends JPanel {
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		panelPoints.add(horizontalStrut);
 		
-		JLabel lblPoints = new JLabel("1000 ");
+		lblPoints = new JLabel(String.valueOf(gameTable.getOwnPlayer().getPoints()));
 		lblPoints.setForeground(UIConstants.TextColor);
 		lblPoints.setFont(UIConstants.TextNormalFont.deriveFont(16f));
 		panelPoints.add(lblPoints);
@@ -54,4 +66,13 @@ public class PlayerInfoPanel extends JPanel {
 
 	}
 
+	@Override
+	public void newWordAdded(Word w) {
+
+	}
+
+	@Override
+	public void playersPointsUpdate() {
+		lblPoints.setText(String.valueOf(gameTable.getOwnPlayer().getPoints()));
+	}
 }

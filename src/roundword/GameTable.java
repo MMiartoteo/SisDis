@@ -1,8 +1,6 @@
 package roundword;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * This represents the game table, that contains 
@@ -10,9 +8,35 @@ import java.util.List;
  * players, like the list of other players with their points,
  * or the list of written words.
  * */
-public class GameTable {
+public class GameTable implements Player.EventListener {
 
-	List<Player> players;
+	// ------------------------------------------------------------------------
+	// INTERFACES
+	// ------------------------------------------------------------------------
+
+	public interface EventListener extends java.util.EventListener {
+
+		//Called when a new word is added
+		void newWordAdded(Word w);
+
+		//Called when a/some player/s changes its point
+		void playersPointsUpdate();
+	}
+
+	// ------------------------------------------------------------------------
+	// FIELDS
+	// ------------------------------------------------------------------------
+
+	/**
+	 * The list of all players
+	 */
+	List<Player> playersList;
+
+	/**
+	 * The player that plays in the current client
+	 * This must be present in the players list to
+	 */
+	Player ownPlayer;
 	
 	/**
 	 * This represent the words list (i.e. the written words).
@@ -27,18 +51,31 @@ public class GameTable {
 	Date timeOfLastWordShowed;
 	
 	/**
-	 * The callback that is call when a new word is inserted
+	 * The list of listener for callback that is call when a new word is inserted
 	 * */
-	Runnable onNewWordAddedListener;
+	Set<EventListener> eventListeners;
+
+
+	// ------------------------------------------------------------------------
+	// METHODS 
+	// ------------------------------------------------------------------------
 	
-	
-	public GameTable() {
-		players = new ArrayList<Player>();
+	public GameTable(List<Player> playersList, Player ownPlayer) {
+		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
+
+		this.playersList = playersList;
+		for (Player p : playersList) p.addEventListener(this);
+		this.ownPlayer = ownPlayer;
+
 		words = new ArrayList<Word>();
 	}
 	
 	public List<Player> getPlayersList() {
-		return players;
+		return playersList;
+	}
+
+	public Player getOwnPlayer() {
+		return ownPlayer;
 	}
 	
 	public List<Word> getWordsList() {
@@ -47,11 +84,21 @@ public class GameTable {
 	
 	public void addWord(Word w) {
 		words.add(0, w);
-		if (onNewWordAddedListener != null) onNewWordAddedListener.run();
+		for (EventListener el : eventListeners) el.newWordAdded(w);
 	}
 	
-	public void setOnNewWordAddedListener(Runnable listener) {
-		onNewWordAddedListener = listener;
+	public void addEventListener(EventListener listener) {
+		eventListeners.add(listener);
 	}
+
+	public void removeEventListener(EventListener listener) {
+		eventListeners.remove(listener);
+	}
+
+	@Override
+	public void playerPointsUpdated(Player sender) {
+		for (EventListener el : eventListeners) el.playersPointsUpdate();
+	}
+
 
 }

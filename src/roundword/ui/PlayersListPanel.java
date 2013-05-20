@@ -12,30 +12,37 @@ import javax.swing.border.MatteBorder;
 
 import roundword.GameTable;
 import roundword.Player;
+import roundword.Word;
 
-public class PlayersListPanel extends JPanel {
+public class PlayersListPanel extends JPanel implements GameTable.EventListener {
 	private static final long serialVersionUID = 1L;
 	
 	JList playersList;
-	
-	AbstractListModel model;
+
+	PlayersListModel model;
+
+	public static final Dimension MinimumDimension = new Dimension(150, 100);
 
 	/**
 	 * Create the panel.
 	 */
 	public PlayersListPanel() { this(null); }
 	public PlayersListPanel(GameTable gameTable) {
-		setPreferredSize(new Dimension(200, 300));
 		setLayout(new BorderLayout(0, 0));
 		setBackground(UIConstants.BackgroundColor);
+		setMinimumSize(MinimumDimension);
+		setPreferredSize(MinimumDimension);
+		if (gameTable != null) model = new PlayersListModel(gameTable.getPlayersList());
 		
 		playersList = new JList();
 		playersList.setBorder(new MatteBorder(0, 1, 0, 0, UIConstants.BordersColor));
 		playersList.setCellRenderer(new PlayersListElement());
 		playersList.setBackground(UIConstants.BackgroundColor);
 		playersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		if (gameTable != null) playersList.setModel(new PlayersListModel(gameTable.getPlayersList()));
+		if (model != null) playersList.setModel(model);
 		add(playersList);
+
+		gameTable.addEventListener(this);
 
 	}
 	
@@ -44,4 +51,13 @@ public class PlayersListPanel extends JPanel {
 		playersList.setModel(model);
 	}
 
+	@Override
+	public void newWordAdded(Word w) {
+
+	}
+
+	@Override
+	public void playersPointsUpdate() {
+		model.elementRefreshed();
+	}
 }

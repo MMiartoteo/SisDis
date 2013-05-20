@@ -1,4 +1,4 @@
-package roundword.peer;
+package roundword.net;
 
 public class Peer {
 	
@@ -30,5 +30,9 @@ public class Peer {
 	public void start_client_side() {
         client = new ClientSide();
         client.start();
+	}
+
+	public void send_msg(Msg m) {
+		client.send_msg(m);
 	}
 }

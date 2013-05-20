@@ -1,10 +1,7 @@
-package roundword.peer;
+package roundword.net;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.*;
 
 public class ClientSide extends Thread {
@@ -12,7 +9,7 @@ public class ClientSide extends Thread {
 	BlockingQueue msgQ;
 	
 	public ClientSide() {
-		msgQ = new ArrayBlockingQueue<Msg>(2^20);
+		msgQ = new LinkedBlockingDeque(2^20);
 	}
 	
 	public void run() {
@@ -21,7 +18,7 @@ public class ClientSide extends Thread {
 			System.out.println("Client cycle!");
 			Msg m = null;
 			try {
-				m = (Msg) msgQ.poll(10, TimeUnit.SECONDS);
+				m = (Msg) msgQ.poll(NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);
 			}
 			catch (InterruptedException e) {
 				// ??
@@ -33,13 +30,13 @@ public class ClientSide extends Thread {
     
     public void send_msg(Msg m) {
 		// Incoda (bloccante?)
-		try {msgQ.offer(m, 10, TimeUnit.SECONDS);}
+		try {msgQ.offer(m, NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);}
 		catch (InterruptedException e) {}
 	}
 	
 	private void send_msg_rmi(Msg m) {
 		try {
-			Registry registry = LocateRegistry.getRegistry(m.dest_host, 8000);
+			Registry registry = LocateRegistry.getRegistry(m.dest_host, NetConstants.LocateRegistryPort);
 			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
 			
 			String response = "";

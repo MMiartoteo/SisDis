@@ -17,7 +17,12 @@ public class PlayersListModel extends AbstractListModel {
 	public int getSize() {
 		return players.size();
 	}
+
 	public Object getElementAt(int index) {
 		return players.get(index);
+	}
+
+	public void elementRefreshed() {
+		super.fireContentsChanged(this, 0, getSize());
 	}
 }

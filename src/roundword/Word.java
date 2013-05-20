@@ -2,12 +2,20 @@ package roundword;
 
 
 public class Word {
-	
+
+	// ------------------------------------------------------------------------
+	// FIELDS
+	// ------------------------------------------------------------------------
+
 	public static final int[] letterValues = {1, 5, 2, 5, 1, 5, 8, 8, 1, 10, 5, 3, 3, 3, 1, 5, 10, 2, 2, 2, 3, 5, 10, 8, 4, 8}; 
 	
 	String word;
 	int lastSyllableIndex;
-	
+
+	// ------------------------------------------------------------------------
+	// METHODS
+	// ------------------------------------------------------------------------
+
 	public Word(String word) {
 		this.word = word.toUpperCase();
 		lastSyllableIndex = calculateLastSyllableIndex();

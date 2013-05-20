@@ -1,28 +1,29 @@
+import java.util.ArrayList;
 import java.util.List;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Set;
+import java.util.Random;
+
 import roundword.*;
 import roundword.ui.*;
-import roundword.peer.*;
+import roundword.net.*;
 
 public class Main {
 
 	public static void main(String[] args) {
 		
 		Peer p = new Peer("p1", "100", "9000", null);
-		p.client.send_msg(new Msg("127.0.0.1", Msg.MsgType.HELLO, ""));
+		p.send_msg(new Msg("127.0.0.1", Msg.MsgType.HELLO, ""));
 		
 		/*
 		 * Qui si dovrebbe chiamare il server per dargli la disponibilita',
 		 * aspettare la risposta e poi avviare il gioco
 		 * */
-		
-		GameTable table = new GameTable();
-		List<Player> pl = table.getPlayersList();
-		pl.add(new Player("Miro"));
+
+		Player ownPlayer = new Player("Miro");
+		List<Player> pl = new ArrayList<Player>();
+		pl.add(ownPlayer);
 		pl.add(new Player("Ciccio"));
 		pl.add(new Player("Tizio"));
+		GameTable table = new GameTable(pl, ownPlayer);
 		table.addWord(new Word("CASA"));
 		table.addWord(new Word("SALE"));
 		table.addWord(new Word("LETTO"));
@@ -42,12 +43,14 @@ public class Main {
 			}
 			
 			public void run() {
+				Random rnd = new Random();
 				String[] words = {"CHIODO", "DORATO", "TOMO", "MODERNO", "NOVE", "VELI"};
 				for (int i = 0; i < words.length; i++) {
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) { }
 					t.addWord(new Word(words[i]));
+					t.getOwnPlayer().setPoints(t.getOwnPlayer().getPoints() + rnd.nextInt(10000000));
 				}
 			}
 		}

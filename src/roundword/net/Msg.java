@@ -1,7 +1,4 @@
-package roundword.peer;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+package roundword.net;
 
 public class Msg {
 	
