@@ -6,9 +6,77 @@ import roundword.*;
 import roundword.ui.*;
 import roundword.net.*;
 
+import java.net.*;
+import java.io.*;
+
 public class Main {
 
 	public static void main(String[] args) {
+		
+		int SEC_WAIT = 2;
+		
+		/// 0 - Leggi parametri del giocatore e del peer locale
+		String player_name = args[0];
+		String portno = args[1]; // TODO <--- REGISTRALA ANCHE NEL PEER?
+		System.out.println(player_name + ", " + portno);
+		
+		/// 1 - Contatta il registrar centrale
+		/* 
+		 * Per ottenere la lista dei giocatori, dei loro peer associati
+		 * e l'ordine di gioco.
+		 * */
+		while (true) {
+			System.out.println("Contacting registrar...");
+			
+			HttpURLConnection connection = null;
+			String response = null;
+			try {
+				URL serverAddress = new URL(String.format("http://localhost:8080/%s/%s", player_name, portno));
+				connection = (HttpURLConnection)serverAddress.openConnection();
+				connection.setRequestMethod("GET");
+				connection.setDoOutput(true);
+				connection.setReadTimeout(10000);
+				connection.connect();
+				BufferedReader rd  = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				StringBuilder sb = new StringBuilder();
+				String line = null;
+				while ((line = rd.readLine()) != null) {
+				  sb.append(line + "\n");
+				}
+				response = sb.toString();
+				System.out.println(response);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (ProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally{
+				//close the connection, set all objects to null
+				connection.disconnect();
+				if (response.split("\n")[0].equals("start")) break;
+			}
+			
+			try {
+				Thread.sleep(SEC_WAIT*1000);
+			} catch(InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+		}
+		
+		/// 2 - Contatta ogni signolo peer per dirgli "okay ci sono"
+		
+		/// 3 - Lo stato condiviso è composto da:
+		/*
+		 * 1) La lista dei giocatori presenti con i loro punteggi
+		 * 2) La lista delle parole fino ad ora giocate (vuota all'inizio)
+		 * ...
+		 * */
+		
+		
+		
+		
+		
 		
 		Peer p = new Peer("p1", "100", "9000", null);
 		p.send_msg(new Msg("127.0.0.1", Msg.MsgType.HELLO, ""));
