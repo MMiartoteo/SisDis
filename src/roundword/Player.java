@@ -51,7 +51,11 @@ public class Player {
 	public int getPoints() {
 		return points;
 	}
-
+	
+	public String getNickName() {
+		return nickName;
+	}
+	
 	public void addEventListener(EventListener listener) {
 		eventListeners.add(listener);
 	}

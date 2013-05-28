@@ -1,7 +1,4 @@
 package roundword.net;
-
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.concurrent.*;
 
 public class ClientSide extends Thread {
@@ -30,25 +27,22 @@ public class ClientSide extends Thread {
     
     public void send_msg(Msg m) {
 		// Incoda (bloccante?)
-		try {msgQ.offer(m, NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);}
-		catch (InterruptedException e) {}
+		try {
+			msgQ.offer(m, NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// ??
+		}
 	}
 	
 	private void send_msg_rmi(Msg m) {
+		System.out.println("Provo a inviare messaggio " + m);
 		try {
-			Registry registry = LocateRegistry.getRegistry(m.dest_host, NetConstants.LocateRegistryPort);
-			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-			
-			String response = "";
-			switch (m.type) {
-				case HELLO: response = stub.sayHello(); break;
-				default: throw new Exception("Wrong message name "+m.type);
-			}
-			
+			String response = m.execute();
 			System.out.println("response: " + response);
 		} catch (Exception e) {
 			System.err.println("Client exception: " + e.toString());
 			e.printStackTrace();
 		}
+		// NOTA: Qui poi dovrai beccare gli errori di connessione per sgamare peer "crashed"
 	}
 }

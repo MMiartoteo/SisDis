@@ -1,18 +1,18 @@
 package roundword.net;
 
-public class Msg {
-	
-	public enum MsgType {
-		HELLO
-	};
+public abstract class Msg {
 	
 	String dest_host;
-	MsgType type;
-	String args;
+	int dest_portno;
 	
-	public Msg(String dest_host, MsgType type, String args) {
-		this.dest_host = dest_host;
-		this.type = type;
-		this.args = args;
+	public Msg(Peer to) {
+		this.dest_host = to.IPaddr;
+		this.dest_portno = to.server_portno;
 	}
+	
+	public String toString() {
+		return String.format("(%s)%s:%s", getClass().getName(), this.dest_host, this.dest_portno);
+	}
+	
+	public abstract String execute() throws Exception;
 }

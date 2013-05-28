@@ -9,6 +9,8 @@ import roundword.net.*;
 import java.net.*;
 import java.io.*;
 
+import org.json.JSONArray;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -17,7 +19,7 @@ public class Main {
 		
 		/// 0 - Leggi parametri del giocatore e del peer locale
 		String player_name = args[0];
-		String portno = args[1]; // TODO <--- REGISTRALA ANCHE NEL PEER?
+		int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
 		System.out.println(player_name + ", " + portno);
 		
 		/// 1 - Contatta il registrar centrale
@@ -25,11 +27,11 @@ public class Main {
 		 * Per ottenere la lista dei giocatori, dei loro peer associati
 		 * e l'ordine di gioco.
 		 * */
+		String response = null;
 		while (true) {
 			System.out.println("Contacting registrar...");
 			
 			HttpURLConnection connection = null;
-			String response = null;
 			try {
 				URL serverAddress = new URL(String.format("http://localhost:8080/%s/%s", player_name, portno));
 				connection = (HttpURLConnection)serverAddress.openConnection();
@@ -54,7 +56,11 @@ public class Main {
 			} finally{
 				//close the connection, set all objects to null
 				connection.disconnect();
-				if (response.split("\n")[0].equals("start")) break;
+				if (response.split("\n")[0].equals("nickname-present")) {
+					System.out.println(String.format("The nickname %s has already been taken. Choose a different nickname.", player_name));
+					System.exit(1);
+				}
+				else if (response.split("\n")[0].equals("start")) break;
 			}
 			
 			try {
@@ -63,6 +69,55 @@ public class Main {
 				Thread.currentThread().interrupt();
 			}
 		}
+		
+		// Estrai lista dei peer/giocatori partecipanti dal Json
+		JSONArray peers_players = new JSONArray((response.split("\n")[1]));
+		System.out.println(peers_players);
+		
+		List<Player> players = new ArrayList<Player>();
+		List<Peer> peers = new ArrayList<Peer>();
+		
+		Player ownPlayer = null; // player locale
+		Peer p = null;           // peer locale
+		
+		for (int i=0; i<peers_players.length(); ++i) {
+			JSONArray player_info = peers_players.getJSONArray(i);
+			int player_ord = player_info.getInt(0);
+			JSONArray infos = player_info.getJSONArray(1);
+			String p_host = infos.getString(0);
+			int p_portno = Integer.parseInt(infos.getString(1));
+			String p_name = infos.getString(2);
+			
+			Player new_player = new Player(p_name);
+			players.add(new_player);
+			
+			Peer new_peer = new Peer(new_player, player_ord, p_host, p_portno);
+			if (player_name.equals(p_name) && portno == p_portno) {
+				ownPlayer = new_player;
+				p = new_peer;
+			}
+			else {
+				peers.add(new_peer);
+			}
+		}
+		if (ownPlayer == null || p == null) {
+			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
+			System.exit(1);
+		}
+		
+		// Add peer list to local peer
+		p.add_peer_list(peers);
+		
+		// Start local peer
+		p.start();
+		
+		
+		/// PROVA INVIO MESSAGGIO
+		//try {Thread.sleep(2000);} catch (Exception e) {System.exit(2);} // aspetto per far settare il server dall'altro lato
+		// Provo ad inviare un Hello al primo dei peer in lista
+		p.send_msg(new HelloMsg(p.peers.get(0)));
+		
+		
 		
 		/// 2 - Contatta ogni signolo peer per dirgli "okay ci sono"
 		
@@ -75,23 +130,13 @@ public class Main {
 		
 		
 		
-		
-		
-		
-		Peer p = new Peer("p1", "100", "9000", null);
-		p.send_msg(new Msg("127.0.0.1", Msg.MsgType.HELLO, ""));
-		
 		/*
 		 * Qui si dovrebbe chiamare il server per dargli la disponibilita',
 		 * aspettare la risposta e poi avviare il gioco
 		 * */
 
-		Player ownPlayer = new Player("Miro");
-		List<Player> pl = new ArrayList<Player>();
-		pl.add(ownPlayer);
-		pl.add(new Player("Ciccio"));
-		pl.add(new Player("Tizio"));
-		GameTable table = new GameTable(pl, ownPlayer);
+		
+		GameTable table = new GameTable(players, ownPlayer);
 		table.addWord(new Word("CASA"));
 		table.addWord(new Word("SALE"));
 		table.addWord(new Word("LETTO"));

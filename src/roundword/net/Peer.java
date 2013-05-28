@@ -1,4 +1,6 @@
 package roundword.net;
+import roundword.*;
+import java.util.List;
 
 public class Peer {
 	
@@ -6,33 +8,45 @@ public class Peer {
 		T execute();
 	}
 	
-	//~ String name;
-	//~ String IPaddr;
-	//~ String portno;
-	//~ String id;
-	
+	Player player;
+	int ord; // Usato per elezione leader
+	String IPaddr;
+	int server_portno;
+	public List<Peer> peers;
 	ClientSide client;
 	ServerSide server;
 	
-	public Peer(String name, String IPaddr, String portno, String[] peers_contacts) {
-		//~ this.name = name;
-		//~ this.IPaddr = IPaddr;
-		//~ this.portno = portno;
-		//~ this.id = IPaddr+":"+portno;
+	public Peer(Player player, int ord, String IPaddr, int server_portno) {
+		this.player = player;
+		this.ord = ord;
+		this.IPaddr = IPaddr;
+		this.server_portno = server_portno;
+	}
+	
+	public void add_peer_list(List<Peer> peers) {
+		// Chiamata solo sul peer locale
+		this.peers = peers;
+	}
+	
+	public void start() {
+		// Chiamata solo sul peer locale
 		this.start_server_side();
 		this.start_client_side();
 	}
 	
-	public void start_server_side() {
-		server = new ServerSide();
+	public void send_msg(Msg m) {
+		// Chiamata solo sul peer locale
+		client.send_msg(m);
 	}
 	
-	public void start_client_side() {
+	private void start_server_side() {
+		server = new ServerSide(this);
+	}
+	
+	private void start_client_side() {
         client = new ClientSide();
         client.start();
 	}
 
-	public void send_msg(Msg m) {
-		client.send_msg(m);
-	}
+	
 }

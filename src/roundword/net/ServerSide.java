@@ -6,10 +6,13 @@ import java.rmi.server.UnicastRemoteObject;
 
 
 public class ServerSide implements ServerSideInterface {
-	public ServerSide() {
+	Peer peer;
+	
+	public ServerSide(Peer peer) {
+		this.peer = peer;
 		try {
 			ServerSideInterface stub = (ServerSideInterface) UnicastRemoteObject.exportObject(this, 0);
-			Registry registry = LocateRegistry.createRegistry(NetConstants.LocateRegistryPort);
+			Registry registry = LocateRegistry.createRegistry(peer.server_portno);
 			registry.rebind("ServerSide", stub);
 			System.out.println("ComputeEngine bound");
 		}
@@ -17,9 +20,12 @@ public class ServerSide implements ServerSideInterface {
             System.err.println("ComputeEngine exception:");
             e.printStackTrace();
         }
+        finally {
+			System.out.println("Server ready");
+		}
 	}
 	
 	public String sayHello() {
-        return "Hello, world!";
+        return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
     }
 }
