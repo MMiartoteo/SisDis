@@ -31,8 +31,7 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 		setLayout(new BorderLayout(0, 0));
 		setBackground(UIConstants.BackgroundColor);
 		setMinimumSize(MinimumDimension);
-		setPreferredSize(MinimumDimension);
-		if (gameTable != null) model = new PlayersListModel(gameTable.getPlayersList());
+		if (gameTable != null) model = new PlayersListModel(gameTable.getPlayersList(), gameTable.getPlayingPlayer());
 		
 		playersList = new JList();
 		playersList.setBorder(new MatteBorder(0, 1, 0, 0, UIConstants.BordersColor));
@@ -46,8 +45,8 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 
 	}
 	
-	public void setModel(List<Player> players) {
-		model = new PlayersListModel(players);
+	public void setModel(List<Player> players, Player playingPlayer) {
+		model = new PlayersListModel(players, playingPlayer);
 		playersList.setModel(model);
 	}
 
@@ -60,4 +59,10 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 	public void playersPointsUpdate() {
 		model.elementRefreshed();
 	}
+
+	@Override
+	public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
+		model.playingPlayerChanges(oldPlayingPlayer, newPlayingPlayer);
+	}
+
 }

@@ -1,7 +1,9 @@
 package roundword;
 
 
-public class Word {
+import java.io.Serializable;
+
+public class Word implements Serializable {
 
 	// ------------------------------------------------------------------------
 	// FIELDS
@@ -112,7 +114,7 @@ public class Word {
 	public int getValue() {
 		int wordPoints = 0;
 		for (int j = 0; j < word.length(); j++) {
-			wordPoints += Word.letterValues[word.charAt(j) - 'a'];
+			wordPoints += Word.letterValues[word.charAt(j) - 'A'];
 		}
 		if (word.length() >= 5) wordPoints += 5 * (word.length() - 4);
 		return wordPoints;

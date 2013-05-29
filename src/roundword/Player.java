@@ -47,6 +47,10 @@ public class Player {
 			for (EventListener el : eventListeners) el.playerPointsUpdated(this);
 		}
 	}
+
+	public void addPoints(int points) {
+		setPoints(this.points + points);
+	}
 	
 	public int getPoints() {
 		return points;
