@@ -29,6 +29,7 @@ public class Peer {
 	TimerTask lastElectionTask;
 	
 	long lastSentMsgId = 0;
+	long lastSeenMsgId = 0;
 	
 	public Peer(Player player, int ord, String IPaddr, int server_portno) {
 		this.player = player;
@@ -133,27 +134,27 @@ public class Peer {
 	}
 	
 	protected void forwardWord(long id, String word) {
-		try{Thread.sleep(1000);} catch (Exception e) {}
+		//try{Thread.sleep(1000);} catch (Exception e) {}
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", ord, getNextPeer().ord));
 		send_msg(new WordMsg(getNextPeer(), id, word));
+		
+		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", ord, turnHolder));
+		lastWordTask = new TimerTask() {
+			@Override
+			public void run() {
+				System.out.println("Timer WordAck2 scaduto! Il coordinatore è morto, INDIRE ELEZIONE!!");
+				/// TODO: INDIRE ELEZIONE!
+			}
+		};
+		timer.schedule(lastWordTask, peers.size()*(T_trans+T_proc));
 	}
 	
 	protected void sendWordAck() {
-		lastSentMsgId++;
+		//lastSentMsgId++;
 		for (int i=(ord+1)%peers.size(); i!=ord; i=(i+1)%peers.size()) {
 			if (i==ord) break;
 			System.out.println(String.format("%s) Invio WordAck a peer %s", ord, i));
-			
-			lastWordTask = new TimerTask() {
-				@Override
-				public void run() {
-					System.out.println("Timer WordAck(2) scaduto!");
-					/// TODO: fai partire di nuovo il messaggio di Word, con id maggiore?
-					//sendWord(word);
-				}
-			};
-			
-			send_msg(new WordAckMsg(peers.get(i), lastSentMsgId, timer, lastWordTask, 2*T_trans+T_proc));
+			send_msg(new WordAckMsg(peers.get(i), lastSentMsgId));//, timer, lastWordTask, 2*T_trans+T_proc));
 		}
 	}
 	

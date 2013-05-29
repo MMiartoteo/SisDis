@@ -45,6 +45,7 @@ public class ServerSide implements ServerSideInterface {
 		System.out.println(String.format("Ricevuto Word \"%s\"", word));
 		// Fai il forward se non sei tu il turnista
 		if (!peer.isTurnHolder()) {
+			peer.lastSeenMsgId = id;
 			peer.forwardWord(id, word);
 		}
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
@@ -64,7 +65,15 @@ public class ServerSide implements ServerSideInterface {
 	}
 	
 	public String wordAck(long id) {
-		System.out.println();
+		System.out.println(String.format("Ricevuto WordAck2"));
+		if (id == peer.lastSeenMsgId) {
+			System.out.println("L'ack è corretto, cancello il relativo timer.");
+			peer.lastWordTask.cancel();
+			/// TODO: NUOVO TURNO!
+		}
+		else {
+			System.out.println("L'ack è vecchio, ignoro il messaggio.");
+		}
 		return "ok";
 	}
 }
