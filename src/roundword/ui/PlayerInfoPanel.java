@@ -1,6 +1,7 @@
 package roundword.ui;
 
 import roundword.GameTable;
+import roundword.Player;
 import roundword.Word;
 
 import javax.swing.JPanel;
@@ -75,4 +76,10 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 	public void playersPointsUpdate() {
 		lblPoints.setText(String.valueOf(gameTable.getOwnPlayer().getPoints()));
 	}
+
+	@Override
+	public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
+
+	}
+
 }

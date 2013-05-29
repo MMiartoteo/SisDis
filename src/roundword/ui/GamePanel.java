@@ -1,19 +1,60 @@
 package roundword.ui;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.BoxLayout;
+import javax.swing.*;
 import java.awt.*;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 import roundword.GameTable;
+import roundword.Player;
 import roundword.Word;
+
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.List;
 
 public class GamePanel extends JPanel implements GameTable.EventListener {
 	private static final long serialVersionUID = 1L;
+
+	class CharVerifier extends InputVerifier {
+		public boolean verify(JComponent input) {
+			return true;
+
+		}
+	}
+
+	class UppercaseDocumentFilter extends DocumentFilter {
+		public void insertString(DocumentFilter.FilterBypass fb, int offset,
+								 String text, AttributeSet attr) throws BadLocationException {
+
+			text = text.toUpperCase();
+			text = text.replaceAll("à", "A");
+			text = text.replaceAll("é", "E");
+			text = text.replaceAll("è", "E");
+			text = text.replaceAll("ì", "I");
+			text = text.replaceAll("ò", "O");
+			text = text.replaceAll("ù", "U");
+			text = text.replaceAll("[^A-Z]", "");
+			fb.insertString(offset, text.toUpperCase(), attr);
+		}
+
+		public void replace(DocumentFilter.FilterBypass fb, int offset, int length,
+							String text, AttributeSet attrs) throws BadLocationException {
+
+			text = text.toUpperCase();
+			text = text.replaceAll("à", "A");
+			text = text.replaceAll("é", "E");
+			text = text.replaceAll("è", "E");
+			text = text.replaceAll("ì", "I");
+			text = text.replaceAll("ò", "O");
+			text = text.replaceAll("ù", "U");
+			text = text.replaceAll("[^A-Z]", "");
+			fb.replace(offset, length, text.toUpperCase(), attrs);
+		}
+	}
 
 	GameTable gameTable;
 
@@ -29,9 +70,11 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 	public static final int LblWordColorIncrement = 50;
 	public static final String LblLastWord_InWordSyllableColor = "#0A0A0A";
 	public static final Font LblsFont = new Font("Lucida Grande", Font.PLAIN, 30);
-	public static final Dimension LblsDimensionMin = new Dimension(MinPanelWidth, 40);
-	public static final Dimension LblsDimensionMax = new Dimension(Integer.MAX_VALUE, 40);
-	public static final Dimension DimensionMin = new Dimension(MinPanelWidth, 40 * LAST_WORDS_NUMBER);
+	public static final int LblsHeightMin = 40;
+	public static final Dimension LblsDimensionMin = new Dimension(MinPanelWidth, LblsHeightMin);
+	public static final Dimension LblsDimensionMax = new Dimension(Integer.MAX_VALUE, LblsHeightMin);
+	public static final Dimension DimensionMin = new Dimension(MinPanelWidth,
+															   LblsHeightMin * (LAST_WORDS_NUMBER + 1) + 50);
 	
 	/**
 	 * Create the panel.
@@ -44,10 +87,12 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(UIConstants.BackgroundColor);
 		setMinimumSize(DimensionMin);
+		setPreferredSize(DimensionMin);
 
 		JPanel wordPanel = new JPanel();
 		wordPanel.setLayout(new BoxLayout(wordPanel, BoxLayout.Y_AXIS));
-		wordPanel.setBorder(new EmptyBorder(0,0,10,0));
+		wordPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
+		wordPanel.setBackground(UIConstants.BackgroundColor);
 		add(wordPanel);
 
 		JLabel lblInformazioniGiocatore = new JLabel("La tua parola");
@@ -60,11 +105,21 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		txtWord.setAlignmentX(Component.LEFT_ALIGNMENT);
 		txtWord.setHorizontalAlignment(SwingConstants.LEFT);
 		txtWord.setBackground(UIConstants.BackgroundColor);
-		txtWord.setText("nuova parola");
+		txtWord.setText("");
 		txtWord.setForeground(LblWordColor);
 		txtWord.setMaximumSize(LblsDimensionMax);
 		txtWord.setMinimumSize(LblsDimensionMin);
 		txtWord.setFont(LblsFont);
+		txtWord.setEnabled(false);
+		txtWord.setInputVerifier(new CharVerifier());
+		txtWord.addKeyListener(new KeyListener() {
+			public void keyTyped(KeyEvent keyEvent) {
+				if (keyEvent.getKeyChar() == '\n') endPlay();
+			}
+			public void keyPressed(KeyEvent keyEvent) {}
+			public void keyReleased(KeyEvent keyEvent) {}
+		});
+		((AbstractDocument) txtWord.getDocument()).setDocumentFilter(new UppercaseDocumentFilter());
 		wordPanel.add(txtWord);
 
 		JLabel lblInformazioniGiocatore2 = new JLabel("Le ultime parole");
@@ -83,17 +138,18 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 			lblLastsWord[i].setFont(LblsFont);
 			lblLastsWord[i].setMaximumSize(LblsDimensionMax);
 			lblLastsWord[i].setMinimumSize(LblsDimensionMin);
-			lblLastsWord[i].setPreferredSize(LblsDimensionMin);
+			//lblLastsWord[i].setPreferredSize(LblsDimensionMin);
 			add(lblLastsWord[i]);
 		}
-
-
 
 		//Refresh the list depending on the game table
 		refresh();
 
 		//Add we to the game table event listener, so we can update the words list graphically
 		gameTable.addEventListener(this);
+
+
+		if (gameTable.getPlayingPlayer() == gameTable.getOwnPlayer()) startPlay();
 
 	}
 
@@ -107,13 +163,26 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 						"<span style=\"font-weight:bold; color:" + LblLastWord_InWordSyllableColor + "\">" + 
 						w.getLastSyllableSubWord() + "</span></html>";
 				} else {
-					t = w.toString();
+					t = "<html>" + w.toString() + "<html>";
 				}
 			} else {
-				t = "<html></html>";
+				t = "<html> </html>";
 			}
 			lblLastsWord[i].setText(t);
 		}	
+	}
+
+	private void startPlay() {
+		txtWord.setEnabled(true);
+		txtWord.requestFocus();
+	}
+
+	private void endPlay() {
+		txtWord.setEnabled(false);
+		//TODO: check se la parola fa errore (non è presente nel dizionario, o non è conforme alla parola precedente, ecc...)
+		gameTable.addWord(new Word(txtWord.getText()));
+		txtWord.setText("");
+		gameTable.nextTurn();
 	}
 
 	@Override
@@ -125,4 +194,12 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 	public void playersPointsUpdate() {
 
 	}
+
+	@Override
+	public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
+		if (newPlayingPlayer == gameTable.getOwnPlayer()) {
+			startPlay();
+		}
+	}
+
 }

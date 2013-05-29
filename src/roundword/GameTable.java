@@ -21,6 +21,9 @@ public class GameTable implements Player.EventListener {
 
 		//Called when a/some player/s changes its point
 		void playersPointsUpdate();
+
+		//Called when the playing player changes
+		void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer);
 	}
 
 	// ------------------------------------------------------------------------
@@ -34,9 +37,15 @@ public class GameTable implements Player.EventListener {
 
 	/**
 	 * The player that plays in the current client
-	 * This must be present in the players list to
+	 * This must be present in the players list too
 	 */
 	Player ownPlayer;
+
+	/**
+	 * The player that is playing
+	 * This must be present in the players list too
+	 */
+	Player playingPlayer;
 	
 	/**
 	 * This represent the words list (i.e. the written words).
@@ -57,19 +66,57 @@ public class GameTable implements Player.EventListener {
 
 
 	// ------------------------------------------------------------------------
-	// METHODS 
+	// CONSTRUCTORS 
 	// ------------------------------------------------------------------------
-	
-	public GameTable(List<Player> playersList, Player ownPlayer) {
-		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 
+	/**
+	 * Create a game table. The player that is playing is the first player of the player list
+	 *
+	 * param: playersList the list of all players
+	 * param: ownPlayer the player that plays in the current client
+	 * */
+	public GameTable(List<Player> playersList, Player ownPlayer) {
+		this(playersList, ownPlayer, playersList.get(0));
+	}
+
+	/**
+	 * Create a game table.
+	 *
+	 * param: playersList the list of all players
+	 * param: ownPlayer the player that plays in the current client
+	 * param: playingPlayer the player that is playing
+	 * */
+	public GameTable(List<Player> playersList, Player ownPlayer, Player playingPlayer) {
+
+		if (playersList == null) throw new NullPointerException("playersList must be not null");
 		this.playersList = playersList;
-		for (Player p : playersList) p.addEventListener(this);
+
+		if (ownPlayer == null) throw new NullPointerException("ownPlayer must be not null");
 		this.ownPlayer = ownPlayer;
 
+		if (playingPlayer == null) throw new NullPointerException("playingPlayer must be not null");
+		this.playingPlayer = playingPlayer;
+
+		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		words = new ArrayList<Word>();
+
+		boolean ownPlayerFounded = false;
+		boolean playingPlayerFounded = false;
+		for (Player p : playersList) {
+			if (p == ownPlayer) ownPlayerFounded = true;
+			if (p == playingPlayer) playingPlayerFounded = true;
+			p.addEventListener(this);
+		}
+
+		//Check for errors
+		if (!ownPlayerFounded) throw new IllegalArgumentException("the ownPlayer must be in the playersList");
+		if (!playingPlayerFounded) throw new IllegalArgumentException("the playingPlayer must be in the playersList");
 	}
-	
+
+	// ------------------------------------------------------------------------
+	// METHODS 
+	// ------------------------------------------------------------------------
+
 	public List<Player> getPlayersList() {
 		return playersList;
 	}
@@ -77,15 +124,68 @@ public class GameTable implements Player.EventListener {
 	public Player getOwnPlayer() {
 		return ownPlayer;
 	}
+
+	public Player getPlayingPlayer() {
+		return playingPlayer;
+	}
+
+	public void setPlayingPlayer(Player playingPlayer) {
+		if (playingPlayer == null) throw new NullPointerException("playingPlayer must be not null");
+
+		if (this.playingPlayer != playingPlayer) {
+			Player oldPlayingPlayer = this.playingPlayer;
+			this.playingPlayer = playingPlayer;
+
+			//Check for errors
+			boolean playingPlayerFounded = false;
+			for (Player p : playersList) {
+				if (p == playingPlayer) playingPlayerFounded = true;
+			}
+			if (!playingPlayerFounded) throw new IllegalArgumentException("the playingPlayer must be in the playersList");
+
+			//Callbacks call
+			for (EventListener el : eventListeners) el.playingPlayerChanged(oldPlayingPlayer, playingPlayer);
+		}
+	}
 	
 	public List<Word> getWordsList() {
 		return words;
 	}
-	
+
+	/**
+	 * Add a new word to the game table. Is assumed that the current playing player is the author of this word
+	 * */
 	public void addWord(Word w) {
+		if (w == null) throw new NullPointerException("the word must be not null");
 		words.add(0, w);
+		playingPlayer.addPoints(w.getValue());
+
+		//Callbacks call
 		for (EventListener el : eventListeners) el.newWordAdded(w);
 	}
+
+	/**
+	 * We go to the next turn, the playing player will be the next of the player list.
+	 * */
+	public void nextTurn() {
+		Player oldPlayingPlayer = playingPlayer;
+
+		boolean playingPlayerFounded = false;
+		Iterator<Player> i = playersList.iterator();
+		while (i.hasNext()) {
+			if (oldPlayingPlayer == i.next()) {
+				playingPlayerFounded = true;
+				break;
+			}
+		}
+		playingPlayer = (i.hasNext()) ? i.next() : playersList.get(0);
+		if (!playingPlayerFounded) new RuntimeException("the next turn can't found the current playing player");
+
+		//Callbacks call
+		for (EventListener el : eventListeners) el.playingPlayerChanged(oldPlayingPlayer, playingPlayer);
+	}
+
+	// Listeners --------------------------------------------------------------
 	
 	public void addEventListener(EventListener listener) {
 		eventListeners.add(listener);

@@ -3,9 +3,9 @@ package roundword.ui;
 import roundword.Player;
 
 import java.awt.*;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import roundword.ui.PlayersListModel.PlayerInfo;
 
 public class PlayersListElement extends JPanel implements ListCellRenderer {
 	private static final long serialVersionUID = 1L;
@@ -46,8 +46,9 @@ public class PlayersListElement extends JPanel implements ListCellRenderer {
 
 	public Component getListCellRendererComponent(JList list, Object value, int index,
 												  boolean isSelected, boolean cellHasFocus) {
+		PlayerInfo pInfo = (PlayerInfo) value;
 		lblNickname.setText(value.toString());
-		lblPoints.setText(String.valueOf(((Player)value).getPoints()));
+		lblPoints.setText(String.valueOf(pInfo.getPlayer().getPoints()));
 
 		//change the colors with the position
 		if (index % 2 == 0) {

@@ -16,21 +16,21 @@ public class Main {
 	public static void main(String[] args) {
 		
 		int SEC_WAIT = 2;
-		
+
 		/// 0 - Leggi parametri del giocatore e del peer locale
 		String player_name = args[0];
 		int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
 		System.out.println(player_name + ", " + portno);
-		
+
 		/// 1 - Contatta il registrar centrale
-		/* 
+		/*
 		 * Per ottenere la lista dei giocatori, dei loro peer associati
 		 * e l'ordine di gioco.
 		 * */
 		String response = null;
 		while (true) {
 			System.out.println("Contacting registrar...");
-			
+
 			HttpURLConnection connection = null;
 			try {
 				URL serverAddress = new URL(String.format("http://localhost:8080/%s/%s", player_name, portno));
@@ -62,18 +62,18 @@ public class Main {
 				}
 				else if (response.split("\n")[0].equals("start")) break;
 			}
-			
+
 			try {
 				Thread.sleep(SEC_WAIT*1000);
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 		}
-		
+
 		// Estrai lista dei peer/giocatori partecipanti dal Json
 		JSONArray peers_players = new JSONArray((response.split("\n")[1]));
 		System.out.println(peers_players);
-		
+
 		List<Player> players = new ArrayList<Player>();
 		List<Peer> peers = new ArrayList<Peer>();
 		
@@ -140,43 +140,73 @@ public class Main {
 		 * aspettare la risposta e poi avviare il gioco
 		 * */
 
-		
-		GameTable table = new GameTable(players, localPlayer);
-		table.addWord(new Word("CASA"));
-		table.addWord(new Word("SALE"));
-		table.addWord(new Word("LETTO"));
-		table.addWord(new Word("TORCHIO"));
-		
-		//Test interfaccia
-		GameFrame frame = new GameFrame(table);
-		frame.setVisible(true);
-		
-		//Test finti giocatori che aggiungono parole
-		class FakeWordAdder implements Runnable {
-			
-			GameTable t;
-			
-			public FakeWordAdder(GameTable gameTable) {
-				this.t = gameTable;
-			}
-			
-			public void run() {
-				Random rnd = new Random();
-				String[] words = {"CHIODO", "DORATO", "TOMO", "MODERNO", "NOVE", "VELI"};
-				for (int i = 0; i < words.length; i++) {
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) { }
-					t.addWord(new Word(words[i]));
-					t.getOwnPlayer().setPoints(t.getOwnPlayer().getPoints() + rnd.nextInt(10000000));
-				}
-			}
-		}
-		Thread th = new Thread(new FakeWordAdder(table));
-		th.start();
-		
+//		List<Player> players = new ArrayList<Player>();
+//		Player ownPlayer = new Player("CiccioBomba");
+//		players.add(new Player("Stupido"));
+//		players.add(ownPlayer);
+//		players.add(new Player("Rimbambito"));
+//
+//		GameTable table = new GameTable(players, ownPlayer);
+//
+//		//Test interfaccia
+//		GameFrame frame = new GameFrame(table);
+//		frame.setVisible(true);
+//
+//		//Test finti giocatori che aggiungono parole
+//		class FakeWordAdder implements Runnable, GameTable.EventListener {
+//
+//			GameTable t;
+//			volatile boolean ownPlayerIsPlaying;
+//
+//			public FakeWordAdder(GameTable gameTable) {
+//				this.t = gameTable;
+//				ownPlayerIsPlaying = (t.getPlayingPlayer() == t.getOwnPlayer());
+//				this.t.addEventListener(this);
+//			}
+//
+//			public void run() {
+//				Random rnd = new Random();
+//				String[] words = {"CASA", "SALE", "LETTO", "TORCHIO", "CHIODO", "DORATO", "TOMO", "MODERNO", "NOVE", "VELI"};
+//				for (int i = 0; i < words.length; i++) {
+//
+//					//Wait if the own player is playing
+//					synchronized (this) {
+//						if (ownPlayerIsPlaying) try { wait(); } catch (InterruptedException e) {}
+//					}
+//
+//					//Simulate that the other player is thinking
+//					try {
+//						Thread.sleep(3000);
+//					} catch (InterruptedException e) { }
+//
+//					//Add the word
+//					System.out.println("PlayingPlayer: " + t.getPlayingPlayer() + ": " + t.getPlayingPlayer().getPoints());
+//					Word w = new Word(words[i]);
+//					System.out.println("Word: " + w + ": " + w.getValue());
+//					t.addWord(w);
+//					System.out.println("PlayingPlayer: " + t.getPlayingPlayer() + ": " + t.getPlayingPlayer().getPoints());
+//					t.nextTurn();
+//					System.out.println("NextTurn \n--\n");
+//				}
+//			}
+//
+//			public void newWordAdded(Word w) {}
+//			public void playersPointsUpdate() {}
+//			synchronized public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
+//				if (newPlayingPlayer == t.getOwnPlayer()) ownPlayerIsPlaying = true;
+//				if (oldPlayingPlayer == t.getOwnPlayer()) {
+//					ownPlayerIsPlaying = false;
+//					notify();
+//				}
+//
+//			}
+//
+//		}
+//		Thread th = new Thread(new FakeWordAdder(table));
+//		th.start();
 
-		//Test caricamento dizionario e sillabe	
+
+		//Test caricamento dizionario e sillabe
 		/*
 		try {
 			Dictionary d = new Dictionary(Constants.dictionaryPath);
