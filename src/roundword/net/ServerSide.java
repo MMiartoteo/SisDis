@@ -26,6 +26,44 @@ public class ServerSide implements ServerSideInterface {
 	}
 	
 	public String sayHello() {
+		/// ONLY FOR DEBUG
         return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
     }
+    
+    public String ElectionInit() {
+		/// TODO
+		return "ok";
+	}
+	
+	public String ElectionTurnHolder(int turnHolder) {
+		System.out.println(String.format("Ricevuto TurnHolder. Setto %d come turnHolder.", turnHolder));
+		peer.turnHolder = turnHolder;
+		return "ok";
+	}
+	
+	public String word(long id, String word) {
+		System.out.println(String.format("Ricevuto Word \"%s\"", word));
+		// Fai il forward se non sei tu il turnista
+		if (!peer.isTurnHolder()) {
+			peer.forwardWord(id, word);
+		}
+		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
+		else {
+			System.out.println("La word è tornata indietro!");
+			if (id == peer.lastSentMsgId) {
+				System.out.println("L'ack è corretto, cancello il relativo timer.");
+				peer.lastWordTask.cancel();
+				System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
+				peer.sendWordAck();
+			}
+			else {
+				System.out.println("L'ack è vecchio, ignoro il messaggio.");
+			}
+		}
+		return "ok";
+	}
+	
+	public String wordAck(long id) {
+		System.out.println();
+	}
 }

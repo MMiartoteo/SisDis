@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -cp bin Main $@
+java -ea -cp bin Main $@

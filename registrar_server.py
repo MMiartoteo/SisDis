@@ -1,6 +1,6 @@
 import BaseHTTPServer, json
 
-NUM_PEERS_FOR_GAME=2
+NUM_PEERS_FOR_GAME=3
 
 peers = set()
 

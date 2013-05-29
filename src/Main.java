@@ -77,12 +77,12 @@ public class Main {
 		List<Player> players = new ArrayList<Player>();
 		List<Peer> peers = new ArrayList<Peer>();
 		
-		Player ownPlayer = null; // player locale
+		Player localPlayer = null; // player locale
 		Peer p = null;           // peer locale
 		
 		for (int i=0; i<peers_players.length(); ++i) {
 			JSONArray player_info = peers_players.getJSONArray(i);
-			int player_ord = player_info.getInt(0);
+			int player_ord = i; //player_info.getInt(0); <-- per ora ignoriamo l'ord dato dal registrar
 			JSONArray infos = player_info.getJSONArray(1);
 			String p_host = infos.getString(0);
 			int p_portno = Integer.parseInt(infos.getString(1));
@@ -92,36 +92,41 @@ public class Main {
 			players.add(new_player);
 			
 			Peer new_peer = new Peer(new_player, player_ord, p_host, p_portno);
+			peers.add(new_peer);
+			
 			if (player_name.equals(p_name) && portno == p_portno) {
-				ownPlayer = new_player;
+				localPlayer = new_player;
 				p = new_peer;
 			}
 			else {
-				peers.add(new_peer);
+				//peers.add(new_peer);
 			}
 		}
-		if (ownPlayer == null || p == null) {
+		if (localPlayer == null || p == null) {
 			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
 			System.exit(1);
 		}
 		
+		p.setLocal();
+		
 		// Add peer list to local peer
-		p.add_peer_list(peers);
+		p.set_peers(peers);
 		
 		// Start local peer
 		p.start();
 		
 		
-		/// PROVA INVIO MESSAGGIO
+		/// PROVA INVIO MESSAGGIO HELLO AL PEER ACCANTO
 		//try {Thread.sleep(2000);} catch (Exception e) {System.exit(2);} // aspetto per far settare il server dall'altro lato
 		// Provo ad inviare un Hello al primo dei peer in lista
-		p.send_msg(new HelloMsg(p.peers.get(0)));
+		p.send_msg(new HelloMsg(p.getNextPeer()));
 		
 		
 		
-		/// 2 - Contatta ogni signolo peer per dirgli "okay ci sono"
+		if (p.isTurnHolder()) p.chosenWord("CASA");
+
 		
-		/// 3 - Lo stato condiviso è composto da:
+		/// Lo stato condiviso è composto da:
 		/*
 		 * 1) La lista dei giocatori presenti con i loro punteggi
 		 * 2) La lista delle parole fino ad ora giocate (vuota all'inizio)
@@ -136,7 +141,7 @@ public class Main {
 		 * */
 
 		
-		GameTable table = new GameTable(players, ownPlayer);
+		GameTable table = new GameTable(players, localPlayer);
 		table.addWord(new Word("CASA"));
 		table.addWord(new Word("SALE"));
 		table.addWord(new Word("LETTO"));
