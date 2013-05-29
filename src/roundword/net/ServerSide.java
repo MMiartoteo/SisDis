@@ -65,5 +65,6 @@ public class ServerSide implements ServerSideInterface {
 	
 	public String wordAck(long id) {
 		System.out.println();
+		return "ok";
 	}
 }
