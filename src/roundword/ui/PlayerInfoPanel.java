@@ -78,7 +78,7 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 	}
 
 	@Override
-	public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
+	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
 
 	}
 

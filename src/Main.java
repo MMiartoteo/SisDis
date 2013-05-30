@@ -160,7 +160,7 @@ public class Main {
 //
 //			public FakeWordAdder(GameTable gameTable) {
 //				this.t = gameTable;
-//				ownPlayerIsPlaying = (t.getPlayingPlayer() == t.getLocalPlayer());
+//				ownPlayerIsPlaying = (t.getTurnHolder() == t.getLocalPlayer());
 //				this.t.addEventListener(this);
 //			}
 //
@@ -180,11 +180,11 @@ public class Main {
 //					} catch (InterruptedException e) { }
 //
 //					//Add the word
-//					System.out.println("PlayingPlayer: " + t.getPlayingPlayer() + ": " + t.getPlayingPlayer().getPoints());
+//					System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
 //					Word w = new Word(words[i]);
 //					System.out.println("Word: " + w + ": " + w.getValue());
 //					t.addWord(w);
-//					System.out.println("PlayingPlayer: " + t.getPlayingPlayer() + ": " + t.getPlayingPlayer().getPoints());
+//					System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
 //					t.nextTurn();
 //					System.out.println("NextTurn \n--\n");
 //				}
@@ -192,7 +192,7 @@ public class Main {
 //
 //			public void newWordAdded(Word w) {}
 //			public void playersPointsUpdate() {}
-//			synchronized public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
+//			synchronized public void turnHolderChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
 //				if (newPlayingPlayer == t.getLocalPlayer()) ownPlayerIsPlaying = true;
 //				if (oldPlayingPlayer == t.getLocalPlayer()) {
 //					ownPlayerIsPlaying = false;
