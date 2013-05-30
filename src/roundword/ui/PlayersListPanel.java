@@ -2,7 +2,6 @@ package roundword.ui;
 
 import javax.swing.JPanel;
 import javax.swing.JList;
-import javax.swing.AbstractListModel;
 import java.awt.BorderLayout;
 import javax.swing.ListSelectionModel;
 import java.awt.Dimension;
@@ -31,7 +30,7 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 		setLayout(new BorderLayout(0, 0));
 		setBackground(UIConstants.BackgroundColor);
 		setMinimumSize(MinimumDimension);
-		if (gameTable != null) model = new PlayersListModel(gameTable.getPlayersList(), gameTable.getPlayingPlayer());
+		if (gameTable != null) model = new PlayersListModel(gameTable.getPlayersList(), gameTable.getTurnHolder());
 		
 		playersList = new JList();
 		playersList.setBorder(new MatteBorder(0, 1, 0, 0, UIConstants.BordersColor));
@@ -61,8 +60,8 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 	}
 
 	@Override
-	public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
-		model.playingPlayerChanges(oldPlayingPlayer, newPlayingPlayer);
+	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
+		model.playingPlayerChanges(oldTurnHolder, newTurnHolder);
 	}
 
 }
