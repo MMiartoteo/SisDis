@@ -164,14 +164,27 @@ public class GameTable implements Player.EventListener {
 	 * param: secondToReply the second that the user takes to write the word (used to calculate the points)
 	 * */
 	public void addWord(Word w, long secondToReply) {
+		String lastWordSyl = (words.size() > 0)? words.get(0).getLastSyllableSubWord() : null;
 
-		if (w == null) {
+		if (w == null) { //the player doesn't write anything
 			turnHolder.addPoints(RWConstants.pointsForNotReply);
-		} else if (dictionary.contains(w)) {
-			words.add(0, w);
-			turnHolder.addPoints(w.getValue());
 		} else {
-			turnHolder.addPoints(RWConstants.pointsForWrongWord);
+			//TODO: considerare secondi per rispondere
+			String wordStr = w.toString();
+			if (dictionary.contains(w)) {
+				if (lastWordSyl == null) { //No words before this
+					words.add(0, w);
+					turnHolder.addPoints(w.getValue());
+				} else if (wordStr.length() >= lastWordSyl.length()
+						    && (wordStr.substring(0, lastWordSyl.length()).compareTo(lastWordSyl) == 0)) {
+					words.add(0, w);
+					turnHolder.addPoints(w.getValue());
+				} else {
+					turnHolder.addPoints(RWConstants.pointsForWrongWord);
+				}
+			} else { //the player insert a word that isn't in the dictionary
+				turnHolder.addPoints(RWConstants.pointsForWrongWord);
+			}
 		}
 
 		//Callbacks call

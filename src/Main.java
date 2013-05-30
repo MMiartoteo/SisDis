@@ -9,6 +9,7 @@ import roundword.test.*;
 
 import java.net.*;
 import java.io.*;
+import java.util.Set;
 
 import org.json.JSONArray;
 
@@ -165,24 +166,28 @@ public class Main {
 		}
 
 
+
+
 		//Test caricamento dizionario e sillabe
-		/*
-		try {
-			Dictionary d = new Dictionary(Constants.dictionaryPath);
-			Set<String> ws = d.getWordSet();
-			for (String w : ws) {
-				Word w2 = new Word(w);
-				System.out.println(w2 + " " + w2.getSubWordBeforeLastSyllable() + "-" + w2.getLastSyllableSubWord());
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
-		
+
+//		try {
+//			Dictionary d = new Dictionary(Constants.dictionaryPath);
+//			Set<String> ws = d.getWordSet();
+//			for (String w : ws) {
+//				if (w.length() > 0) {
+//					Word w2 = new Word(w);
+//					System.out.println(w2 + " " + w2.getSubWordBeforeLastSyllable() + "-" + w2.getLastSyllableSubWord());
+//				}
+//			}
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+
 	}
 
 }

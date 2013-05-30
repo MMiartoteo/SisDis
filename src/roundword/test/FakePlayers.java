@@ -59,10 +59,9 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				//Add the word
 				System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
 
-				if (w != null) {
-					System.out.println("Word: " + w + ": " + w.getValue());
-					t.addWord(w, 1);
-				}
+				if (w != null) System.out.println("Word: " + w + ": " + w.getValue());
+				else System.out.println("No words founded");
+				t.addWord(w, 1);
 
 				System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
 				t.nextTurn();
