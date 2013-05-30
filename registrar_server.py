@@ -11,19 +11,15 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 		
 		player_name, peer_port = self.path.split('/')[-2:]
 		
-		if len(peers) < NUM_PEERS_FOR_GAME:
-			if player_name in { n for a,p,n in peers } and (self.client_address[0], peer_port, player_name) not in peers:
-				print >> self.wfile, "nickname-present"
-				#print "The nickname {} has already been taken. Choose a different nickname.".format(player_name)
-				return
-			
+		if player_name in { n for a,p,n in peers } and (self.client_address[0], peer_port, player_name) not in peers:
+			print >> self.wfile, "nickname-present"
+			#print "The nickname {} has already been taken. Choose a different nickname.".format(player_name)
+			return
+		
+		if len(peers) < NUM_PEERS_FOR_GAME:			
 			# Add to peer set
 			peers |= { (self.client_address[0], peer_port, player_name) }
 			print peers
-			
-			self.send_response(200)
-			self.end_headers()
-			print >> self.wfile, "wait"
 		
 		if len(peers) == NUM_PEERS_FOR_GAME:
 			self.send_response(200)
@@ -31,10 +27,16 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			print >> self.wfile, "start"
 			print >> self.wfile, json.dumps(list(enumerate(peers)))
 			told |= { (self.client_address[0], peer_port, player_name) }
+			print told
+			print peers
 			if told == peers:
 				peers = set()
 				told = set()
 				print '# TOLD EVERYONE. RESETTING FOR A NEW GAME...'
+		else:
+			self.send_response(200)
+			self.end_headers()
+			print >> self.wfile, "wait"
 
 def run(server_class=BaseHTTPServer.HTTPServer,
         handler_class=BaseHTTPServer.BaseHTTPRequestHandler):
