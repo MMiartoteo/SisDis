@@ -15,19 +15,30 @@ import org.json.JSONArray;
 
 public class Main {
 
-	public static void main(String[] args) {
-		
-		// Carica il dizionario. Se non riesci, chiudi tutto.
-		Dictionary d = null;
+	private static Dictionary loadDictionary() {
+		Dictionary ris = null;
 		try {
-			d = new Dictionary(Constants.dictionaryPath);
+			ris = new Dictionary(Constants.dictionaryPath);
 		} catch (IOException ex) {
 			System.err.println("Impossible to load the dictionary");
 			System.exit(-1);
 		}
-		
-		
-		
+		return ris;
+	}
+
+	private static void openGameFrame(GameTable table) {
+		GameFrame frame = new GameFrame(table);
+		frame.setVisible(true);
+	}
+
+	public static void main(String[] args) {
+
+//		fakePlayers_test();
+//		dictionary_test();
+
+		// Carica il dizionario. Se non riesci, chiudi tutto.
+		Dictionary d = loadDictionary();
+
 		int SEC_WAIT = 2;
 
 		/// 0 - Leggi parametri del giocatore e del peer locale
@@ -119,7 +130,7 @@ public class Main {
 			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
 			System.exit(1);
 		}
-		
+
 		GameTable table = new GameTable(players, localPlayer, d);
 
 		p.setLocal();
@@ -147,49 +158,50 @@ public class Main {
 		 * ...
 		 * */
 
-		
-		
-		
-		
-		/*****************************************************
-		 * Test interfaccia
-		 * */
-		GameFrame frame = new GameFrame(table);
-		frame.setVisible(true);
-//~ 
-		//~ //Test finti giocatori che aggiungono parole
-		//~ try {
-			//~ Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath));
-			//~ th.start();
-		//~ } catch (Exception e) {
-		//~ }
-		
+		/* Start game */
+		openGameFrame(table);
 
-	
+	}
+
+	private static void fakePlayers_test() {
+
+		Dictionary d = loadDictionary();
+
+		List<Player> players = new ArrayList<Player>();
+		Player localPlayer = new Player("CiccioBomba", 1);
+		players.add(new Player("Stupido", 0));
+		players.add(localPlayer);
+		players.add(new Player("Rimbambito", 2));
+
+		GameTable table = new GameTable(players, localPlayer, d);
+		openGameFrame(table);
 
 
+		/* Test fake players */
+		try {
+			Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath));
+			th.start();
+		} catch (Exception e) {
+		}
+	}
 
-
-		//Test caricamento dizionario e sillabe
-
-//		try {
-//			Dictionary d = new Dictionary(Constants.dictionaryPath);
-//			Set<String> ws = d.getWordSet();
-//			for (String w : ws) {
-//				if (w.length() > 0) {
-//					Word w2 = new Word(w);
-//					System.out.println(w2 + " " + w2.getSubWordBeforeLastSyllable() + "-" + w2.getLastSyllableSubWord());
-//				}
-//			}
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
-
+	private static void dictionary_test() {
+		try {
+			Dictionary d = new Dictionary(Constants.dictionaryPath);
+			Set<String> ws = d.getWordSet();
+			for (String w : ws) {
+				if (w.length() > 0) {
+					Word w2 = new Word(w);
+					System.out.println(w2 + " " + w2.getSubWordBeforeLastSyllable() + "-" + w2.getLastSyllableSubWord());
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
