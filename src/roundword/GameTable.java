@@ -210,6 +210,9 @@ public class GameTable implements Player.EventListener {
 
 		//Callbacks call
 		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+		
+		System.out.println("######### NEXT TURN #########");
+		System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
 	}
 
 	// Listeners --------------------------------------------------------------

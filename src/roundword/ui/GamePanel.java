@@ -182,7 +182,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		//TODO: check se la parola fa errore (non è presente nel dizionario, o non è conforme alla parola precedente, ecc...)
 		gameTable.addWord(new Word(txtWord.getText()), 12);
 		txtWord.setText("");
-		gameTable.nextTurn();
+		//gameTable.nextTurn();
 	}
 
 	@Override

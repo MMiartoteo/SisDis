@@ -46,7 +46,9 @@ public class Player {
 		if (ord < 0) throw new IllegalArgumentException("ord must be non-negative");
 		if (nickname == null) throw new NullPointerException("nickname is null");
 		if (nickname.length() == 0) throw new IllegalArgumentException("nickname lenght is 0");
-
+		
+		System.out.println(String.format("Creato player %s %d", nickname, ord));
+		
 		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		this.nickName = nickname;
 		this.ord = ord;

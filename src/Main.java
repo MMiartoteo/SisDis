@@ -17,6 +17,17 @@ public class Main {
 
 	public static void main(String[] args) {
 		
+		// Carica il dizionario. Se non riesci, chiudi tutto.
+		Dictionary d = null;
+		try {
+			d = new Dictionary(Constants.dictionaryPath);
+		} catch (IOException ex) {
+			System.err.println("Impossible to load the dictionary");
+			System.exit(-1);
+		}
+		
+		
+		
 		int SEC_WAIT = 2;
 
 		/// 0 - Leggi parametri del giocatore e del peer locale
@@ -108,11 +119,12 @@ public class Main {
 			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
 			System.exit(1);
 		}
+		
+		GameTable table = new GameTable(players, localPlayer, d);
 
 		p.setLocal();
-
-		// Add peer list to local peer
-		p.set_peers(peers);
+		p.setPeers(peers);
+		p.setGameTable(table);
 
 		// Start local peer
 		p.start();
@@ -121,11 +133,11 @@ public class Main {
 		/// PROVA INVIO MESSAGGIO HELLO AL PEER ACCANTO
 		//try {Thread.sleep(2000);} catch (Exception e) {System.exit(2);} // aspetto per far settare il server dall'altro lato
 		// Provo ad inviare un Hello al primo dei peer in lista
-		p.send_msg(new HelloMsg(p.getNextPeer()));
+		//p.send_msg(new HelloMsg(p.getNextPeer()));
 
 
 
-		if (p.isTurnHolder()) p.chosenWord("CASA");
+		//if (p.isTurnHolder()) p.chosenWord("CASA");
 
 		
 		/// Lo stato condiviso è composto da:
@@ -134,36 +146,26 @@ public class Main {
 		 * 2) La lista delle parole fino ad ora giocate (vuota all'inizio)
 		 * ...
 		 * */
+
 		
 		
 		
-		/*
-		 * Qui si dovrebbe chiamare il server per dargli la disponibilita',
-		 * aspettare la risposta e poi avviare il gioco
+		
+		/*****************************************************
+		 * Test interfaccia
 		 * */
+		GameFrame frame = new GameFrame(table);
+		frame.setVisible(true);
+//~ 
+		//~ //Test finti giocatori che aggiungono parole
+		//~ try {
+			//~ Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath));
+			//~ th.start();
+		//~ } catch (Exception e) {
+		//~ }
+		
 
-//		List<Player> players = new ArrayList<Player>();
-//		Player localPlayer = new Player("CiccioBomba", 1);
-//		players.add(new Player("Stupido", 0));
-//		players.add(localPlayer);
-//		players.add(new Player("Rimbambito", 2));
-
-		try {
-			Dictionary d = new Dictionary(Constants.dictionaryPath);
-			GameTable table = new GameTable(players, localPlayer, d);
-
-			//Test interfaccia
-			GameFrame frame = new GameFrame(table);
-			frame.setVisible(true);
-
-			//Test finti giocatori che aggiungono parole
-			Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath));
-			th.start();
-
-		} catch (IOException ex) {
-			System.err.println("Impossible to load the dictionary");
-			System.exit(-1);
-		}
+	
 
 
 
