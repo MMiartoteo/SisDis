@@ -41,7 +41,7 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 		add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
-		lblNickname = new JLabel(gameTable.getOwnPlayer().toString());
+		lblNickname = new JLabel(gameTable.getLocalPlayer().toString());
 		lblNickname.setForeground(UIConstants.TextColor);
 		lblNickname.setFont(UIConstants.TextNormalFont.deriveFont(30f));
 		panel.add(lblNickname);
@@ -55,7 +55,7 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		panelPoints.add(horizontalStrut);
 		
-		lblPoints = new JLabel(String.valueOf(gameTable.getOwnPlayer().getPoints()));
+		lblPoints = new JLabel(String.valueOf(gameTable.getLocalPlayer().getPoints()));
 		lblPoints.setForeground(UIConstants.TextColor);
 		lblPoints.setFont(UIConstants.TextNormalFont.deriveFont(16f));
 		panelPoints.add(lblPoints);
@@ -74,7 +74,7 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 
 	@Override
 	public void playersPointsUpdate() {
-		lblPoints.setText(String.valueOf(gameTable.getOwnPlayer().getPoints()));
+		lblPoints.setText(String.valueOf(gameTable.getLocalPlayer().getPoints()));
 	}
 
 	@Override

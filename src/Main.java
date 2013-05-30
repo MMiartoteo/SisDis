@@ -76,10 +76,10 @@ public class Main {
 
 		List<Player> players = new ArrayList<Player>();
 		List<Peer> peers = new ArrayList<Peer>();
-		
+
 		Player localPlayer = null; // player locale
 		Peer p = null;           // peer locale
-		
+
 		for (int i=0; i<peers_players.length(); ++i) {
 			JSONArray player_info = peers_players.getJSONArray(i);
 			int player_ord = i; //player_info.getInt(0); <-- per ora ignoriamo l'ord dato dal registrar
@@ -87,13 +87,13 @@ public class Main {
 			String p_host = infos.getString(0);
 			int p_portno = Integer.parseInt(infos.getString(1));
 			String p_name = infos.getString(2);
-			
+
 			Player new_player = new Player(p_name);
 			players.add(new_player);
-			
+
 			Peer new_peer = new Peer(new_player, player_ord, p_host, p_portno);
 			peers.add(new_peer);
-			
+
 			if (player_name.equals(p_name) && portno == p_portno) {
 				localPlayer = new_player;
 				p = new_peer;
@@ -106,23 +106,23 @@ public class Main {
 			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
 			System.exit(1);
 		}
-		
+
 		p.setLocal();
-		
+
 		// Add peer list to local peer
 		p.set_peers(peers);
-		
+
 		// Start local peer
 		p.start();
-		
-		
+
+
 		/// PROVA INVIO MESSAGGIO HELLO AL PEER ACCANTO
 		//try {Thread.sleep(2000);} catch (Exception e) {System.exit(2);} // aspetto per far settare il server dall'altro lato
 		// Provo ad inviare un Hello al primo dei peer in lista
 		p.send_msg(new HelloMsg(p.getNextPeer()));
-		
-		
-		
+
+
+
 		if (p.isTurnHolder()) p.chosenWord("CASA");
 
 		
@@ -141,18 +141,18 @@ public class Main {
 		 * */
 
 //		List<Player> players = new ArrayList<Player>();
-//		Player ownPlayer = new Player("CiccioBomba");
+//		Player localPlayer = new Player("CiccioBomba");
 //		players.add(new Player("Stupido"));
-//		players.add(ownPlayer);
+//		players.add(localPlayer);
 //		players.add(new Player("Rimbambito"));
-//
-//		GameTable table = new GameTable(players, ownPlayer);
-//
-//		//Test interfaccia
-//		GameFrame frame = new GameFrame(table);
-//		frame.setVisible(true);
-//
-//		//Test finti giocatori che aggiungono parole
+
+		GameTable table = new GameTable(players, localPlayer);
+
+		//Test interfaccia
+		GameFrame frame = new GameFrame(table);
+		frame.setVisible(true);
+
+		//Test finti giocatori che aggiungono parole
 //		class FakeWordAdder implements Runnable, GameTable.EventListener {
 //
 //			GameTable t;
@@ -160,7 +160,7 @@ public class Main {
 //
 //			public FakeWordAdder(GameTable gameTable) {
 //				this.t = gameTable;
-//				ownPlayerIsPlaying = (t.getPlayingPlayer() == t.getOwnPlayer());
+//				ownPlayerIsPlaying = (t.getPlayingPlayer() == t.getLocalPlayer());
 //				this.t.addEventListener(this);
 //			}
 //
@@ -193,8 +193,8 @@ public class Main {
 //			public void newWordAdded(Word w) {}
 //			public void playersPointsUpdate() {}
 //			synchronized public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
-//				if (newPlayingPlayer == t.getOwnPlayer()) ownPlayerIsPlaying = true;
-//				if (oldPlayingPlayer == t.getOwnPlayer()) {
+//				if (newPlayingPlayer == t.getLocalPlayer()) ownPlayerIsPlaying = true;
+//				if (oldPlayingPlayer == t.getLocalPlayer()) {
 //					ownPlayerIsPlaying = false;
 //					notify();
 //				}

@@ -149,7 +149,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		gameTable.addEventListener(this);
 
 
-		if (gameTable.getPlayingPlayer() == gameTable.getOwnPlayer()) startPlay();
+		if (gameTable.getPlayingPlayer() == gameTable.getLocalPlayer()) startPlay();
 
 	}
 
@@ -197,7 +197,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 
 	@Override
 	public void playingPlayerChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
-		if (newPlayingPlayer == gameTable.getOwnPlayer()) {
+		if (newPlayingPlayer == gameTable.getLocalPlayer()) {
 			startPlay();
 		}
 	}

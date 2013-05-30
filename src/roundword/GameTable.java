@@ -39,7 +39,7 @@ public class GameTable implements Player.EventListener {
 	 * The player that plays in the current client
 	 * This must be present in the players list too
 	 */
-	Player ownPlayer;
+	Player localPlayer;
 
 	/**
 	 * The player that is playing
@@ -73,26 +73,26 @@ public class GameTable implements Player.EventListener {
 	 * Create a game table. The player that is playing is the first player of the player list
 	 *
 	 * param: playersList the list of all players
-	 * param: ownPlayer the player that plays in the current client
+	 * param: localPlayer the player that plays in the current client
 	 * */
-	public GameTable(List<Player> playersList, Player ownPlayer) {
-		this(playersList, ownPlayer, playersList.get(0));
+	public GameTable(List<Player> playersList, Player localPlayer) {
+		this(playersList, localPlayer, playersList.get(0));
 	}
 
 	/**
 	 * Create a game table.
 	 *
 	 * param: playersList the list of all players
-	 * param: ownPlayer the player that plays in the current client
+	 * param: localPlayer the player that plays in the current client
 	 * param: playingPlayer the player that is playing
 	 * */
-	public GameTable(List<Player> playersList, Player ownPlayer, Player playingPlayer) {
+	public GameTable(List<Player> playersList, Player localPlayer, Player playingPlayer) {
 
 		if (playersList == null) throw new NullPointerException("playersList must be not null");
 		this.playersList = playersList;
 
-		if (ownPlayer == null) throw new NullPointerException("ownPlayer must be not null");
-		this.ownPlayer = ownPlayer;
+		if (localPlayer == null) throw new NullPointerException("localPlayer must be not null");
+		this.localPlayer = localPlayer;
 
 		if (playingPlayer == null) throw new NullPointerException("playingPlayer must be not null");
 		this.playingPlayer = playingPlayer;
@@ -100,16 +100,16 @@ public class GameTable implements Player.EventListener {
 		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		words = new ArrayList<Word>();
 
-		boolean ownPlayerFounded = false;
+		boolean localPlayerFounded = false;
 		boolean playingPlayerFounded = false;
 		for (Player p : playersList) {
-			if (p == ownPlayer) ownPlayerFounded = true;
+			if (p == localPlayer) localPlayerFounded = true;
 			if (p == playingPlayer) playingPlayerFounded = true;
 			p.addEventListener(this);
 		}
 
 		//Check for errors
-		if (!ownPlayerFounded) throw new IllegalArgumentException("the ownPlayer must be in the playersList");
+		if (!localPlayerFounded) throw new IllegalArgumentException("the localPlayer must be in the playersList");
 		if (!playingPlayerFounded) throw new IllegalArgumentException("the playingPlayer must be in the playersList");
 	}
 
@@ -121,8 +121,8 @@ public class GameTable implements Player.EventListener {
 		return playersList;
 	}
 
-	public Player getOwnPlayer() {
-		return ownPlayer;
+	public Player getLocalPlayer() {
+		return localPlayer;
 	}
 
 	public Player getPlayingPlayer() {
