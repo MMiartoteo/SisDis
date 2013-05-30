@@ -19,6 +19,9 @@ public class Word implements Serializable {
 	// ------------------------------------------------------------------------
 
 	public Word(String word) {
+		if (word == null) throw new NullPointerException("word is null");
+		if (word.length() == 0) throw new IllegalArgumentException("word lenght is 0");
+
 		this.word = word.toUpperCase();
 		lastSyllableIndex = calculateLastSyllableIndex();
 	}

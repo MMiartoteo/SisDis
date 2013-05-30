@@ -141,10 +141,10 @@ public class Main {
 		 * */
 
 //		List<Player> players = new ArrayList<Player>();
-//		Player localPlayer = new Player("CiccioBomba");
-//		players.add(new Player("Stupido"));
+//		Player localPlayer = new Player("CiccioBomba", 1);
+//		players.add(new Player("Stupido", 0));
 //		players.add(localPlayer);
-//		players.add(new Player("Rimbambito"));
+//		players.add(new Player("Rimbambito"), 2);
 
 		GameTable table = new GameTable(players, localPlayer);
 
