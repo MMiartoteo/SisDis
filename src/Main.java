@@ -78,7 +78,7 @@ public class Main {
 		List<Peer> peers = new ArrayList<Peer>();
 		
 		Player localPlayer = null; // player locale
-		Peer p = null;           // peer locale
+		Peer p = null;             // peer locale
 		
 		for (int i=0; i<peers_players.length(); ++i) {
 			JSONArray player_info = peers_players.getJSONArray(i);
@@ -91,7 +91,7 @@ public class Main {
 			Player new_player = new Player(p_name);
 			players.add(new_player);
 			
-			Peer new_peer = new Peer(new_player, player_ord, p_host, p_portno);
+			Peer new_peer = new Peer(new_player, gameTable, player_ord, p_host, p_portno);
 			peers.add(new_peer);
 			
 			if (player_name.equals(p_name) && portno == p_portno) {

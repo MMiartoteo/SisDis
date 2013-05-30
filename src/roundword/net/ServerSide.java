@@ -70,6 +70,8 @@ public class ServerSide implements ServerSideInterface {
 			System.out.println("L'ack è corretto, cancello il relativo timer.");
 			peer.lastWordTask.cancel();
 			/// TODO: NUOVO TURNO!
+			System.out.println("E passo al prossimo turno.");
+			peer.nextTurn();
 		}
 		else {
 			System.out.println("L'ack è vecchio, ignoro il messaggio.");
