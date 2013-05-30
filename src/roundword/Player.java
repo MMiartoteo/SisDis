@@ -22,6 +22,8 @@ public class Player {
 
 	String nickName;
 	
+	int ord; // Ordinale del player. Univoco. Dato dal registrar
+	
 	int points;
 	
 	//IP Address, or other information to contact him
@@ -35,9 +37,10 @@ public class Player {
 	// METHODS
 	// ------------------------------------------------------------------------
 
-	public Player(String nickname) {
+	public Player(String nickname, int ord) {
 		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		this.nickName = nickname;
+		this.ord = ord;
 		points = 0;
 	}
 	
@@ -58,6 +61,10 @@ public class Player {
 	
 	public String getNickName() {
 		return nickName;
+	}
+	
+	public int getOrd() {
+		return ord;
 	}
 	
 	public void addEventListener(EventListener listener) {

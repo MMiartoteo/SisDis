@@ -6,8 +6,8 @@ import java.util.TimerTask;
 
 public class Peer {
 	
-	public static final long T_trans = 100; // milliseconds
-	public static final long T_proc  = 100; // milliseconds
+	public static final int T_trans = 100; // milliseconds
+	public static final int T_proc  = 100; // milliseconds
 	
 	Player player;        // The associated player
 	GameTable gameTable; // The game table (the game logic controller)
@@ -32,9 +32,9 @@ public class Peer {
 	long lastSentMsgId = 0;
 	long lastSeenMsgId = 0;
 	
-	public Peer(Player player, GameTable gameTable, String IPaddr, int server_portno) {
+	public Peer(Player player, String IPaddr, int server_portno) {
 		this.player = player;
-		this.gameTable = gameTable;
+		//this.gameTable = gameTable;
 		//this.ord = ord;
 		this.IPaddr = IPaddr;
 		this.server_portno = server_portno;
@@ -58,6 +58,7 @@ public class Peer {
 	
 	public void start() {
 		assert local;
+		assert gameTable!=null;
 		this.start_server_side();
 		this.start_client_side();
 		
@@ -82,11 +83,15 @@ public class Peer {
 	}
 	
 	public boolean isTurnHolder() {
-		return this.player.isTurnHolder();
+		return player == gameTable.getTurnHolder();
 	}
 	
-	public long getOrd() {
+	public int getOrd() {
 		return this.player.getOrd();
+	}
+	
+	public Player getTurnHolder() {
+		return this.gameTable.getTurnHolder();
 	}
 	
 	public Peer getNextPeer() {
@@ -144,7 +149,7 @@ public class Peer {
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", getOrd(), getNextPeer().getOrd()));
 		send_msg(new WordMsg(getNextPeer(), id, word));
 		
-		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), turnHolder));
+		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), getTurnHolder().getOrd()));
 		lastWordTask = new TimerTask() {
 			@Override
 			public void run() {
@@ -165,7 +170,7 @@ public class Peer {
 	}
 	
 	public void startTurnHolderElection() {
-		if (getOrd()==getTurnHolderOrd()) {
+		if (isTurnHolder()) {
 			// Sono io il leader! Invio notizia a tutti i processi minori (in realtà tutti tranne me)
 			for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
 				if (i==getOrd()) break;
@@ -175,7 +180,7 @@ public class Peer {
 		} else {
 			// Non sono il leader. Invio elezione a tutti quelli prima di me, a partire
 			// da chi credo sia il leader attuale
-			for (int i=turnHolder; i!=getOrd(); i=(i+1)%peers.size()) {
+			for (int i=getTurnHolder().getOrd(); i!=getOrd(); i=(i+1)%peers.size()) {
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio Elezione a peer %s", getOrd(), i));
 				/// TODO: invia
@@ -199,7 +204,7 @@ public class Peer {
 	/*             PRIVATI            */
 	/* ############################## */
 	private void start_server_side() {
-		server = new ServerSide(this);
+		server = new ServerSide(this, gameTable);
 	}
 	
 	private void start_client_side() {
