@@ -65,7 +65,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 
 	List<Word> words;
 
-	public static final int MinPanelWidth = 250;
+	public static final int MinPanelWidth = 450;
 	public static final Color LblWordColor = new Color(10,10,10);
 	public static final int LblWordColorIncrement = 50;
 	public static final String LblLastWord_InWordSyllableColor = "#0A0A0A";
@@ -159,14 +159,14 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 			if (words.size() > i) {
 				Word w = words.get(i);
 				if (i == 0) {
-					t = "<html>" + w.getSubWordBeforeLastSyllable() + 
+					t = "<html><div style=\"width: 1000\">" + w.getSubWordBeforeLastSyllable() +
 						"<span style=\"font-weight:bold; color:" + LblLastWord_InWordSyllableColor + "\">" + 
-						w.getLastSyllableSubWord() + "</span></html>";
+						w.getLastSyllableSubWord() + "</span></div></html>";
 				} else {
-					t = "<html>" + w.toString() + "<html>";
+					t = "<html><div style=\"width: 1000\">" + w.toString() + "</div><html>";
 				}
 			} else {
-				t = "<html> </html>";
+				t = "<html><div style=\"width: 1000\"> </div></html>";
 			}
 			lblLastsWord[i].setText(t);
 		}	

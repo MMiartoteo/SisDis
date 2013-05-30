@@ -46,23 +46,22 @@ public class GameTable implements Player.EventListener {
 	 * This must be present in the players list too
 	 */
 	Player turnHolder;
-	
+
 	/**
 	 * This represent the words list (i.e. the written words).
 	 * If the most recent words are in the first positions
 	 * */
 	List<Word> words;
-	
-	/**
-	 * The time when the word is shown to the user. To calculate the
-	 * points, because they depend on the time to reply. 
-	 */
-	Date timeOfLastWordShowed;
-	
+
 	/**
 	 * The list of listener for callback that is call when a new word is inserted
 	 * */
 	Set<EventListener> eventListeners;
+
+	/**
+	 * Dictionary. To check if a word is valid or not
+	 */
+	Dictionary dictionary;
 
 
 	// ------------------------------------------------------------------------
@@ -74,9 +73,10 @@ public class GameTable implements Player.EventListener {
 	 *
 	 * param: playersList the list of all players
 	 * param: localPlayer the player that plays in the current client
+	 * param: dictionary an instance of the class Dictionary, to check if a word is valid or not
 	 * */
-	public GameTable(List<Player> playersList, Player localPlayer) {
-		this(playersList, localPlayer, playersList.get(0));
+	public GameTable(List<Player> playersList, Player localPlayer, Dictionary dictionary) {
+		this(playersList, localPlayer, playersList.get(0), dictionary);
 	}
 
 	/**
@@ -85,8 +85,9 @@ public class GameTable implements Player.EventListener {
 	 * param: playersList the list of all players
 	 * param: localPlayer the player that plays in the current client
 	 * param: turnHolder the player that is playing
+	 * param: dictionary an instance of the class Dictionary, to check if a word is valid or not
 	 * */
-	public GameTable(List<Player> playersList, Player localPlayer, Player turnHolder) {
+	public GameTable(List<Player> playersList, Player localPlayer, Player turnHolder, Dictionary dictionary) {
 
 		if (playersList == null) throw new NullPointerException("playersList must be not null");
 		this.playersList = playersList;
@@ -96,6 +97,9 @@ public class GameTable implements Player.EventListener {
 
 		if (turnHolder == null) throw new NullPointerException("turnHolder must be not null");
 		this.turnHolder = turnHolder;
+
+		if (dictionary == null) throw new NullPointerException("dictionary must be not null");
+		this.dictionary = dictionary;
 
 		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		words = new ArrayList<Word>();
@@ -154,11 +158,21 @@ public class GameTable implements Player.EventListener {
 
 	/**
 	 * Add a new word to the game table. Is assumed that the current playing player is the author of this word
+	 *
+	 * param: word the inserted word. With {@code null} it means that the player don't write anything and
+	 * in this case the user will have a negative point addition.
+	 * param: secondToReply the second that the user takes to write the word (used to calculate the points)
 	 * */
-	public void addWord(Word w) {
-		if (w == null) throw new NullPointerException("the word must be not null");
-		words.add(0, w);
-		turnHolder.addPoints(w.getValue());
+	public void addWord(Word w, long secondToReply) {
+
+		if (w == null) {
+			turnHolder.addPoints(RWConstants.pointsForNotReply);
+		} else if (dictionary.contains(w)) {
+			words.add(0, w);
+			turnHolder.addPoints(w.getValue());
+		} else {
+			turnHolder.addPoints(RWConstants.pointsForWrongWord);
+		}
 
 		//Callbacks call
 		for (EventListener el : eventListeners) el.newWordAdded(w);
