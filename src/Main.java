@@ -5,6 +5,7 @@ import java.util.Random;
 import roundword.*;
 import roundword.ui.*;
 import roundword.net.*;
+import roundword.test.*;
 
 import java.net.*;
 import java.io.*;
@@ -145,64 +146,24 @@ public class Main {
 //		Player localPlayer = new Player("CiccioBomba", 1);
 //		players.add(new Player("Stupido", 0));
 //		players.add(localPlayer);
-//		players.add(new Player("Rimbambito"), 2);
+//		players.add(new Player("Rimbambito", 2));
 
-		//Test interfaccia
-		GameFrame frame = new GameFrame(table);
-		frame.setVisible(true);
+		try {
+			Dictionary d = new Dictionary(Constants.dictionaryPath);
+			GameTable table = new GameTable(players, localPlayer, d);
 
-		//Test finti giocatori che aggiungono parole
-//		class FakeWordAdder implements Runnable, GameTable.EventListener {
-//
-//			GameTable t;
-//			volatile boolean ownPlayerIsPlaying;
-//
-//			public FakeWordAdder(GameTable gameTable) {
-//				this.t = gameTable;
-//				ownPlayerIsPlaying = (t.getTurnHolder() == t.getLocalPlayer());
-//				this.t.addEventListener(this);
-//			}
-//
-//			public void run() {
-//				Random rnd = new Random();
-//				String[] words = {"CASA", "SALE", "LETTO", "TORCHIO", "CHIODO", "DORATO", "TOMO", "MODERNO", "NOVE", "VELI"};
-//				for (int i = 0; i < words.length; i++) {
-//
-//					//Wait if the own player is playing
-//					synchronized (this) {
-//						if (ownPlayerIsPlaying) try { wait(); } catch (InterruptedException e) {}
-//					}
-//
-//					//Simulate that the other player is thinking
-//					try {
-//						Thread.sleep(3000);
-//					} catch (InterruptedException e) { }
-//
-//					//Add the word
-//					System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
-//					Word w = new Word(words[i]);
-//					System.out.println("Word: " + w + ": " + w.getValue());
-//					t.addWord(w);
-//					System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
-//					t.nextTurn();
-//					System.out.println("NextTurn \n--\n");
-//				}
-//			}
-//
-//			public void newWordAdded(Word w) {}
-//			public void playersPointsUpdate() {}
-//			synchronized public void turnHolderChanged(Player oldPlayingPlayer, Player newPlayingPlayer) {
-//				if (newPlayingPlayer == t.getLocalPlayer()) ownPlayerIsPlaying = true;
-//				if (oldPlayingPlayer == t.getLocalPlayer()) {
-//					ownPlayerIsPlaying = false;
-//					notify();
-//				}
-//
-//			}
-//
-//		}
-//		Thread th = new Thread(new FakeWordAdder(table));
-//		th.start();
+			//Test interfaccia
+			GameFrame frame = new GameFrame(table);
+			frame.setVisible(true);
+
+			//Test finti giocatori che aggiungono parole
+			Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath));
+			th.start();
+
+		} catch (IOException ex) {
+			System.err.println("Impossible to load the dictionary");
+			System.exit(-1);
+		}
 
 
 		//Test caricamento dizionario e sillabe

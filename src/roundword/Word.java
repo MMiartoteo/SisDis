@@ -106,10 +106,6 @@ public class Word implements Serializable {
 		return word.substring(0, lastSyllableIndex);
 	}
 	
-	public String getWord() {
-		return word;
-	}
-	
 	/**
 	 * get the points for the word, depending on the length
 	 * and the used letters

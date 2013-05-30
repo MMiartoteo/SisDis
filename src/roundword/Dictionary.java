@@ -51,4 +51,8 @@ public class Dictionary {
 		return wordSet.contains(word);
 	}
 
+	public boolean contains(Word word) {
+		return wordSet.contains(word.toString());
+	}
+
 }
