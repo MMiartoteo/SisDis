@@ -106,11 +106,12 @@ public class Main {
 			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
 			System.exit(1);
 		}
+		
+		GameTable table = new GameTable(players, localPlayer);
 
 		p.setLocal();
-
-		// Add peer list to local peer
-		p.set_peers(peers);
+		p.setPeers(peers);
+		p.setGameTable(table);
 
 		// Start local peer
 		p.start();
@@ -145,8 +146,6 @@ public class Main {
 //		players.add(new Player("Stupido", 0));
 //		players.add(localPlayer);
 //		players.add(new Player("Rimbambito"), 2);
-
-		GameTable table = new GameTable(players, localPlayer);
 
 		//Test interfaccia
 		GameFrame frame = new GameFrame(table);

@@ -37,19 +37,20 @@ public class ServerSide implements ServerSideInterface {
 		return "ok";
 	}
 	
-	public String ElectionTurnHolder(int turnHolder) {
-		System.out.println(String.format("Ricevuto TurnHolder. Setto %d come turnHolder.", turnHolder));
+	public String ElectionSetTurnHolder(int newTurnHolder) {
+		System.out.println(String.format("Ricevuto TurnHolder. Setto %d come turnHolder.", newTurnHolder));
 		//peer.turnHolder = turnHolder;
-		peer.gameTable.setTurnHolder(peer.player);
+		gameTable.setTurnHolder(peer.peers.get(newTurnHolder).player);
 		return "ok";
 	}
 	
 	public String word(long id, String word) {
 		System.out.println(String.format("Ricevuto Word \"%s\"", word));
-		// Fai il forward se non sei tu il turnista
+		// Fai il forward se non sei tu il turnista (e setta la parola nella gui)
 		if (!peer.isTurnHolder()) {
 			peer.lastSeenMsgId = id;
 			peer.forwardWord(id, word);
+			gameTable.addWord(new Word(word));
 		}
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
 		else {

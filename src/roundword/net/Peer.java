@@ -51,9 +51,14 @@ public class Peer {
 		System.out.println(String.format("PEER LOCALE = %d", getOrd()));
 	}
 	
-	public void set_peers(List<Peer> peers) {
+	public void setPeers(List<Peer> peers) {
 		assert local;
 		this.peers = peers;
+	}
+	
+	public void setGameTable(GameTable gameTable) {
+		assert local;
+		this.gameTable = gameTable;
 	}
 	
 	public void start() {
@@ -175,7 +180,7 @@ public class Peer {
 			for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio TurnHolder a peer %s", getOrd(), i));
-				send_msg(new ElectionTurnHolderMsg(peers.get(i), getOrd()));
+				send_msg(new ElectionSetTurnHolderMsg(peers.get(i), getOrd()));
 			}
 		} else {
 			// Non sono il leader. Invio elezione a tutti quelli prima di me, a partire
