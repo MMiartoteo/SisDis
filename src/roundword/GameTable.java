@@ -188,10 +188,12 @@ public class GameTable implements Player.EventListener {
 	// Listeners --------------------------------------------------------------
 	
 	public void addEventListener(EventListener listener) {
+		if (listener == null) throw new NullPointerException("listener is null");
 		eventListeners.add(listener);
 	}
 
 	public void removeEventListener(EventListener listener) {
+		if (listener == null) throw new NullPointerException("listener is null");
 		eventListeners.remove(listener);
 	}
 
