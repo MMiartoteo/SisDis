@@ -89,10 +89,10 @@ public class Main {
 			int p_portno = Integer.parseInt(infos.getString(1));
 			String p_name = infos.getString(2);
 
-			Player new_player = new Player(p_name);
+			Player new_player = new Player(p_name, player_ord);
 			players.add(new_player);
 
-			Peer new_peer = new Peer(new_player, player_ord, p_host, p_portno);
+			Peer new_peer = new Peer(new_player, p_host, p_portno);
 			peers.add(new_peer);
 
 			if (player_name.equals(p_name) && portno == p_portno) {

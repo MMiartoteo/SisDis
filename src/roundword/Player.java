@@ -23,7 +23,7 @@ public class Player {
 	/**
 	 * The position of the player, decided by a registrar at the begin of the game. This is a convenience variable
 	 * that is useful to have a numeric id that is valid for all the player of the game, even they are in another
-	 * client.
+	 * client. Univocal.
 	 * */
 	int ord;
 
@@ -43,7 +43,7 @@ public class Player {
 	// ------------------------------------------------------------------------
 
 	public Player(String nickname, int ord) {
-		if (ord < 0) throw new IllegalArgumentException("ord must be positive");
+		if (ord < 0) throw new IllegalArgumentException("ord must be non-negative");
 		if (nickname == null) throw new NullPointerException("nickname is null");
 		if (nickname.length() == 0) throw new IllegalArgumentException("nickname lenght is 0");
 

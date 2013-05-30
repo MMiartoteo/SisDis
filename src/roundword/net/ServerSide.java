@@ -1,5 +1,5 @@
 package roundword.net;
-
+import roundword.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -7,9 +7,11 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class ServerSide implements ServerSideInterface {
 	Peer peer;
+	GameTable gameTable;
 	
-	public ServerSide(Peer peer) {
+	public ServerSide(Peer peer, GameTable gameTable) {
 		this.peer = peer;
+		this.gameTable = gameTable;
 		try {
 			ServerSideInterface stub = (ServerSideInterface) UnicastRemoteObject.exportObject(this, 0);
 			Registry registry = LocateRegistry.createRegistry(peer.server_portno);
@@ -37,7 +39,8 @@ public class ServerSide implements ServerSideInterface {
 	
 	public String ElectionTurnHolder(int turnHolder) {
 		System.out.println(String.format("Ricevuto TurnHolder. Setto %d come turnHolder.", turnHolder));
-		peer.turnHolder = turnHolder;
+		//peer.turnHolder = turnHolder;
+		peer.gameTable.setTurnHolder(peer.player);
 		return "ok";
 	}
 	
@@ -70,6 +73,8 @@ public class ServerSide implements ServerSideInterface {
 			System.out.println("L'ack è corretto, cancello il relativo timer.");
 			peer.lastWordTask.cancel();
 			/// TODO: NUOVO TURNO!
+			System.out.println("E passo al prossimo turno.");
+			peer.nextTurn();
 		}
 		else {
 			System.out.println("L'ack è vecchio, ignoro il messaggio.");
