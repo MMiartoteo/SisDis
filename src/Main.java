@@ -34,10 +34,17 @@ public class Main {
 			Starter starter = new Starter();
 
 			/// 0 - Leggi parametri del giocatore e del peer locale
-			if (args.length == 3) {
+			if (args.length >= 3) {
 				String nickname = args[0];
 				int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
 				String registrarURL = args[2];
+
+				//Decide if we want an artificial player
+				boolean artificial = false;
+				if (args.length > 3 && args[3].compareTo("ai") == 0) {
+					artificial = true;
+				}
+
 				System.out.println(nickname + ", " + portno + ", " + registrarURL);
 
 				starter.setMessageUpdateListener(new Starter.EventListener() {
@@ -55,7 +62,8 @@ public class Main {
 					}
 				});
 
-				starter.startGame(nickname, portno, registrarURL);
+
+				starter.startGame(nickname, portno, registrarURL, artificial);
 
 			} else {
 				System.out.println("No arguments, open the window to choose them");

@@ -6,6 +6,7 @@ import roundword.GameTable;
 import roundword.Player;
 import roundword.Word;
 import roundword.net.Peer;
+import roundword.test.FakePlayer;
 import roundword.ui.GameFrame;
 
 import javax.swing.*;
@@ -62,7 +63,7 @@ public class Starter {
 		this.eventListener = eventListener;
 	}
 
-	public void startGame(String player_name, int portno, String registrarURL) {
+	public void startGame(String player_name, int portno, String registrarURL, boolean artificial) {
 
 		int SEC_WAIT = 2;
 
@@ -181,8 +182,18 @@ public class Starter {
 		 * */
 
 		/* Start game */
-		GameFrame frame = new GameFrame(table);
-		frame.setVisible(true);
+
+		if (artificial) {
+			try {
+				Thread t = new Thread(new FakePlayer(table, Constants.dictionaryPath));
+				t.start();
+			} catch (Exception ex) {
+				if (eventListener != null) eventListener.gameFailedToStart("Impossible to create a fake player");
+			}
+		} else {
+			GameFrame frame = new GameFrame(table);
+			frame.setVisible(true);
+		}
 	}
 
 }

@@ -10,6 +10,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.Box;
+
+import roundword.Constants;
 import roundword.Starter;
 
 import java.awt.event.ActionEvent;
@@ -17,9 +19,6 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 
 public class ArgumentsChooser extends JFrame implements Starter.EventListener, ActionListener {
-
-	private static final String[] nomiCasuali = {
-			"Ramazzore", "Strapaccioni", "Bomba", "Sorpreso", "Stilografo", "Trasandato", "Tremolo"};
 
 	private JPanel contentPane;
 	private JTextField txtNickname;
@@ -66,7 +65,7 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		panelForm.add(nicknameLabel);
 		
 		txtNickname = new JTextField();
-		txtNickname.setText(ArgumentsChooser.nomiCasuali[rnd.nextInt(ArgumentsChooser.nomiCasuali.length)]);
+		txtNickname.setText(Constants.CasualNames[rnd.nextInt(Constants.CasualNames.length)]);
 		panelForm.add(txtNickname);
 		txtNickname.setColumns(10);
 		
@@ -124,7 +123,7 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				starter.startGame(txtNickname.getText(), Integer.valueOf(txtPort.getText()), txtRegistrarURL.getText());
+				starter.startGame(txtNickname.getText(), Integer.valueOf(txtPort.getText()), txtRegistrarURL.getText(), false);
 			}
 		});
 		t.start();
