@@ -8,6 +8,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import roundword.Constants;
 import roundword.GameTable;
 import roundword.Player;
 import roundword.Word;
@@ -58,23 +59,22 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 
 	GameTable gameTable;
 
-	public static final int LAST_WORDS_NUMBER = 3;
-
-	JLabel[] lblLastsWord = new JLabel[LAST_WORDS_NUMBER];
+	JLabel[] lblLastsWord = new JLabel[Constants.WordToDisplay];
 	JTextField txtWord;
 
 	List<Word> words;
 
 	public static final int MinPanelWidth = 450;
-	public static final Color LblWordColor = new Color(10,10,10);
-	public static final int LblWordColorIncrement = 50;
+	public static final int LblWordColorComp = 10;
+	public static final Color LblWordColor = new Color(LblWordColorComp,LblWordColorComp,LblWordColorComp);
+	public static final int LblWordColorIncrement = (200 - LblWordColorComp)/Constants.WordToDisplay;
 	public static final String LblLastWord_InWordSyllableColor = "#0A0A0A";
 	public static final Font LblsFont = new Font("Lucida Grande", Font.PLAIN, 30);
 	public static final int LblsHeightMin = 40;
 	public static final Dimension LblsDimensionMin = new Dimension(MinPanelWidth, LblsHeightMin);
 	public static final Dimension LblsDimensionMax = new Dimension(Integer.MAX_VALUE, LblsHeightMin);
 	public static final Dimension DimensionMin = new Dimension(MinPanelWidth,
-															   LblsHeightMin * (LAST_WORDS_NUMBER + 1) + 50);
+															   LblsHeightMin * (Constants.WordToDisplay + 1) + 50);
 	
 	/**
 	 * Create the panel.
@@ -127,7 +127,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		lblInformazioniGiocatore2.setFont(UIConstants.TextInfoFont);
 		add(lblInformazioniGiocatore2);
 		
-		for (int i = 0; i < LAST_WORDS_NUMBER; i++) {
+		for (int i = 0; i < Constants.WordToDisplay; i++) {
 			lblLastsWord[i] = new JLabel("word " + i);
 			lblLastsWord[i].setHorizontalTextPosition(SwingConstants.LEFT);
 			lblLastsWord[i].setHorizontalAlignment(SwingConstants.LEFT);
@@ -154,7 +154,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 	}
 
 	public void refresh() {
-		for (int i = 0; i < LAST_WORDS_NUMBER; i++) {
+		for (int i = 0; i < Constants.WordToDisplay; i++) {
 			String t;
 			if (words.size() > i) {
 				Word w = words.get(i);
@@ -182,7 +182,6 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		//TODO: check se la parola fa errore (non è presente nel dizionario, o non è conforme alla parola precedente, ecc...)
 		gameTable.addWord(new Word(txtWord.getText()), 12);
 		txtWord.setText("");
-		//gameTable.nextTurn();
 	}
 
 	@Override
