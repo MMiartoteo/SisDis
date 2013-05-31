@@ -167,7 +167,7 @@ public class GameTable implements Player.EventListener {
 		String lastWordSyl = (words.size() > 0)? words.get(0).getLastSyllableSubWord() : null;
 
 		if (w == null) { //the player doesn't write anything
-			turnHolder.addPoints(RWConstants.pointsForNotReply);
+			turnHolder.addPoints(Constants.PointsForNotReply);
 		} else {
 			//TODO: considerare secondi per rispondere
 			String wordStr = w.toString();
@@ -180,10 +180,10 @@ public class GameTable implements Player.EventListener {
 					words.add(0, w);
 					turnHolder.addPoints(w.getValue());
 				} else {
-					turnHolder.addPoints(RWConstants.pointsForWrongWord);
+					turnHolder.addPoints(Constants.PointsForWrongWord);
 				}
 			} else { //the player insert a word that isn't in the dictionary
-				turnHolder.addPoints(RWConstants.pointsForWrongWord);
+				turnHolder.addPoints(Constants.PointsForWrongWord);
 			}
 		}
 
