@@ -13,6 +13,8 @@ public class PlayersListElement extends JPanel implements ListCellRenderer {
 	public static final Color BackgroundColor1 = new Color(243, 243, 243);
 	public static final Color BackgroundColor2 = new Color(233, 233, 233);
 
+	public static final Color PlayingBackgroundColor = new Color(188, 188, 188);
+
 	JLabel lblNickname;
 	JLabel lblPoints;
 	JPanel panelPoints;
@@ -50,13 +52,18 @@ public class PlayersListElement extends JPanel implements ListCellRenderer {
 		lblNickname.setText(value.toString());
 		lblPoints.setText(String.valueOf(pInfo.getPlayer().getPoints()));
 
-		//change the colors with the position
-		if (index % 2 == 0) {
-			setBackground(BackgroundColor1);
-			panelPoints.setBackground(BackgroundColor1);
+		if (pInfo.isPlaying()) {
+			setBackground(PlayingBackgroundColor);
+			panelPoints.setBackground(PlayingBackgroundColor);
 		} else {
-			setBackground(BackgroundColor2);
-			panelPoints.setBackground(BackgroundColor2);
+			//change the colors with the position
+			if (index % 2 == 0) {
+				setBackground(BackgroundColor1);
+				panelPoints.setBackground(BackgroundColor1);
+			} else {
+				setBackground(BackgroundColor2);
+				panelPoints.setBackground(BackgroundColor2);
+			}
 		}
 
 		return this;

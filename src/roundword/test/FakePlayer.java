@@ -67,8 +67,14 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 		}
 	}
 
-	public void newWordAdded(Word w) {}
+	public void newWordAdded(Word w) {
+		String word = "";
+		if (w != null) word = w.toString();
+		System.out.println(t.getTurnHolder() + " inserted '" + word);
+	}
+
 	public void playersPointsUpdate() {}
+
 	synchronized public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
 		if (newTurnHolder == t.getLocalPlayer()) {
 			localPlayerIsPlaying = true;
