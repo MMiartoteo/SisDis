@@ -13,6 +13,7 @@ public class WordMsg extends Msg {
 	TimerTask timerTask;
 	long delay;
 	
+	/* Questa viene usata dal turnista, per avere anche un tempo di attesa */
 	public WordMsg(Peer to, long id, Word word, Timer timer, TimerTask timerTask, long delay) {
 		super(to);
 		this.id = id;
@@ -22,6 +23,7 @@ public class WordMsg extends Msg {
 		this.delay = delay;
 	}
 	
+	/* Questa viene usata da chi fa solo forwarding */
 	public WordMsg(Peer to, long id, Word word) {
 		super(to);
 		this.id = id;

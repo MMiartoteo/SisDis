@@ -29,11 +29,18 @@ public class ServerSide implements ServerSideInterface {
 	
 	public String sayHello() {
 		/// ONLY FOR DEBUG
+		System.out.println(String.format("Ricevuto HELLO"));
+		peer.startTurnHolderElection();
         return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
     }
     
     public String ElectionInit() {
-		System.out.println(String.format("Ricevuto ElectionInit. Rispondo al mittente con un return immediato."));
+		System.out.println(String.format("Ricevuto ElectionInit"));
+		//if (! peer.electionActive) {
+		System.out.println(String.format("Comincio anche io l'elezione."));
+		peer.startTurnHolderElection();
+		//}
+		System.out.println(String.format("Rispondo al mittente con un return immediato."));
 		return "ok";
 	}
 	
@@ -41,6 +48,16 @@ public class ServerSide implements ServerSideInterface {
 		System.out.println(String.format("Ricevuto SetTurnHolder. Setto %d come turnHolder.", newTurnHolder));
 		//peer.turnHolder = turnHolder;
 		gameTable.setTurnHolder(peer.peers.get(newTurnHolder).player);
+		if (peer.firstPhaseElectionTask != null) {
+			peer.firstPhaseElectionTask.cancel();
+			peer.firstPhaseElectionTask = null;
+		}
+		if (peer.secondPhaseElectionTask != null) {
+			peer.secondPhaseElectionTask.cancel();
+			peer.secondPhaseElectionTask = null;
+		}
+		peer.electionActive = false;
+		peer.rescheduleTurnHolderTimer();
 		return "ok";
 	}
 	

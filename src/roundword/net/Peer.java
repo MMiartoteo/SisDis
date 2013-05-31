@@ -26,11 +26,15 @@ public class Peer implements GameTable.EventListener {
 	ServerSide server;
 	
 	Timer timer;
-	TimerTask lastWordTask;
-	TimerTask lastElectionTask;
+	TimerTask lastWordTask;     // Per catturare la morte dei forwarder del token "Word"
+	TimerTask lastElectionTask; // Per catturare la morte del turnHolder attuale
+	TimerTask firstPhaseElectionTask; // Per catturare la morte dei turnHolder candidati durante l'elezione
+	TimerTask secondPhaseElectionTask; // Per catturare la morte del turnHolder nella seconda fase dell'elezione
 	
 	long lastSentMsgId = 0;
 	long lastSeenMsgId = 0;
+	
+	boolean electionActive = false;
 	
 	public Peer(Player player, String IPaddr, int server_portno) {
 		this.player = player;
@@ -69,10 +73,13 @@ public class Peer implements GameTable.EventListener {
 		this.start_server_side();
 		this.start_client_side();
 		
-		if (this.isTurnHolder()) {
+		//~ if (this.isTurnHolder()) {
 			// Solo il primo giocatore/peer lancia elezione (più che altro per far sapere agli altri che c'è)
-			this.startTurnHolderElection();
-		}
+			//~ this.startTurnHolderElection();
+		//~ }
+		// PROVA A FAR FARE UN'ELEZIONE A TUTTI: TEST:
+		send_msg(new HelloMsg(getNextPeer()));
+		//startTurnHolderElection();
 		
 		// Fai partire i vari timer per beccare la morte del turnHolder
 		rescheduleTurnHolderTimer();
@@ -196,7 +203,12 @@ public class Peer implements GameTable.EventListener {
 		gameTable.nextTurn();
 	}
 	
-	public void startTurnHolderElection() {
+	protected void startTurnHolderElection() {
+		if (electionActive) {
+			System.out.println("ATTENZIONE!! ELEZIONE ERA GIA' IN CORSO. IGNORO startTurnHolderElection()");
+			return;
+		}
+		electionActive = true;
 		if (isTurnHolder()) {
 			// Sono io il leader! Invio notizia a tutti i processi minori (in realtà tutti tranne me)
 			for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
@@ -204,13 +216,52 @@ public class Peer implements GameTable.EventListener {
 				System.out.println(String.format("%s) Invio SetTurnHolder a peer %s", getOrd(), i));
 				send_msg(new ElectionSetTurnHolderMsg(peers.get(i), getOrd()));
 			}
+			electionActive = false; // In questo caso l'elezione finisce subito.
 		} else {
 			// Non sono il leader. Invio elezione a tutti quelli prima di me, a partire
 			// da chi credo sia il leader attuale
 			for (int i=getTurnHolder().getOrd(); i!=getOrd(); i=(i+1)%peers.size()) {
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio ElectionInit a peer %s", getOrd(), i));
-				send_msg(new ElectionInitMsg(peers.get(i)));
+				
+				// Il delay nell'elezione del leader è sempre il seguente:
+				long delay = 2*T_trans + T_proc;
+				
+				// Setta un primo timer tempo T per aspettare risposta
+				// da ALMENO UN peer possibile coordinatore.
+				if (firstPhaseElectionTask == null) {
+					firstPhaseElectionTask = new TimerTask() {
+						@Override
+						public void run() {
+							// Se scade, devi settare te stesso come coordinatore e dirlo a quelli dopo di te.
+							System.out.println("Timer ElectionInit1 scaduto! Setto me come TurnHolder e lo dico a tutti.");
+							gameTable.setTurnHolder(player);
+							electionActive = false;
+							startTurnHolderElection();
+						}
+					};
+					timer.schedule(firstPhaseElectionTask, delay);
+				}
+				/// NOTA: qui sarebbe meglio schedulare il timer task solo
+				/// dopo aver spedito almeno il primo messaggio.
+				/// Ma metto qui per semplicità, per ora almeno.
+				
+				// Timer per aspettare un messaggio SetTurnHolder
+				// Dopo che avrò ricevuto la prima risposta da qualcuno
+				if (secondPhaseElectionTask == null) {
+					secondPhaseElectionTask = new TimerTask() {
+						@Override
+						public void run() {
+							// Se non arriva, devi indire una nuova elezione
+							System.out.println("Timer ElectionInit2 scaduto! Indico una nuova elezione.");
+							startTurnHolderElection();
+						}
+					};
+				} else {
+					//secondPhaseElectionTask = null;
+				}
+				
+				send_msg(new ElectionInitMsg(peers.get(i), timer, firstPhaseElectionTask, secondPhaseElectionTask, delay));
 			}
 		}
 	}
@@ -225,6 +276,8 @@ public class Peer implements GameTable.EventListener {
 	protected void nextTurn() {
 		this.gameTable.nextTurn();
 	}
+	
+	
 	
 	
 	/* ############################## */
