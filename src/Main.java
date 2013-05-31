@@ -41,7 +41,7 @@ public class Main {
 
 				//Decide if we want an artificial player
 				boolean artificial = false;
-				if (args.length > 3 && args[3].compareTo("ai") == 0) {
+				if (args.length > 3 && args[3].equals("ai")) {
 					artificial = true;
 				}
 

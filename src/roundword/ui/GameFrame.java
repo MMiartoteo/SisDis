@@ -1,7 +1,6 @@
 package roundword.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -36,7 +35,7 @@ public class GameFrame extends JFrame {
 	private void initialize() {
 		setBackground(UIConstants.BackgroundColor);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 491, 300);
+
 		contentPane = new JPanel();
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -81,6 +80,12 @@ public class GameFrame extends JFrame {
 		});
 		btnExit.setAlignmentX(Component.CENTER_ALIGNMENT);
 		controlsBar.add(btnExit, BorderLayout.EAST);
+
+		pack();
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (dim.width - getSize().width)/2;
+		int y = (dim.height - getSize().height)/2;
+		setLocation(x, y);
 
 	}
 

@@ -20,7 +20,7 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 
 	PlayersListModel model;
 
-	public static final Dimension MinimumDimension = new Dimension(150, 100);
+	public static final Dimension MinimumDimension = new Dimension(250, 100);
 
 	/**
 	 * Create the panel.
@@ -30,6 +30,7 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 		setLayout(new BorderLayout(0, 0));
 		setBackground(UIConstants.BackgroundColor);
 		setMinimumSize(MinimumDimension);
+		setPreferredSize(MinimumDimension);
 		if (gameTable != null) model = new PlayersListModel(gameTable.getPlayersList(), gameTable.getTurnHolder());
 		
 		playersList = new JList();
