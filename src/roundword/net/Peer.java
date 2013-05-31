@@ -94,7 +94,7 @@ public class Peer implements GameTable.EventListener {
 				startTurnHolderElection();
 			}
 		};
-		timer.schedule(lastElectionTask, 5000); /// TODO <--- metti delay corretto!
+		timer.schedule(lastElectionTask, 10000); /// TODO <--- metti delay corretto!
 	}
 	
 	public boolean isActive() {

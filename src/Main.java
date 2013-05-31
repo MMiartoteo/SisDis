@@ -43,7 +43,7 @@ public class Main {
 
 		/// 0 - Leggi parametri del giocatore e del peer locale
 		String player_name = args[0];
-		int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
+		int portno = Integer.parseInt(args[1]);
 		System.out.println(player_name + ", " + portno);
 
 		/// 1 - Contatta il registrar centrale
