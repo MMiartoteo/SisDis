@@ -68,12 +68,17 @@ public class GameFrame extends JFrame {
 		contentPane.add(panPlayersInfo, BorderLayout.EAST);
 		panPlayersInfo.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		
+		JPanel controlsBarContainer = new JPanel();
+		controlsBarContainer.setBackground(UIConstants.ControlBarBackgroundColor);
+		controlsBarContainer.setBorder(new MatteBorder(1, 0, 0, 0, UIConstants.BordersColor));
+		contentPane.add(controlsBarContainer, BorderLayout.SOUTH);
+		controlsBarContainer.setLayout(new BorderLayout(0, 0));
+
 		JPanel controlsBar = new JPanel();
-		controlsBar.setBackground(UIConstants.ControlBarBackgroundColor);
-		controlsBar.setBorder(new MatteBorder(1, 0, 0, 0, UIConstants.BordersColor));
-		contentPane.add(controlsBar, BorderLayout.SOUTH);
 		controlsBar.setLayout(new BorderLayout(0, 0));
-		
+		controlsBar.setBorder(new EmptyBorder(3, 3, 3, 3));
+		controlsBarContainer.add(controlsBar, BorderLayout.CENTER);
+
 		JButton btnExit = new JButton("Esci");
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent actionEvent) { exit(); }

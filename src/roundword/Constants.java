@@ -13,4 +13,6 @@ public class Constants {
 			"Ramazzore", "Strapaccioni", "Bomba88", "Sorpreso", "Stilografo", "Trasandato", "Tremolo",
 			"Strigi", "Paparazzo", "Perdente46", "Lillo", "Greg", "Python", "C++", "Java"};
 
+	public static final int TimeoutSeconds = 5;
+
 }

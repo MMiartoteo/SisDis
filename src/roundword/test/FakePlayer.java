@@ -67,7 +67,7 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 		}
 	}
 
-	public void newWordAdded(Word w) {
+	public void newWordAdded(Word w, int seconds, WordAddedState state) {
 		String word = "";
 		if (w != null) word = w.toString();
 		System.out.println(t.getTurnHolder() + " inserted '" + word);

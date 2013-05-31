@@ -70,10 +70,14 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 			}
 		}
 
-		public void newWordAdded(Word w) {
+		public void newWordAdded(Word w, int seconds, WordAddedState state) {
 			if (t.getTurnHolder() == t.getLocalPlayer()) t.nextTurn();
 		}
-		public void playersPointsUpdate() {}
+
+		public void playersPointsUpdate() {
+
+		}
+
 		synchronized public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
 			if (newTurnHolder == t.getLocalPlayer()) localPlayerIsPlaying = true;
 			if (oldTurnHolder == t.getLocalPlayer()) {

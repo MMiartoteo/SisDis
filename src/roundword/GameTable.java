@@ -16,8 +16,10 @@ public class GameTable implements Player.EventListener {
 
 	public interface EventListener extends java.util.EventListener {
 
+		public enum WordAddedState {OK, TIMEOUT_ELAPSED, NO_IN_DICTIONARY, SYLLABE_INCORRECT};
+
 		//Called when a new word is added
-		void newWordAdded(Word w);
+		void newWordAdded(Word w, int seconds, WordAddedState state);
 
 		//Called when a/some player/s changes its point
 		void playersPointsUpdate();
@@ -56,7 +58,9 @@ public class GameTable implements Player.EventListener {
 	/**
 	 * The list of listener for callback that is call when a new word is inserted
 	 * */
-	Set<EventListener> eventListeners;
+	List<EventListener> eventListeners;
+
+	EventListener strangeEventListeners;
 
 	/**
 	 * Dictionary. To check if a word is valid or not
@@ -101,7 +105,7 @@ public class GameTable implements Player.EventListener {
 		if (dictionary == null) throw new NullPointerException("dictionary must be not null");
 		this.dictionary = dictionary;
 
-		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
+		eventListeners = Collections.synchronizedList(new LinkedList<EventListener>());
 		words = new ArrayList<Word>();
 
 		boolean localPlayerFounded = false;
@@ -149,6 +153,7 @@ public class GameTable implements Player.EventListener {
 
 			//Callbacks call
 			for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+			if (strangeEventListeners != null) strangeEventListeners.turnHolderChanged(oldTurnHolder, turnHolder);
 		}
 	}
 	
@@ -163,8 +168,10 @@ public class GameTable implements Player.EventListener {
 	 * in this case the user will have a negative point addition.
 	 * param: secondToReply the second that the user takes to write the word (used to calculate the points)
 	 * */
-	public void addWord(Word w, long secondToReply) {
+	public void addWord(Word w, int secondToReply) {
+
 		String lastWordSyl = (words.size() > 0)? words.get(0).getLastSyllableSubWord() : null;
+		EventListener.WordAddedState state = EventListener.WordAddedState.OK;
 
 		if (w == null) { //the player doesn't write anything
 			turnHolder.addPoints(Constants.PointsForNotReply);
@@ -175,20 +182,30 @@ public class GameTable implements Player.EventListener {
 				if (lastWordSyl == null) { //No words before this
 					words.add(0, w);
 					turnHolder.addPoints(w.getValue());
+					state = EventListener.WordAddedState.OK;
 				} else if (wordStr.length() >= lastWordSyl.length()
 						    && (wordStr.substring(0, lastWordSyl.length()).compareTo(lastWordSyl) == 0)) {
 					words.add(0, w);
 					turnHolder.addPoints(w.getValue());
+					state = EventListener.WordAddedState.OK;
 				} else {
 					turnHolder.addPoints(Constants.PointsForWrongWord);
+					state = EventListener.WordAddedState.SYLLABE_INCORRECT;
 				}
 			} else { //the player insert a word that isn't in the dictionary
 				turnHolder.addPoints(Constants.PointsForWrongWord);
+				state = EventListener.WordAddedState.NO_IN_DICTIONARY;
 			}
 		}
 
+		System.out.println("ADD WORD: " + w);
+
 		//Callbacks call
-		for (EventListener el : eventListeners) el.newWordAdded(w);
+		for (EventListener el : eventListeners) {
+			System.out.println("ADD WORD EVENT:" + el.getClass().toString());
+			el.newWordAdded(w, secondToReply, state);
+		}
+		if (strangeEventListeners != null) strangeEventListeners.newWordAdded(w, secondToReply, state);
 	}
 
 	/**
@@ -210,6 +227,7 @@ public class GameTable implements Player.EventListener {
 
 		//Callbacks call
 		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+		if (strangeEventListeners != null) strangeEventListeners.turnHolderChanged(oldTurnHolder, turnHolder);
 		
 		System.out.println("######### NEXT TURN #########");
 		System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
@@ -225,6 +243,15 @@ public class GameTable implements Player.EventListener {
 	public void removeEventListener(EventListener listener) {
 		if (listener == null) throw new NullPointerException("listener is null");
 		eventListeners.remove(listener);
+	}
+
+	public void setStrangeEventListener(EventListener listener) {
+		if (listener == null) throw new NullPointerException("listener is null");
+		strangeEventListeners = listener;
+	}
+
+	public void deleteStrangeEventListener() {
+		strangeEventListeners = null;
 	}
 
 	@Override

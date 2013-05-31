@@ -68,7 +68,7 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 	}
 
 	@Override
-	public void newWordAdded(Word w) {
+	public void newWordAdded(Word w, int seconds, WordAddedState state) {
 
 	}
 

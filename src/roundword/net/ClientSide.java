@@ -29,6 +29,7 @@ public class ClientSide extends Thread {
 		// Incoda (bloccante?)
 		try {
 			msgQ.offer(m, NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);
+			//msgQ.add(m);
 		} catch (InterruptedException e) {
 			// ??
 		}
