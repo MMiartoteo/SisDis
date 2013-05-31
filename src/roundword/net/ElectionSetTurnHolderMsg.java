@@ -16,7 +16,7 @@ public class ElectionSetTurnHolderMsg extends Msg {
 	}
 	
 	public String execute() throws Exception {
-		for (int i=0; i<10; ++i) {
+		for (int i=0; i<1; ++i) {
 			try {
 				Registry registry = LocateRegistry.getRegistry(dest_host, dest_portno);
 				ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
