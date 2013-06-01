@@ -140,7 +140,7 @@ public class Peer implements GameTable.EventListener {
 	/* ##############################  */
 	/*       EVENTI DI GAMETABLE       */
 	/* ##############################  */
-	public void newWordAdded(Word word, int seconds, WordAddedState state) {
+	public void newWordAdded(Word word, long milliseconds, WordAddedState state) {
 		if (!this.isTurnHolder()) return; //We manage only the word created by the local player
 		System.out.println("EVENTO newWordAdded");
 		sendWord(word);
@@ -187,7 +187,7 @@ public class Peer implements GameTable.EventListener {
 				/// TODO: INDIRE ELEZIONE!
 			}
 		};
-		timer.schedule(lastWordTask, peers.size()*(T_trans+T_proc));
+		timer.schedule(lastWordTask, peers.size() * (T_trans + T_proc));
 	}
 	
 	protected void sendWordAck() {

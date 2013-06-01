@@ -46,12 +46,12 @@ public class GameFrame extends JFrame {
 		infoBar.setBorder(new MatteBorder(0, 0, 1, 0, UIConstants.BordersColor));
 		contentPane.add(infoBar, BorderLayout.NORTH);
 		infoBar.setLayout(new BorderLayout(0, 0));
-		
-		JPanel panPlayerInfo = new PlayerInfoPanel(gameTable);
+
+		PlayerInfoPanel panPlayerInfo = new PlayerInfoPanel(gameTable);
 		infoBar.add(panPlayerInfo, BorderLayout.WEST);
 		panPlayerInfo.setBorder(new EmptyBorder(10, 10, 10, 10));
 		
-		JPanel panTimeInfo = new TimePanel();
+		TimePanel panTimeInfo = new TimePanel();
 		infoBar.add(panTimeInfo);
 		panTimeInfo.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		panTimeInfo.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -59,8 +59,8 @@ public class GameFrame extends JFrame {
 		JPanel panel = new JPanel();
 		contentPane.add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BorderLayout(0,0));
-		
-		JPanel panGame = new GamePanel(gameTable);
+
+		GamePanel panGame = new GamePanel(gameTable, panTimeInfo);
 		panGame.setBorder(new EmptyBorder(10, 10, 10, 10));
 		panel.add(panGame, BorderLayout.CENTER);
 		

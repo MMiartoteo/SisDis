@@ -15,10 +15,13 @@ import roundword.Word;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Date;
 import java.util.List;
 
 public class GamePanel extends JPanel implements GameTable.EventListener {
 	private static final long serialVersionUID = 1L;
+
+	volatile boolean isPlaying = false;
 
 	class CharVerifier extends InputVerifier {
 		public boolean verify(JComponent input) {
@@ -59,9 +62,9 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 
 	GameTable gameTable;
 
+	TimePanel timePanel;
 	JLabel[] lblLastsWord = new JLabel[Constants.WordToDisplay];
 	JTextField txtWord;
-
 	List<Word> words;
 
 	public static final int MinPanelWidth = 450;
@@ -79,9 +82,9 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 	/**
 	 * Create the panel.
 	 */
-	public GamePanel(GameTable gameTable) {
+	public GamePanel(GameTable gameTable, TimePanel timePanel) {
 		this.gameTable = gameTable;
-
+		this.timePanel = timePanel;
 		this.words = gameTable.getWordsList();
 		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -114,7 +117,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		txtWord.setInputVerifier(new CharVerifier());
 		txtWord.addKeyListener(new KeyListener() {
 			public void keyTyped(KeyEvent keyEvent) {
-				if (keyEvent.getKeyChar() == '\n') endPlay();
+				if (keyEvent.getKeyChar() == '\n') endPlay(false);
 			}
 			public void keyPressed(KeyEvent keyEvent) {}
 			public void keyReleased(KeyEvent keyEvent) {}
@@ -141,6 +144,11 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 			//lblLastsWord[i].setPreferredSize(LblsDimensionMin);
 			add(lblLastsWord[i]);
 		}
+
+		//Set the listener for the timePanel
+		timePanel.setEndTimeListener(new Runnable() {
+			public void run() { endPlay(true); }
+		});
 
 		//Refresh the list depending on the game table
 		refresh();
@@ -173,19 +181,24 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 	}
 
 	private void startPlay() {
+		isPlaying = true;
 		txtWord.setEnabled(true);
 		txtWord.requestFocus();
+		timePanel.startTimer();
 	}
 
-	private void endPlay() {
-		txtWord.setEnabled(false);
-		//TODO: check se la parola fa errore (non è presente nel dizionario, o non è conforme alla parola precedente, ecc...)
-		gameTable.addWord(new Word(txtWord.getText()), 12);
-		txtWord.setText("");
+	synchronized public void endPlay(boolean timeoutElapsed) {
+		if (isPlaying) {
+			isPlaying = false;
+			txtWord.setEnabled(false);
+			//TODO: feedback visuale se la parola fa errore (non è presente nel dizionario, o non è conforme alla parola precedente, ecc...)
+			gameTable.addWord(timeoutElapsed ? null : new Word(txtWord.getText()), timePanel.endTimer());
+			txtWord.setText("");
+		}
 	}
 
 	@Override
-	public void newWordAdded(Word w, int seconds, WordAddedState state) {
+	public void newWordAdded(Word w, long milliseconds, WordAddedState state) {
 		System.out.println("NEW WORD ADDED INTERFACCIA");
 		refresh();
 	}

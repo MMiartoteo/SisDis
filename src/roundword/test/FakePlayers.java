@@ -19,6 +19,8 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 		GameTable t;
 		volatile boolean localPlayerIsPlaying;
 
+		Runnable endTimeListener;
+
 		public FakePlayers(GameTable gameTable, String dictionaryPath) throws IOException {
 			this.t = gameTable;
 			localPlayerIsPlaying = (t.getTurnHolder() == t.getLocalPlayer());
@@ -70,7 +72,7 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 			}
 		}
 
-		public void newWordAdded(Word w, int seconds, WordAddedState state) {
+		public void newWordAdded(Word w, long milliseconds, WordAddedState state) {
 			if (t.getTurnHolder() == t.getLocalPlayer()) t.nextTurn();
 		}
 
@@ -96,6 +98,11 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				word = br.readLine();
 			}
 			br.close();
+		}
+
+
+		public void setEndTimeListener(Runnable listener) {
+
 		}
 
 }

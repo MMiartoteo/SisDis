@@ -19,7 +19,7 @@ public class GameTable implements Player.EventListener {
 		public enum WordAddedState {OK, TIMEOUT_ELAPSED, NO_IN_DICTIONARY, SYLLABE_INCORRECT};
 
 		//Called when a new word is added
-		void newWordAdded(Word w, int seconds, WordAddedState state);
+		void newWordAdded(Word w, long milliseconds, WordAddedState state);
 
 		//Called when a/some player/s changes its point
 		void playersPointsUpdate();
@@ -163,9 +163,9 @@ public class GameTable implements Player.EventListener {
 	 *
 	 * param: word the inserted word. With {@code null} it means that the player don't write anything and
 	 * in this case the user will have a negative point addition.
-	 * param: secondToReply the second that the user takes to write the word (used to calculate the points)
+	 * param: millisecondToReply the milliseconds that the user takes to write the word (used to calculate the points)
 	 * */
-	public void addWord(Word w, int secondToReply) {
+	public void addWord(Word w, long millisecondToReply) {
 
 		String lastWordSyl = (words.size() > 0)? words.get(0).getLastSyllableSubWord() : null;
 		EventListener.WordAddedState state = EventListener.WordAddedState.OK;
@@ -173,17 +173,16 @@ public class GameTable implements Player.EventListener {
 		if (w == null) { //the player doesn't write anything
 			turnHolder.addPoints(Constants.PointsForNotReply);
 		} else {
-			//TODO: considerare secondi per rispondere
 			String wordStr = w.toString();
 			if (dictionary.contains(w)) {
 				if (lastWordSyl == null) { //No words before this
 					words.add(0, w);
-					turnHolder.addPoints(w.getValue());
+					turnHolder.addPoints(w.getValue() + (int) Math.round(Constants.PointsPerMilliseconds * millisecondToReply));
 					state = EventListener.WordAddedState.OK;
 				} else if (wordStr.length() >= lastWordSyl.length()
 						    && (wordStr.substring(0, lastWordSyl.length()).compareTo(lastWordSyl) == 0)) {
 					words.add(0, w);
-					turnHolder.addPoints(w.getValue());
+					turnHolder.addPoints(w.getValue() + (int) Math.round(Constants.PointsPerMilliseconds * millisecondToReply));
 					state = EventListener.WordAddedState.OK;
 				} else {
 					turnHolder.addPoints(Constants.PointsForWrongWord);
@@ -196,7 +195,7 @@ public class GameTable implements Player.EventListener {
 		}
 
 		//Callbacks call
-		for (EventListener el : eventListeners) el.newWordAdded(w, secondToReply, state);
+		for (EventListener el : eventListeners) el.newWordAdded(w, millisecondToReply, state);
 	}
 
 	/**

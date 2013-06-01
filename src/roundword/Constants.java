@@ -3,7 +3,7 @@ package roundword;
 public class Constants {
 	
 	public static final int PointsForWrongWord = -100;
-	public static final int PointsForNotReply = -200;
+	public static final int PointsForNotReply = -80;
 
 	public static final int WordToDisplay = 6;
 
@@ -13,6 +13,8 @@ public class Constants {
 			"Ramazzore", "Strapaccioni", "Bomba88", "Sorpreso", "Stilografo", "Trasandato", "Tremolo",
 			"Strigi", "Paparazzo", "Perdente46", "Lillo", "Greg", "Python", "C++", "Java"};
 
-	public static final int TimeoutSeconds = 5;
+	public static final int TimeoutMilliseconds = 5000;
+
+	public static final double PointsPerMilliseconds = 0.02;
 
 }
