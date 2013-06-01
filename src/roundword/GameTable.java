@@ -58,7 +58,7 @@ public class GameTable implements Player.EventListener {
 	/**
 	 * The list of listener for callback that is call when a new word is inserted
 	 * */
-	List<EventListener> eventListeners;
+	Set<EventListener> eventListeners;
 
 	EventListener strangeEventListeners;
 
@@ -105,7 +105,7 @@ public class GameTable implements Player.EventListener {
 		if (dictionary == null) throw new NullPointerException("dictionary must be not null");
 		this.dictionary = dictionary;
 
-		eventListeners = Collections.synchronizedList(new LinkedList<EventListener>());
+		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		words = new ArrayList<Word>();
 
 		boolean localPlayerFounded = false;
@@ -198,14 +198,13 @@ public class GameTable implements Player.EventListener {
 			}
 		}
 
-		System.out.println("ADD WORD: " + w);
-
 		//Callbacks call
 		for (EventListener el : eventListeners) {
-			System.out.println("ADD WORD EVENT:" + el.getClass().toString());
 			el.newWordAdded(w, secondToReply, state);
 		}
+		System.out.println("##########BEFORE KILLER LISTENER##########");
 		if (strangeEventListeners != null) strangeEventListeners.newWordAdded(w, secondToReply, state);
+		System.out.println("##########AFTER KILLER LISTENER##########");
 	}
 
 	/**
