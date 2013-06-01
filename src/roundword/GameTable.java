@@ -60,8 +60,6 @@ public class GameTable implements Player.EventListener {
 	 * */
 	Set<EventListener> eventListeners;
 
-	EventListener strangeEventListeners;
-
 	/**
 	 * Dictionary. To check if a word is valid or not
 	 */
@@ -153,7 +151,6 @@ public class GameTable implements Player.EventListener {
 
 			//Callbacks call
 			for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
-			if (strangeEventListeners != null) strangeEventListeners.turnHolderChanged(oldTurnHolder, turnHolder);
 		}
 	}
 	
@@ -199,12 +196,7 @@ public class GameTable implements Player.EventListener {
 		}
 
 		//Callbacks call
-		for (EventListener el : eventListeners) {
-			el.newWordAdded(w, secondToReply, state);
-		}
-		System.out.println("##########BEFORE KILLER LISTENER##########");
-		if (strangeEventListeners != null) strangeEventListeners.newWordAdded(w, secondToReply, state);
-		System.out.println("##########AFTER KILLER LISTENER##########");
+		for (EventListener el : eventListeners) el.newWordAdded(w, secondToReply, state);
 	}
 
 	/**
@@ -226,8 +218,7 @@ public class GameTable implements Player.EventListener {
 
 		//Callbacks call
 		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
-		if (strangeEventListeners != null) strangeEventListeners.turnHolderChanged(oldTurnHolder, turnHolder);
-		
+
 		System.out.println("######### NEXT TURN #########");
 		System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
 	}
@@ -242,15 +233,6 @@ public class GameTable implements Player.EventListener {
 	public void removeEventListener(EventListener listener) {
 		if (listener == null) throw new NullPointerException("listener is null");
 		eventListeners.remove(listener);
-	}
-
-	public void setStrangeEventListener(EventListener listener) {
-		if (listener == null) throw new NullPointerException("listener is null");
-		strangeEventListeners = listener;
-	}
-
-	public void deleteStrangeEventListener() {
-		strangeEventListeners = null;
 	}
 
 	@Override

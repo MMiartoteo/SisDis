@@ -1,38 +1,39 @@
 package roundword.net;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 public class ClientSide extends Thread {
-	
-	BlockingQueue msgQ;
+
+	public static final int SleepTimeOnEmptyQueue = 200;
+
+	private BlockingQueue<Msg> msgQ;
 	
 	public ClientSide() {
-		msgQ = new LinkedBlockingDeque(2^20);
+		msgQ = new LinkedBlockingQueue<Msg>();
 	}
 	
 	public void run() {
+		Msg m = null;
+
         System.out.println("Client started!");
+
         while (true) {
 			System.out.println("Client cycle!");
-			Msg m = null;
+
 			try {
-				m = (Msg) msgQ.poll(NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);
-			}
-			catch (InterruptedException e) {
-				// ??
-			}
+				m = msgQ.poll(NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);
+			} catch (InterruptedException e) { }
+
 			if (m == null) continue;
+
+			System.out.println("STO CHIAMANDO SEND_MSG_RMI");
 			send_msg_rmi(m);
+			System.out.println("SEND_MSG_RMI HA FINITO");
 		}
     }
     
     public void send_msg(Msg m) {
-		// Incoda (bloccante?)
-		try {
-			msgQ.offer(m, NetConstants.BlockingQueueTimeoutSeconds, TimeUnit.SECONDS);
-			//msgQ.add(m);
-		} catch (InterruptedException e) {
-			// ??
-		}
+		msgQ.add(m);
 	}
 	
 	private void send_msg_rmi(Msg m) {

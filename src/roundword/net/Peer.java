@@ -63,8 +63,7 @@ public class Peer implements GameTable.EventListener {
 	public void setGameTable(GameTable gameTable) {
 		assert local;
 		this.gameTable = gameTable;
-		//gameTable.addEventListener(this);
-		gameTable.setStrangeEventListener(this);
+		gameTable.addEventListener(this);
 	}
 	
 	public void start() {
@@ -142,7 +141,7 @@ public class Peer implements GameTable.EventListener {
 	/*       EVENTI DI GAMETABLE       */
 	/* ##############################  */
 	public void newWordAdded(Word word, int seconds, WordAddedState state) {
-		assert this.isTurnHolder();
+		if (!this.isTurnHolder()) return; //We manage only the word created by the local player
 		System.out.println("EVENTO newWordAdded");
 		sendWord(word);
 	}
