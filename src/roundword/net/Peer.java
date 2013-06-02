@@ -6,18 +6,16 @@ import java.util.TimerTask;
 
 public class Peer implements GameTable.EventListener {
 	
-	public static final int T_trans = 100; // milliseconds
-	public static final int T_proc  = 100; // milliseconds
+	//~ public static final int T_trans = 100; // milliseconds
+	//~ public static final int T_proc  = 100; // milliseconds
 	
 	Player player;        // The associated player
 	GameTable gameTable; // The game table (the game logic controller)
 	
-	//int ord;       // Usato per identificazione univoca del peer
 	boolean local = false;// True solo se l'istanza corrente corrisponde al peer locale
 	boolean active = true;// Se il peer è crashato o no
 	
 	List<Peer> peers;   // Da sta lista non togliamo nulla (almeno per ora)
-	//int turnHolder = 0; // All'inizio tutti sanno che il primo a giocare è il giocatore zero
 	
 	String IPaddr;
 	int server_portno;
@@ -39,12 +37,11 @@ public class Peer implements GameTable.EventListener {
 	
 	public Peer(Player player, String IPaddr, int server_portno) {
 		this.player = player;
-		//this.gameTable = gameTable;
-		//this.ord = ord;
 		this.IPaddr = IPaddr;
 		this.server_portno = server_portno;
 		this.timer = new Timer("Timer Messaggi");
 	}
+	
 	
 	
 	/* ############################## */
@@ -175,7 +172,9 @@ public class Peer implements GameTable.EventListener {
 	/*     COMUNICAZIONI TRA PEER     */
 	/* ############################## */
 	
-	/* ------ HELLO ------ */
+	/* ---------------------- */
+	/* ------- HELLO -------- */
+	/* ---------------------- */
 	protected void sendHello() {
 		System.out.println(String.format("%s) Invio HELLO a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		
@@ -189,7 +188,7 @@ public class Peer implements GameTable.EventListener {
 				System.exit(-1);
 			}
 		};
-		timer.schedule(helloTask, 10000*peers.size()*(T_trans+T_proc));
+		timer.schedule(helloTask, 10000*peers.size()*(NetConstants.T_trans+NetConstants.T_proc));
 		
 		// Invia il messaggio di Hello al peer successivo
 		send_msg(new HelloMsg(getNextActivePeer()));
@@ -201,7 +200,9 @@ public class Peer implements GameTable.EventListener {
 		send_msg(new HelloMsg(getNextActivePeer()));
 	}
 	
-	/* ------ WORD ------ */
+	/* ---------------------- */
+	/* -------- WORD -------- */
+	/* ---------------------- */
 	protected void sendWord(final Word word) {
 		System.out.println(String.format("%s) Invio Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		
@@ -217,7 +218,7 @@ public class Peer implements GameTable.EventListener {
 			}
 		};
 		
-		send_msg(new WordMsg(getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, peers.size()*(T_trans+T_proc)));
+		send_msg(new WordMsg(getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, peers.size()*(NetConstants.T_trans+NetConstants.T_proc)));
 	}
 	
 	protected void forwardWord(long id, Word word) {
@@ -233,7 +234,7 @@ public class Peer implements GameTable.EventListener {
 				/// TODO: INDIRE ELEZIONE!
 			}
 		};
-		timer.schedule(lastWordTask, peers.size() * (T_trans + T_proc));
+		timer.schedule(lastWordTask, peers.size()*(NetConstants.T_trans+NetConstants.T_proc));
 	}
 	
 	protected void sendWordAck() {
@@ -249,16 +250,20 @@ public class Peer implements GameTable.EventListener {
 		nextTurn();
 	}
 	
+	/* ---------------------- */
 	/* ------ ELECTION ------ */
+	/* ---------------------- */
 	protected void startTurnHolderElection() {
 		System.out.println(String.format("START ELECTION. Il turno attualmente è di %d", gameTable.getTurnHolder().getOrd()));
 		if (electionActive) {
 			System.out.println("ATTENZIONE!! ELEZIONE ERA GIA' IN CORSO. IGNORO startTurnHolderElection()");
 			return;
 		}
+		
 		electionActive = true;
+		
+		// Se sono io il leader, invio notizia a tutti i processi minori (in realtà tutti tranne me)
 		if (isTurnHolder()) {
-			// Sono io il leader! Invio notizia a tutti i processi minori (in realtà tutti tranne me)
 			for (int i=(getOrd()+1)%peers.size(); ; i=(i+1)%peers.size()) {
 				if (!peers.get(i).isActive()) continue;
 				if (i==getOrd()) break;
@@ -266,16 +271,18 @@ public class Peer implements GameTable.EventListener {
 				send_msg(new ElectionSetTurnHolderMsg(peers.get(i), getOrd()));
 			}
 			electionActive = false; // In questo caso l'elezione finisce subito.
-		} else {
-			// Non sono il leader. Invio elezione a tutti quelli prima di me, a partire
-			// da chi credo sia il leader attuale
+		}
+		
+		// Se non sono il leader, invio elezione a tutti quelli prima di me, 
+		// a partire da chi credo sia il leader attuale
+		else {
 			for (int i=getTurnHolder().getOrd(); i!=getOrd(); i=(i+1)%peers.size()) {
 				if (!peers.get(i).isActive()) continue;
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio ElectionInit a peer %s", getOrd(), i));
 				
 				// Il delay nell'elezione del leader è sempre il seguente:
-				long delay = 2*T_trans + T_proc;
+				long delay = 2*NetConstants.T_trans + NetConstants.T_proc;
 				
 				// Setta un primo timer tempo T per aspettare risposta
 				// da ALMENO UN peer possibile coordinatore.
