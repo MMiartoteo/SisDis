@@ -6,9 +6,6 @@ import java.util.TimerTask;
 
 public class Peer implements GameTable.EventListener {
 	
-	//~ public static final int T_trans = 100; // milliseconds
-	//~ public static final int T_proc  = 100; // milliseconds
-	
 	Player player;        // The associated player
 	GameTable gameTable; // The game table (the game logic controller)
 	
@@ -70,8 +67,8 @@ public class Peer implements GameTable.EventListener {
 		this.start_server_side();
 		this.start_client_side();
 		
-		// Il turnHolder iniziale invia Hello per aspettare che
-		// tutti i Peer si siano configurati e siano pronti
+		// Il turnHolder iniziale invia Hello in cerchio, per aspettare 
+		// che tutti i Peer si siano configurati e siano pronti
 		// a ricevere e inviare messaggi
 		if (this.isTurnHolder()) {
 			sendHello();
@@ -139,7 +136,7 @@ public class Peer implements GameTable.EventListener {
 	/*       EVENTI DI GAMETABLE       */
 	/* ##############################  */
 	public void newWordAdded(Word word, long milliseconds, WordAddedState state) {
-		if (!this.isTurnHolder()) return; //We manage only the word created by the local player
+		if (!this.isTurnHolder()) return; // We manage only the word created by the local player
 		System.out.println("EVENTO newWordAdded");
 		sendWord(word);
 	}
@@ -178,8 +175,6 @@ public class Peer implements GameTable.EventListener {
 	protected void sendHello() {
 		System.out.println(String.format("%s) Invio HELLO a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		
-		//lastSentMsgId++;
-		
 		// Setta il timerTask nel caso in cui il messaggio non torna (ack non ricevuto)
 		helloTask = new TimerTask() {
 			@Override
@@ -188,14 +183,14 @@ public class Peer implements GameTable.EventListener {
 				System.exit(-1);
 			}
 		};
-		timer.schedule(helloTask, 10000*peers.size()*(NetConstants.T_trans+NetConstants.T_proc));
+		long delay = 10000*peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
+		timer.schedule(helloTask, delay);
 		
 		// Invia il messaggio di Hello al peer successivo
 		send_msg(new HelloMsg(getNextActivePeer()));
 	}
 	
 	protected void forwardHello() {
-		//try{Thread.sleep(1000);} catch (Exception e) {}
 		System.out.println(String.format("%s) Forwardo HELLO a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		send_msg(new HelloMsg(getNextActivePeer()));
 	}
@@ -212,17 +207,15 @@ public class Peer implements GameTable.EventListener {
 		lastWordTask = new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("Timer Word Ack scaduto!");
-				/// TODO: fai partire di nuovo il messaggio di Word, con id maggiore?
+				System.out.println("Timer Word Ack scaduto! Faccio ripartire la Word.");
 				sendWord(word);
 			}
 		};
-		
-		send_msg(new WordMsg(getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, peers.size()*(NetConstants.T_trans+NetConstants.T_proc)));
+		long delay = peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
+		send_msg(new WordMsg(getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, delay));
 	}
 	
 	protected void forwardWord(long id, Word word) {
-		//try{Thread.sleep(1000);} catch (Exception e) {}
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		send_msg(new WordMsg(getNextActivePeer(), id, word));
 		
@@ -231,14 +224,15 @@ public class Peer implements GameTable.EventListener {
 			@Override
 			public void run() {
 				System.out.println("Timer WordAck2 scaduto! Il coordinatore è morto, INDIRE ELEZIONE!!");
-				/// TODO: INDIRE ELEZIONE!
+				startTurnHolderElection();
 			}
 		};
 		timer.schedule(lastWordTask, peers.size()*(NetConstants.T_trans+NetConstants.T_proc));
+		/// NOTA: Anche qui, teoricamente sarebbe meglio far partire il
+		/// timer mentre invii davvero il messaggio (dentro la execute() del msg)
 	}
 	
 	protected void sendWordAck() {
-		//lastSentMsgId++;
 		// Il msg Word ha fatto tutto il giro, ora invio ack a tutti (tranne me)
 		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
 			if (!peers.get(i).isActive()) continue;
