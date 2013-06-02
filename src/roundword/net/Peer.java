@@ -158,7 +158,12 @@ public class Peer implements GameTable.EventListener {
 	/*   COMUNICAZIONI COL GAMETABLE  */
 	/* ############################## */
 	protected void nextTurn() {
-		this.gameTable.nextTurn();
+		for (int i=(getTurnHolder().getOrd()+1)%peers.size(); ; i=(i+1)%peers.size()) {
+			if (!peers.get(i).isActive()) continue;
+			assert i!=getTurnHolder().getOrd(); // <-- Significa che non ci sono più Peer attivi!
+			gameTable.setTurnHolder(peers.get(i).player);
+			return;
+		}
 	}
 	
 	
@@ -235,12 +240,13 @@ public class Peer implements GameTable.EventListener {
 		//lastSentMsgId++;
 		// Il msg Word ha fatto tutto il giro, ora invio ack a tutti (tranne me)
 		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
+			if (!peers.get(i).isActive()) continue;
 			if (i==getOrd()) break;
 			System.out.println(String.format("%s) Invio WordAck a peer %s", getOrd(), i));
 			send_msg(new WordAckMsg(peers.get(i), lastSentMsgId));//, timer, lastWordTask, 2*T_trans+T_proc));
 		}
 		// Io già posso settare il turno nel prossimo giocatore
-		gameTable.nextTurn();
+		nextTurn();
 	}
 	
 	/* ------ ELECTION ------ */
@@ -254,6 +260,7 @@ public class Peer implements GameTable.EventListener {
 		if (isTurnHolder()) {
 			// Sono io il leader! Invio notizia a tutti i processi minori (in realtà tutti tranne me)
 			for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
+				if (!peers.get(i).isActive()) continue;
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio SetTurnHolder a peer %s", getOrd(), i));
 				send_msg(new ElectionSetTurnHolderMsg(peers.get(i), getOrd()));
@@ -263,6 +270,7 @@ public class Peer implements GameTable.EventListener {
 			// Non sono il leader. Invio elezione a tutti quelli prima di me, a partire
 			// da chi credo sia il leader attuale
 			for (int i=getTurnHolder().getOrd(); i!=getOrd(); i=(i+1)%peers.size()) {
+				if (!peers.get(i).isActive()) continue;
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio ElectionInit a peer %s", getOrd(), i));
 				

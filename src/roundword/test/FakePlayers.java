@@ -66,14 +66,14 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				t.addWord(w, 1);
 
 				System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
-				t.nextTurn();
+				//t.nextTurn();
 				System.out.println("NextTurn \n--\n");
 
 			}
 		}
 
 		public void newWordAdded(Word w, long milliseconds, WordAddedState state) {
-			if (t.getTurnHolder() == t.getLocalPlayer()) t.nextTurn();
+			//if (t.getTurnHolder() == t.getLocalPlayer()) t.nextTurn();
 		}
 
 		public void playersPointsUpdate() {
