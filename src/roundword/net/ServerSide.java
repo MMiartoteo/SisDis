@@ -98,6 +98,7 @@ public class ServerSide implements ServerSideInterface {
 			System.out.println("Il peer attuale NON è il detentore del turno. Faccio forwarding.");
 			peer.lastSeenMsgId = id;
 			peer.forwardWord(id, word);
+			System.out.println("--");
 			gameTable.addWord(word, 100); /// TODO <--- Poi metti vero valore per secondi
 		}
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello

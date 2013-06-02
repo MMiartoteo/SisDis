@@ -122,7 +122,7 @@ public class Peer implements GameTable.EventListener {
 	}
 	
 	public Peer getNextActivePeer() {
-		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i++) {
+		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
 			assert i!=getOrd(); // Significherebbe che non ci sono più altri peer attivi in giro...
 			Peer p = peers.get(i);
 			if (p.isActive()) {
@@ -259,7 +259,7 @@ public class Peer implements GameTable.EventListener {
 		electionActive = true;
 		if (isTurnHolder()) {
 			// Sono io il leader! Invio notizia a tutti i processi minori (in realtà tutti tranne me)
-			for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
+			for (int i=(getOrd()+1)%peers.size(); ; i=(i+1)%peers.size()) {
 				if (!peers.get(i).isActive()) continue;
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio SetTurnHolder a peer %s", getOrd(), i));

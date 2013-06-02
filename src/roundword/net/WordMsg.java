@@ -30,20 +30,21 @@ public class WordMsg extends Msg {
 		this.word = word;
 	}
 	
-	public String execute() throws Exception {
-		Registry registry = LocateRegistry.getRegistry(dest_host, dest_portno);
-		ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-		String response = null;
+	public String execute() throws CrashException {
 		try {
+			Registry registry = LocateRegistry.getRegistry(dest_host, dest_portno);
+			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
+			String response = null;
 			if (timer != null) {
 				timer.schedule(timerTask, delay); // delay is in milliseconds
 			}
-			response = stub.word(id, this.word);
-		} catch (Exception e) {
+			return stub.word(id, this.word);
+		} catch (java.rmi.RemoteException e) {
 			throw new CrashException("Crash durante invio di messaggio Word");
-			/// TODO: CATTURA e fai qualcosa
-		} finally {
-			return response;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+			return "";
 		}
 	}
 }

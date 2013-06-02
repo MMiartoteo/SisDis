@@ -92,6 +92,9 @@ public class Starter {
 				}
 				response = sb.toString();
 				if (eventListener != null) eventListener.messageUpdate(response);
+			} catch (java.net.ConnectException e) {
+				System.out.println("Cannot connect to the registrar. Is it active?");
+				System.exit(-1);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} catch (ProtocolException e) {
