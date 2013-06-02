@@ -148,7 +148,10 @@ public class Starter {
 			}
 		}
 		if (localPlayer == null || p == null) {
-			if (eventListener != null) eventListener.gameFailedToStart("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
+			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
+			if (eventListener != null) {
+				eventListener.gameFailedToStart("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
+			}
 			return;
 		}
 
@@ -161,17 +164,9 @@ public class Starter {
 		// Start local peer
 		p.start();
 
-		if (eventListener != null) eventListener.gameStarted();
-
-
-		/// PROVA INVIO MESSAGGIO HELLO AL PEER ACCANTO
-		//try {Thread.sleep(2000);} catch (Exception e) {System.exit(2);} // aspetto per far settare il server dall'altro lato
-		// Provo ad inviare un Hello al primo dei peer in lista
-		//p.send_msg(new HelloMsg(p.getNextPeer()));
-
-
-
-		//if (p.isTurnHolder()) p.chosenWord("CASA");
+		if (eventListener != null) {
+			eventListener.gameStarted();
+		}
 
 
 		/// Lo stato condiviso è composto da:

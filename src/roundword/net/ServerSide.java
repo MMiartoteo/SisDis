@@ -28,18 +28,48 @@ public class ServerSide implements ServerSideInterface {
 	}
 	
 	public String sayHello() {
-		/// ONLY FOR DEBUG
 		System.out.println(String.format("Ricevuto HELLO"));
-		peer.startTurnHolderElection();
-        return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
+		// Fai il forward se non sei tu il turnista (e setta la parola nella gui)
+		if (!peer.isTurnHolder()) {
+			System.out.println("Il peer attuale NON è il detentore del turno. Faccio forwarding.");
+			//~ peer.lastSeenMsgId = id;
+			peer.forwardHello();
+			//~ gameTable.addWord(word, 100); /// TODO <--- Poi metti vero valore per secondi
+		}
+		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
+		else {
+			System.out.println(String.format("HELLO è tornato indietro!"));
+			//~ if (id == peer.lastSentMsgId) {
+				//~ System.out.println("L'ack è corretto, cancello il relativo timer.");
+			peer.helloTask.cancel();
+			
+			/// DEBUG: Comincio elezione (poi non servirà nellav versione finale)
+			peer.startTurnHolderElection();
+			
+			//~ System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
+			//~ peer.sendWordAck();
+			//~ }
+			//~ else {
+				//~ System.out.println("La parola è vecchia, faccio solo il forward.");
+				//~ //peer.lastSeenMsgId = id;
+				//~ peer.forwardWord(id, word);
+			//~ }
+		}
+		// Inoltre, questo significa che il turnHolder non è morto
+		peer.rescheduleTurnHolderTimer();
+		return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
+		//~ /// ONLY FOR DEBUG
+		//~ System.out.println(String.format("Ricevuto HELLO"));
+		//~ peer.startTurnHolderElection();
+        //~ return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
     }
     
     public String ElectionInit() {
 		System.out.println(String.format("Ricevuto ElectionInit"));
-		//if (! peer.electionActive) {
-		System.out.println(String.format("Comincio anche io l'elezione."));
-		peer.startTurnHolderElection();
-		//}
+		if (! peer.electionActive) {
+			System.out.println(String.format("Comincio anche io l'elezione."));
+			peer.startTurnHolderElection();
+		}
 		System.out.println(String.format("Rispondo al mittente con un return immediato."));
 		return "ok";
 	}
