@@ -15,7 +15,7 @@ public class Peer implements GameTable.EventListener {
 	List<Peer> peers;   // Da sta lista non togliamo nulla (almeno per ora)
 	
 	String IPaddr;
-	int server_portno;
+	int serverPortno;
 	
 	ClientSide client;
 	ServerSide server;
@@ -32,10 +32,10 @@ public class Peer implements GameTable.EventListener {
 	
 	boolean electionActive = false;
 	
-	public Peer(Player player, String IPaddr, int server_portno) {
+	public Peer(Player player, String IPaddr, int serverPortno) {
 		this.player = player;
 		this.IPaddr = IPaddr;
-		this.server_portno = server_portno;
+		this.serverPortno = serverPortno;
 		this.timer = new Timer("Timer Messaggi");
 	}
 	
@@ -52,7 +52,9 @@ public class Peer implements GameTable.EventListener {
 	
 	public void setPeers(List<Peer> peers) {
 		assert local;
-		this.peers = peers;
+		for (Peer p : peers) {
+			p.peers = peers;
+		}
 	}
 	
 	public void setGameTable(GameTable gameTable) {
@@ -87,6 +89,7 @@ public class Peer implements GameTable.EventListener {
 	}
 	
 	public void rescheduleTurnHolderTimer() {
+		assert local;
 		if (lastElectionTask != null) lastElectionTask.cancel();
 		lastElectionTask = new TimerTask() {
 			@Override
@@ -187,12 +190,12 @@ public class Peer implements GameTable.EventListener {
 		timer.schedule(helloTask, delay);
 		
 		// Invia il messaggio di Hello al peer successivo
-		send_msg(new HelloMsg(getNextActivePeer()));
+		send_msg(new HelloMsg(this, getNextActivePeer()));
 	}
 	
 	protected void forwardHello() {
 		System.out.println(String.format("%s) Forwardo HELLO a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
-		send_msg(new HelloMsg(getNextActivePeer()));
+		send_msg(new HelloMsg(this, getNextActivePeer()));
 	}
 	
 	/* ---------------------- */
@@ -212,12 +215,12 @@ public class Peer implements GameTable.EventListener {
 			}
 		};
 		long delay = peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
-		send_msg(new WordMsg(getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, delay));
+		send_msg(new WordMsg(this, getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, delay));
 	}
 	
 	protected void forwardWord(long id, Word word) {
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
-		send_msg(new WordMsg(getNextActivePeer(), id, word));
+		send_msg(new WordMsg(this, getNextActivePeer(), id, word));
 		
 		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), getTurnHolder().getOrd()));
 		lastWordTask = new TimerTask() {
@@ -238,7 +241,7 @@ public class Peer implements GameTable.EventListener {
 			if (!peers.get(i).isActive()) continue;
 			if (i==getOrd()) break;
 			System.out.println(String.format("%s) Invio WordAck a peer %s", getOrd(), i));
-			send_msg(new WordAckMsg(peers.get(i), lastSentMsgId));//, timer, lastWordTask, 2*T_trans+T_proc));
+			send_msg(new WordAckMsg(this, peers.get(i), lastSentMsgId));//, timer, lastWordTask, 2*T_trans+T_proc));
 		}
 		// Io già posso settare il turno nel prossimo giocatore
 		nextTurn();
@@ -262,7 +265,7 @@ public class Peer implements GameTable.EventListener {
 				if (!peers.get(i).isActive()) continue;
 				if (i==getOrd()) break;
 				System.out.println(String.format("%s) Invio SetTurnHolder a peer %s", getOrd(), i));
-				send_msg(new ElectionSetTurnHolderMsg(peers.get(i), getOrd()));
+				send_msg(new ElectionSetTurnHolderMsg(this, peers.get(i), getOrd()));
 			}
 			electionActive = false; // In questo caso l'elezione finisce subito.
 		}
@@ -312,7 +315,7 @@ public class Peer implements GameTable.EventListener {
 					//secondPhaseElectionTask = null;
 				}
 				
-				send_msg(new ElectionInitMsg(peers.get(i), timer, firstPhaseElectionTask, secondPhaseElectionTask, delay));
+				send_msg(new ElectionInitMsg(this, peers.get(i), timer, firstPhaseElectionTask, secondPhaseElectionTask, delay));
 			}
 		}
 	}

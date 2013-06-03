@@ -14,7 +14,7 @@ public class ServerSide implements ServerSideInterface {
 		this.gameTable = gameTable;
 		try {
 			ServerSideInterface stub = (ServerSideInterface) UnicastRemoteObject.exportObject(this, 0);
-			Registry registry = LocateRegistry.createRegistry(peer.server_portno);
+			Registry registry = LocateRegistry.createRegistry(peer.serverPortno);
 			registry.rebind("ServerSide", stub);
 			System.out.println("ComputeEngine bound");
 		}
@@ -57,11 +57,11 @@ public class ServerSide implements ServerSideInterface {
 		}
 		// Inoltre, questo significa che il turnHolder non è morto
 		peer.rescheduleTurnHolderTimer();
-		return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
+		return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.serverPortno);
 		//~ /// ONLY FOR DEBUG
 		//~ System.out.println(String.format("Ricevuto HELLO"));
 		//~ peer.startTurnHolderElection();
-        //~ return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.server_portno);
+        //~ return String.format("Hello, world! I am %s in %s:%s", peer.player.getNickName(), peer.IPaddr, peer.serverPortno);
     }
     
     public String ElectionInit() {

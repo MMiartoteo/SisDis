@@ -4,8 +4,8 @@ import java.rmi.registry.Registry;
 
 public class HelloMsg extends Msg {
 	
-	public HelloMsg(Peer to) {
-		super(to);
+	public HelloMsg(Peer sourcePeer, Peer destPeer) {
+		super(sourcePeer, destPeer);
 	}
 	
 	public String execute() throws Exception {
@@ -13,7 +13,7 @@ public class HelloMsg extends Msg {
 		// il tempo agli altri server di essersi settati.
 		for (int i=0; i<NetConstants.HelloRetry; ++i) {
 			try {
-				Registry registry = LocateRegistry.getRegistry(dest_host, dest_portno);
+				Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
 				ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
 				return stub.sayHello();
 			} catch (java.rmi.ConnectException e) {

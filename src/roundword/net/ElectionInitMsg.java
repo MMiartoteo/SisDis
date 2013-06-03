@@ -15,8 +15,8 @@ public class ElectionInitMsg extends Msg {
 	TimerTask timerTask2;
 	long delay;
 	
-	public ElectionInitMsg(Peer to, Timer timer, TimerTask timerTask1, TimerTask timerTask2, long delay) {
-		super(to);
+	public ElectionInitMsg(Peer sourcePeer, Peer destPeer, Timer timer, TimerTask timerTask1, TimerTask timerTask2, long delay) {
+		super(sourcePeer, destPeer);
 		this.timer = timer;
 		this.timerTask1 = timerTask1;
 		this.timerTask2 = timerTask2;
@@ -26,7 +26,7 @@ public class ElectionInitMsg extends Msg {
 	public String execute() throws Exception {
 		for (int i=0; i<1; ++i) {
 			try {
-				Registry registry = LocateRegistry.getRegistry(dest_host, dest_portno);
+				Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
 				ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
 				
 				// Provo a contattare il peer
