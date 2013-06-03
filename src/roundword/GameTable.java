@@ -199,7 +199,8 @@ public class GameTable implements Player.EventListener {
 	}
 
 	/**
-	 * We go to the next turn, the playing player will be the next of the player list.
+	 * We go to the next turn, the playing player will be the next of the player list. If you want to set the turn
+	 * to another player, for example after a catastrophic event, you can use the {@code setTurnHolder}.
 	 * */
 	public void nextTurn() {
 		Player oldTurnHolder = turnHolder;

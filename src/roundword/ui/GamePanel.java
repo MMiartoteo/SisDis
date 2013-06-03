@@ -117,7 +117,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		txtWord.setInputVerifier(new CharVerifier());
 		txtWord.addKeyListener(new KeyListener() {
 			public void keyTyped(KeyEvent keyEvent) {
-				if (keyEvent.getKeyChar() == '\n' && txtWord.getText().length() > 0'') endPlay(false);
+				if (keyEvent.getKeyChar() == '\n' && txtWord.getText().length() > 0) endPlay(false);
 			}
 			public void keyPressed(KeyEvent keyEvent) {}
 			public void keyReleased(KeyEvent keyEvent) {}
