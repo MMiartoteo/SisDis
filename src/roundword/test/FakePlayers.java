@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -18,11 +17,13 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 
 		GameTable t;
 		volatile boolean localPlayerIsPlaying;
+		Player aLittleDeadPlayer;
 
 		Runnable endTimeListener;
 
-		public FakePlayers(GameTable gameTable, String dictionaryPath) throws IOException {
+		public FakePlayers(GameTable gameTable, String dictionaryPath, Player aLittleDeadPlayer) throws IOException {
 			this.t = gameTable;
+			this.aLittleDeadPlayer = aLittleDeadPlayer;
 			localPlayerIsPlaying = (t.getTurnHolder() == t.getLocalPlayer());
 			this.t.addEventListener(this);
 			loadDictionary(dictionaryPath);
@@ -30,6 +31,8 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 
 		public void run() {
 			Random rnd = new Random();
+			int played = 0;
+
 			while (true) {
 
 				//Wait if the own player is playing
@@ -43,6 +46,7 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				} catch (InterruptedException e) { }
 
 				Word w = null;
+				Player playingPlayer = t.getTurnHolder();
 
 				if (t.getWordsList().size() == 0) {
 					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
@@ -68,6 +72,12 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
 				t.nextTurn();
 				System.out.println("NextTurn \n--\n");
+
+				if (++played > 8) {
+					if (playingPlayer == aLittleDeadPlayer) {
+						aLittleDeadPlayer.setActiveStatus(false);
+					}
+				}
 
 			}
 		}

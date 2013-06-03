@@ -2,8 +2,9 @@ package roundword;
 
 public class Constants {
 	
-	public static final int PointsForWrongWord = -100;
-	public static final int PointsForNotReply = -80;
+	public static final int PointsForWrongWord = -80;
+	public static final int PointsForNotReply = -60;
+	public static final int PointsForPreviouslyAddedWord = -100;
 
 	public static final int WordToDisplay = 6;
 

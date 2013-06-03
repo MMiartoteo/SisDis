@@ -27,6 +27,12 @@ public class Player {
 	 * */
 	int ord;
 
+	/**
+	 * Determines if the player is active or not. For example the player could left the game, or can lost the internet
+	 * connection if the game is player via the web.
+	 */
+	boolean active;
+
 	String nickName;
 	
 	int points;
@@ -52,6 +58,7 @@ public class Player {
 		eventListeners = Collections.synchronizedSet(new HashSet<EventListener>());
 		this.nickName = nickname;
 		this.ord = ord;
+		this.active = true;
 		points = 0;
 	}
 	
@@ -76,6 +83,14 @@ public class Player {
 
 	public int getOrd() {
 		return ord;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActiveStatus(boolean active) {
+		this.active = active;
 	}
 	
 	public void addEventListener(EventListener listener) {

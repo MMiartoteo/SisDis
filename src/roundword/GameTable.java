@@ -16,7 +16,7 @@ public class GameTable implements Player.EventListener {
 
 	public interface EventListener extends java.util.EventListener {
 
-		public enum WordAddedState {OK, TIMEOUT_ELAPSED, NO_IN_DICTIONARY, SYLLABE_INCORRECT};
+		public enum WordAddedState {OK, TIMEOUT_ELAPSED, NO_IN_DICTIONARY, SYLLABE_INCORRECT, PREVIOUSLY_ADDED};
 
 		//Called when a new word is added
 		void newWordAdded(Word w, long milliseconds, WordAddedState state);
@@ -140,7 +140,9 @@ public class GameTable implements Player.EventListener {
 
 		if (this.turnHolder != turnHolder) {
 			Player oldTurnHolder = this.turnHolder;
-			this.turnHolder = turnHolder;
+
+			//Check that is actuve
+			if (!turnHolder.isActive()) throw new IllegalArgumentException("the turnHolder must be active");
 
 			//Check for errors
 			boolean turnHolderFounded = false;
@@ -148,6 +150,8 @@ public class GameTable implements Player.EventListener {
 				if (p == turnHolder) turnHolderFounded = true;
 			}
 			if (!turnHolderFounded) throw new IllegalArgumentException("the turnHolder must be in the playersList");
+
+			this.turnHolder = turnHolder;
 
 			//Callbacks call
 			for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
@@ -179,6 +183,9 @@ public class GameTable implements Player.EventListener {
 					words.add(0, w);
 					turnHolder.addPoints(w.getValue() + (int) Math.round(Constants.PointsPerMilliseconds * millisecondToReply));
 					state = EventListener.WordAddedState.OK;
+				} else if (words.contains(w)) {
+					turnHolder.addPoints(Constants.PointsForPreviouslyAddedWord);
+					state = EventListener.WordAddedState.PREVIOUSLY_ADDED;
 				} else if (wordStr.length() >= lastWordSyl.length()
 						    && (wordStr.substring(0, lastWordSyl.length()).compareTo(lastWordSyl) == 0)) {
 					words.add(0, w);
@@ -213,8 +220,23 @@ public class GameTable implements Player.EventListener {
 				break;
 			}
 		}
-		turnHolder = (i.hasNext()) ? i.next() : playersList.get(0);
-		if (!turnHolderFounded) new RuntimeException("the next turn can't found the current playing player");
+		if (!turnHolderFounded) throw new RuntimeException("can't found the current playing player");
+
+		//Find the first active player to assign the turn
+		Player tempP;
+		if (!i.hasNext()) i = playersList.iterator(); //rewind
+		while (i.hasNext()) {
+
+			tempP = i.next();
+			if (tempP.isActive()) {
+				turnHolder = tempP;
+				break;
+			}
+
+			if (tempP == oldTurnHolder) throw new RuntimeException("no player founded that can get the turn");
+
+			if (!i.hasNext()) i = playersList.iterator(); //rewind
+		}
 
 		//Callbacks call
 		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);

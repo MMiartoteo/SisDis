@@ -32,10 +32,12 @@ public class Tests {
 		Dictionary d = loadDictionary();
 
 		List<Player> players = new ArrayList<Player>();
-		Player localPlayer = new Player("CiccioBomba", 1);
+		Player localPlayer = new Player("CiccioBomba", 2);
+		Player aLittleDeadPlayer = new Player("QuasiMorto", 3);
 		players.add(new Player("Stupido", 0));
 		players.add(localPlayer);
 		players.add(new Player("Rimbambito", 2));
+		players.add(aLittleDeadPlayer);
 
 		GameTable table = new GameTable(players, localPlayer, d);
 		GameFrame frame = new GameFrame(table);
@@ -43,7 +45,7 @@ public class Tests {
 
 		/* Test fake players */
 		try {
-			Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath));
+			Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath, aLittleDeadPlayer));
 			th.start();
 		} catch (Exception e) {
 		}

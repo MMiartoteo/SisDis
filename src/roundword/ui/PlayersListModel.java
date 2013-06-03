@@ -25,12 +25,19 @@ public class PlayersListModel extends AbstractListModel {
 			return isPlaying;
 		}
 
+		public boolean isActive() {
+			return player.isActive();
+		}
+
 		@Override
 		public String toString() {
+			boolean isActive = player.isActive();
 			StringBuilder b = new StringBuilder();
 			b.append("<html>");
 			if (isPlaying) b.append("<b>");
+			if (!isActive) b.append("<strike>");
 			b.append(player.toString());
+			if (!isActive) b.append("</strike>");
 			if (isPlaying) b.append("</b>");
 			b.append("</html>");
 			return b.toString();

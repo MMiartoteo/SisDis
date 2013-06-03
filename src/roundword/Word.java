@@ -130,4 +130,10 @@ public class Word implements Serializable {
 		return word;
 	}
 
+	@Override
+	public boolean equals(Object w){
+		if (w == null || !(w instanceof Word)) return false;
+		return this.word.equals(((Word)w).word);
+	}
+
 }

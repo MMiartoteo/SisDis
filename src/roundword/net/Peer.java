@@ -10,7 +10,7 @@ public class Peer implements GameTable.EventListener {
 	GameTable gameTable; // The game table (the game logic controller)
 	
 	boolean local = false;// True solo se l'istanza corrente corrisponde al peer locale
-	boolean active = true;// Se il peer è crashato o no
+	//boolean active = true;// Se il peer è crashato o no
 	
 	List<Peer> peers;   // Da sta lista non togliamo nulla (almeno per ora)
 	
@@ -100,19 +100,23 @@ public class Peer implements GameTable.EventListener {
 	}
 	
 	public boolean isActive() {
-		return this.active;
+		return player.isActive();
 	}
-	
+
+	public void setActiveStatus(boolean active) {
+		player.setActiveStatus(active);
+	}
+
 	public boolean isTurnHolder() {
 		return player == gameTable.getTurnHolder();
 	}
 	
 	public int getOrd() {
-		return this.player.getOrd();
+		return player.getOrd();
 	}
 	
 	public Player getTurnHolder() {
-		return this.gameTable.getTurnHolder();
+		return gameTable.getTurnHolder();
 	}
 	
 	public Peer getNextActivePeer() {
