@@ -27,54 +27,54 @@ public class Main {
 			System.exit(-1);
 		}
 
-		Tests.fakePlayers_test();
+//		Tests.fakePlayers_test();
 //		Tests.dictionary_test();
 
-//		try {
-//			Starter starter = new Starter();
-//
-//			/// 0 - Leggi parametri del giocatore e del peer locale
-//			if (args.length >= 3) {
-//				String nickname = args[0];
-//				int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
-//				String registrarURL = args[2];
-//
-//				//Decide if we want an artificial player
-//				boolean artificial = false;
-//				if (args.length > 3 && args[3].equals("ai")) {
-//					artificial = true;
-//				}
-//
-//				System.out.println(nickname + ", " + portno + ", " + registrarURL);
-//
-//				starter.setMessageUpdateListener(new Starter.EventListener() {
-//					public void messageUpdate(String msg) {
-//						System.out.println(msg);
-//					}
-//
-//					@Override
-//					public void gameStarted() {}
-//
-//					@Override
-//					public void gameFailedToStart(String msg) {
-//						System.out.println(msg);
-//						System.exit(-1);
-//					}
-//				});
-//
-//
-//				starter.startGame(nickname, portno, registrarURL, artificial);
-//
-//			} else {
-//				System.out.println("No arguments, open the window to choose them");
-//				ArgumentsChooser ac = new ArgumentsChooser(starter);
-//				ac.setVisible(true);
-//			}
-//
-//		} catch (Exception e) {
-//			System.err.println(e.getMessage());
-//			System.exit(-1);
-//		}
+		try {
+			Starter starter = new Starter();
+
+			/// 0 - Leggi parametri del giocatore e del peer locale
+			if (args.length >= 3) {
+				String nickname = args[0];
+				int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
+				String registrarURL = args[2];
+
+				//Decide if we want an artificial player
+				boolean artificial = false;
+				if (args.length > 3 && args[3].equals("ai")) {
+					artificial = true;
+				}
+
+				System.out.println(nickname + ", " + portno + ", " + registrarURL);
+
+				starter.setMessageUpdateListener(new Starter.EventListener() {
+					public void messageUpdate(String msg) {
+						System.out.println(msg);
+					}
+
+					@Override
+					public void gameStarted() {}
+
+					@Override
+					public void gameFailedToStart(String msg) {
+						System.out.println(msg);
+						System.exit(-1);
+					}
+				});
+
+
+				starter.startGame(nickname, portno, registrarURL, artificial);
+
+			} else {
+				System.out.println("No arguments, open the window to choose them");
+				ArgumentsChooser ac = new ArgumentsChooser(starter);
+				ac.setVisible(true);
+			}
+
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		}
 
 
 
