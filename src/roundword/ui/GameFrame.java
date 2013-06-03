@@ -108,18 +108,34 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 
 	@Override
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
-		if (state == WordAddedState.TIMEOUT_ELAPSED) {
-			lblMessages.setText("<html><b>" + p + "</b> non è riuscito ad inserire una parola</html>");
-		} else if (state == WordAddedState.NO_IN_DICTIONARY) {
-			lblMessages.setText("<html><b>" + p + "</b> ha inserito una parola sconosciuta</html>");
-		} else if (state == WordAddedState.SYLLABE_INCORRECT) {
-			lblMessages.setText("<html><b>" + p + "</b> ha inserito una parola che non iniziava con l'ultima sillaba della precedente</html>");
-		} else if (state == WordAddedState.PREVIOUSLY_ADDED) {
-			lblMessages.setText("<html><b>" + p + "</b> ha inserito una parola già precedentemente inserita</html>");
-		} else if (state == WordAddedState.OK) {
-			lblMessages.setText("<html><b>" + p + "</b> ha inserito la parola: " + w + "</html>");
+		if (p == gameTable.getLocalPlayer()) {
+			if (state == WordAddedState.TIMEOUT_ELAPSED) {
+				lblMessages.setText("<html><div style=\"width: 1000\">Non sei riuscito ad inserire una parola</div></html>");
+			} else if (state == WordAddedState.NO_IN_DICTIONARY) {
+				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito una parola sconosciuta</div></html>");
+			} else if (state == WordAddedState.SYLLABE_INCORRECT) {
+				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito una parola che non iniziava con l'ultima sillaba della precedente</div></html>");
+			} else if (state == WordAddedState.PREVIOUSLY_ADDED) {
+				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito una parola già precedentemente inserita</div></html>");
+			} else if (state == WordAddedState.OK) {
+				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito la parola: " + w + "</div></html>");
+			} else {
+				assert(false);
+			}
 		} else {
-			assert(false);
+			if (state == WordAddedState.TIMEOUT_ELAPSED) {
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> non è riuscito ad inserire una parola</div></html>");
+			} else if (state == WordAddedState.NO_IN_DICTIONARY) {
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito una parola sconosciuta</div></html>");
+			} else if (state == WordAddedState.SYLLABE_INCORRECT) {
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito una parola che non iniziava con l'ultima sillaba della precedente</div></html>");
+			} else if (state == WordAddedState.PREVIOUSLY_ADDED) {
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito una parola già precedentemente inserita</div></html>");
+			} else if (state == WordAddedState.OK) {
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito la parola: " + w + "</div></html>");
+			} else {
+				assert(false);
+			}
 		}
 	}
 

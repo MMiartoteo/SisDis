@@ -6,10 +6,13 @@ import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import java.awt.Component;
+import java.text.DecimalFormat;
 import javax.swing.border.EmptyBorder;
 
 public class TimePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
+
+	public static final String DigitalFormatPattern = "0.00";
 
 	long startTime; //Time when the user started to play
 	Thread refresher;
@@ -43,8 +46,9 @@ public class TimePanel extends JPanel {
 		panel.setBackground(UIConstants.InfoBarBackgroundColor);
 		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		
-		lblTime = new JLabel(String.valueOf((int) Math.round(Constants.TimeoutMilliseconds / 1000)));
+
+		DecimalFormat df = new DecimalFormat(DigitalFormatPattern);
+		lblTime = new JLabel(df.format(Constants.TimeoutMilliseconds / 1000));
 		lblTime.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		lblTime.setFont(UIConstants.TextNormalFont.deriveFont(30f));
 		panel.add(lblTime);
@@ -67,6 +71,7 @@ public class TimePanel extends JPanel {
 			public void run() {
 				long currentTime;
 				double remainingTime;
+				DecimalFormat df = new DecimalFormat(DigitalFormatPattern);
 
 				while (!Thread.currentThread().isInterrupted()) {
 					currentTime = System.currentTimeMillis();
@@ -75,15 +80,15 @@ public class TimePanel extends JPanel {
 						if (endTimeListener != null) endTimeListener.run();
 						Thread.currentThread().interrupt();
 					}
-					lblTime.setText(String.valueOf((int) Math.round(remainingTime/1000))
-					);
+					lblTime.setText(df.format(remainingTime/1000));
 					try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 				}
-				lblTime.setText("0");
+				lblTime.setText(df.format(0));
 			}
 		});
 
-		lblTime.setText(String.valueOf((int) Math.round(Constants.TimeoutMilliseconds / 1000)));
+		DecimalFormat df = new DecimalFormat(DigitalFormatPattern);
+		lblTime.setText(df.format(Constants.TimeoutMilliseconds / 1000));
 		refresher.start();
 		return startTime;
 	}

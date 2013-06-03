@@ -176,6 +176,7 @@ public class GameTable implements Player.EventListener {
 
 		if (w == null) { //the player doesn't write anything
 			turnHolder.addPoints(Constants.PointsForNotReply);
+			state = EventListener.WordAddedState.TIMEOUT_ELAPSED;
 		} else {
 			String wordStr = w.toString();
 			if (dictionary.contains(w)) {
