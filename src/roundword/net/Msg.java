@@ -2,18 +2,16 @@ package roundword.net;
 
 public abstract class Msg {
 	
-	Peer dest_peer;
-	String dest_host;
-	int dest_portno;
+	final Peer sourcePeer;
+	final Peer destPeer;
 	
-	public Msg(Peer dest_peer) {
-		this.dest_peer = dest_peer;
-		this.dest_host = dest_peer.IPaddr;
-		this.dest_portno = dest_peer.server_portno;
+	public Msg(Peer sourcePeer, Peer destPeer) {
+		this.sourcePeer = sourcePeer;
+		this.destPeer = destPeer;
 	}
 	
 	public String toString() {
-		return String.format("(%s)%s:%s", getClass().getName(), dest_host, dest_portno);
+		return String.format("(%s)%s:%s", getClass().getName(), destPeer.IPaddr, destPeer.serverPortno);
 	}
 	
 	public abstract String execute() throws Exception;

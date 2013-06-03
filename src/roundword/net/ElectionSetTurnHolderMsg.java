@@ -10,15 +10,15 @@ public class ElectionSetTurnHolderMsg extends Msg {
 	
 	int turnHolder;
 	
-	public ElectionSetTurnHolderMsg(Peer to, int turnHolder) {
-		super(to);
+	public ElectionSetTurnHolderMsg(Peer sourcePeer, Peer destPeer, int turnHolder) {
+		super(sourcePeer, destPeer);
 		this.turnHolder = turnHolder;
 	}
 	
 	public String execute() throws Exception {
 		for (int i=0; i<1; ++i) {
 			try {
-				Registry registry = LocateRegistry.getRegistry(dest_host, dest_portno);
+				Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
 				ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
 				return stub.ElectionSetTurnHolder(this.turnHolder);
 			} catch (java.rmi.ConnectException e) {
