@@ -136,7 +136,7 @@ public class GameTable implements Player.EventListener {
 	}
 
 	public void setTurnHolder(Player turnHolder) {
-		if (turnHolder == null) throw new NullPointerException("turnHolder must be not null");
+		if (turnHolder == null) throw new NullPointerException("turnHolder is null");
 
 		if (this.turnHolder != turnHolder) {
 			Player oldTurnHolder = this.turnHolder;
@@ -201,27 +201,26 @@ public class GameTable implements Player.EventListener {
 	/**
 	 * We go to the next turn, the playing player will be the next of the player list.
 	 * */
-	//~ public void setTurn(Player newTurnHolder) {
-		//~ turnHolder = newTurnHolder;
-		//~ Player oldTurnHolder = turnHolder;
-//~ 
-		//~ boolean turnHolderFounded = false;
-		//~ Iterator<Player> i = playersList.iterator();
-		//~ while (i.hasNext()) {
-			//~ if (oldTurnHolder == i.next()) {
-				//~ turnHolderFounded = true;
-				//~ break;
-			//~ }
-		//~ }
-		//~ turnHolder = (i.hasNext()) ? i.next() : playersList.get(0);
-		//~ if (!turnHolderFounded) new RuntimeException("the next turn can't found the current playing player");
-//~ 
-		//~ //Callbacks call
-		//~ for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+	public void nextTurn() {
+		Player oldTurnHolder = turnHolder;
 
-		//~ System.out.println("######### SET TURN #########");
-		//~ System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
-	//~ }
+		boolean turnHolderFounded = false;
+		Iterator<Player> i = playersList.iterator();
+		while (i.hasNext()) {
+			if (oldTurnHolder == i.next()) {
+				turnHolderFounded = true;
+				break;
+			}
+		}
+		turnHolder = (i.hasNext()) ? i.next() : playersList.get(0);
+		if (!turnHolderFounded) new RuntimeException("the next turn can't found the current playing player");
+
+		//Callbacks call
+		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+
+		System.out.println("######### NEXT TURN #########");
+		System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
+	}
 
 	// Listeners --------------------------------------------------------------
 	
