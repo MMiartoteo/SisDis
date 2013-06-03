@@ -1,6 +1,6 @@
-import BaseHTTPServer, json
+import BaseHTTPServer, json, sys
 
-NUM_PEERS_FOR_GAME=3
+NUM_PLAYERS_PER_GAME=int(sys.argv[1]) if len(sys.argv)>1 else 3
 
 peers = {}
 told  = set()
@@ -17,12 +17,12 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			#print "The nickname {} has already been taken. Choose a different nickname.".format(player_name)
 			return
 		
-		if len(peers) < NUM_PEERS_FOR_GAME:			
+		if len(peers) < NUM_PLAYERS_PER_GAME:			
 			# Add to peer set
 			peers[(self.client_address[0], peer_port)] = player_name
 			print peers
 		
-		if len(peers) == NUM_PEERS_FOR_GAME:
+		if len(peers) == NUM_PLAYERS_PER_GAME:
 			self.send_response(200)
 			self.end_headers()
 			print >> self.wfile, "start"
@@ -38,13 +38,13 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			self.send_response(200)
 			self.end_headers()
 			print >> self.wfile, "wait"
-			print >> self.wfile, NUM_PEERS_FOR_GAME-len(peers)
+			print >> self.wfile, NUM_PLAYERS_PER_GAME-len(peers)
 
 def run(server_class=BaseHTTPServer.HTTPServer,
         handler_class=BaseHTTPServer.BaseHTTPRequestHandler):
     server_address = ('', 8080)
     httpd = server_class(server_address, handler_class)
-    print "starting server..."
+    print "starting server for %d players..." % NUM_PLAYERS_PER_GAME
     httpd.serve_forever()
 
 

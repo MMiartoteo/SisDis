@@ -23,9 +23,11 @@ public class ElectionSetTurnHolderMsg extends Msg {
 				return stub.ElectionSetTurnHolder(this.turnHolder);
 			} catch (java.rmi.ConnectException e) {
 				// riprova solo se l'eccezione era di connessione fallita
-				System.out.println("Msg TurnHolder Fallito...");
+				System.out.println("Msg TurnHolder Fallito. QUESTO PEER E' MORTO!");
+			} catch (java.rmi.ConnectIOException e) {
+				System.out.println("Msg TurnHolder Fallito. QUESTO PEER E' MORTO!");
 			}
-			Thread.sleep(1000);
+			//Thread.sleep(1000);
 		}
 		throw new CrashException("Impossibile inviare messaggio!");
 	}

@@ -30,6 +30,15 @@ public class WordMsg extends Msg {
 		this.word = word;
 	}
 	
+	private void sendToNext() throws CrashException {
+		if (timer != null) {
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, timer, timerTask, delay));
+		} else {
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word));
+		}
+		throw new CrashException("Crash durante invio di messaggio Word");
+	}
+	
 	public String execute() throws CrashException {
 		try {
 			Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
@@ -40,17 +49,12 @@ public class WordMsg extends Msg {
 			}
 			return stub.word(id, this.word);
 		} catch (java.rmi.RemoteException e) {
-			/// TODO: Qui devi provare a inviare a quello dopo ancora...
-			if (timer != null) {
-				sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, timer, timerTask, delay));
-			} else {
-				sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word));
-			}
-			throw new CrashException("Crash durante invio di messaggio Word");
+			// Prova a inviare a quello dopo ancora...
+			sendToNext();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
-			return "";
 		}
+		return "";
 	}
 }
