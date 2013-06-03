@@ -4,21 +4,22 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
 import roundword.GameTable;
+import roundword.Player;
 import roundword.Word;
 
-public class GameFrame extends JFrame {
+public class GameFrame extends JFrame implements GameTable.EventListener {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
 	
 	GameTable gameTable;
+
+	JLabel lblMessages;
 
 	/**
 	 * Create the frame.
@@ -79,11 +80,16 @@ public class GameFrame extends JFrame {
 		controlsBar.setBorder(new EmptyBorder(3, 3, 3, 3));
 		controlsBarContainer.add(controlsBar, BorderLayout.CENTER);
 
+		lblMessages = new JLabel("");
+		lblMessages.setBorder(new EmptyBorder(0, 5, 0, 00));
+		controlsBar.add(lblMessages, BorderLayout.WEST);
+
 		JButton btnExit = new JButton("Esci");
 		btnExit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent actionEvent) { exit(); }
+			public void actionPerformed(ActionEvent actionEvent) {
+				exit();
+			}
 		});
-		btnExit.setAlignmentX(Component.CENTER_ALIGNMENT);
 		controlsBar.add(btnExit, BorderLayout.EAST);
 
 		pack();
@@ -92,10 +98,37 @@ public class GameFrame extends JFrame {
 		int y = (dim.height - getSize().height)/2;
 		setLocation(x, y);
 
+		gameTable.addEventListener(this);
+
 	}
 
 	void exit() {
 		this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 
+	@Override
+	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
+		if (state == WordAddedState.TIMEOUT_ELAPSED) {
+			lblMessages.setText("<html><b>" + p + "</b> non è riuscito ad inserire una parola</html>");
+		} else if (state == WordAddedState.NO_IN_DICTIONARY) {
+			lblMessages.setText("<html><b>" + p + "</b> ha inserito una parola sconosciuta</html>");
+		} else if (state == WordAddedState.SYLLABE_INCORRECT) {
+			lblMessages.setText("<html><b>" + p + "</b> ha inserito una parola che non iniziava con l'ultima sillaba della precedente</html>");
+		} else if (state == WordAddedState.PREVIOUSLY_ADDED) {
+			lblMessages.setText("<html><b>" + p + "</b> ha inserito una parola già precedentemente inserita</html>");
+		} else if (state == WordAddedState.OK) {
+			lblMessages.setText("<html><b>" + p + "</b> ha inserito la parola: " + w + "</html>");
+		} else {
+			assert(false);
+		}
+	}
+
+	@Override
+	public void playersPointsUpdate() {
+
+	}
+
+	@Override
+	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
+	}
 }

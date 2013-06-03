@@ -18,8 +18,8 @@ public class GameTable implements Player.EventListener {
 
 		public enum WordAddedState {OK, TIMEOUT_ELAPSED, NO_IN_DICTIONARY, SYLLABE_INCORRECT, PREVIOUSLY_ADDED};
 
-		//Called when a new word is added
-		void newWordAdded(Word w, long milliseconds, WordAddedState state);
+		//Called when a new word {@code word} is added by the player {@code player}
+		void newWordAdded(Player player, Word word, long milliseconds, WordAddedState state);
 
 		//Called when a/some player/s changes its point
 		void playersPointsUpdate();
@@ -202,7 +202,8 @@ public class GameTable implements Player.EventListener {
 		}
 
 		//Callbacks call
-		for (EventListener el : eventListeners) el.newWordAdded(w, millisecondToReply, state);
+		Player p = turnHolder; //the listener can change the turn, we save it to make sure that is right
+		for (EventListener el : eventListeners) el.newWordAdded(p, w, millisecondToReply, state);
 	}
 
 	/**

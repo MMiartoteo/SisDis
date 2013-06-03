@@ -51,7 +51,7 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 	}
 
 	@Override
-	public void newWordAdded(Word w, long milliseconds, WordAddedState state) {
+	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
 
 	}
 

@@ -142,7 +142,7 @@ public class Peer implements GameTable.EventListener {
 	/* ##############################  */
 	/*       EVENTI DI GAMETABLE       */
 	/* ##############################  */
-	public void newWordAdded(Word word, long milliseconds, WordAddedState state) {
+	public void newWordAdded(Player p, Word word, long milliseconds, WordAddedState state) {
 		if (!this.isTurnHolder()) return; // We manage only the word created by the local player
 		System.out.println("EVENTO newWordAdded");
 		sendWord(word);

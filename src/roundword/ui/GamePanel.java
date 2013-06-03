@@ -34,13 +34,13 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		public void insertString(DocumentFilter.FilterBypass fb, int offset,
 								 String text, AttributeSet attr) throws BadLocationException {
 
+			text = text.replaceAll("à", "a");
+			text = text.replaceAll("é", "e");
+			text = text.replaceAll("è", "e");
+			text = text.replaceAll("ì", "i");
+			text = text.replaceAll("ò", "o");
+			text = text.replaceAll("ù", "u");
 			text = text.toUpperCase();
-			text = text.replaceAll("à", "A");
-			text = text.replaceAll("é", "E");
-			text = text.replaceAll("è", "E");
-			text = text.replaceAll("ì", "I");
-			text = text.replaceAll("ò", "O");
-			text = text.replaceAll("ù", "U");
 			text = text.replaceAll("[^A-Z]", "");
 			fb.insertString(offset, text.toUpperCase(), attr);
 		}
@@ -48,13 +48,13 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		public void replace(DocumentFilter.FilterBypass fb, int offset, int length,
 							String text, AttributeSet attrs) throws BadLocationException {
 
+			text = text.replaceAll("à", "a");
+			text = text.replaceAll("é", "e");
+			text = text.replaceAll("è", "e");
+			text = text.replaceAll("ì", "i");
+			text = text.replaceAll("ò", "o");
+			text = text.replaceAll("ù", "u");
 			text = text.toUpperCase();
-			text = text.replaceAll("à", "A");
-			text = text.replaceAll("é", "E");
-			text = text.replaceAll("è", "E");
-			text = text.replaceAll("ì", "I");
-			text = text.replaceAll("ò", "O");
-			text = text.replaceAll("ù", "U");
 			text = text.replaceAll("[^A-Z]", "");
 			fb.replace(offset, length, text.toUpperCase(), attrs);
 		}
@@ -198,7 +198,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 	}
 
 	@Override
-	public void newWordAdded(Word w, long milliseconds, WordAddedState state) {
+	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
 		System.out.println("NEW WORD ADDED INTERFACCIA");
 		refresh();
 	}
