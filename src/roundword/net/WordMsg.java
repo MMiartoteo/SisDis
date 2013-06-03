@@ -36,7 +36,6 @@ public class WordMsg extends Msg {
 		} else {
 			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word));
 		}
-		throw new CrashException("Crash durante invio di messaggio Word");
 	}
 	
 	public String execute() throws CrashException {
@@ -48,13 +47,18 @@ public class WordMsg extends Msg {
 				timer.schedule(timerTask, delay); // delay is in milliseconds
 			}
 			return stub.word(id, this.word);
-		} catch (java.rmi.RemoteException e) {
+		} catch (java.rmi.ConnectException e) {
 			// Prova a inviare a quello dopo ancora...
+			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");
+			sendToNext();
+		} catch (java.rmi.ConnectIOException e) {
+			// Prova a inviare a quello dopo ancora...
+			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");
 			sendToNext();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		return "";
+		throw new CrashException("Impossibile inviare messaggio!");
 	}
 }

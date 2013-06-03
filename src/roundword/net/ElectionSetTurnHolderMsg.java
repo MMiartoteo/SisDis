@@ -15,19 +15,18 @@ public class ElectionSetTurnHolderMsg extends Msg {
 		this.turnHolder = turnHolder;
 	}
 	
-	public String execute() throws Exception {
-		for (int i=0; i<1; ++i) {
-			try {
-				Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
-				ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-				return stub.ElectionSetTurnHolder(this.turnHolder);
-			} catch (java.rmi.ConnectException e) {
-				// riprova solo se l'eccezione era di connessione fallita
-				System.out.println("Msg TurnHolder Fallito. QUESTO PEER E' MORTO!");
-			} catch (java.rmi.ConnectIOException e) {
-				System.out.println("Msg TurnHolder Fallito. QUESTO PEER E' MORTO!");
-			}
-			//Thread.sleep(1000);
+	public String execute() throws CrashException {
+		try {
+			Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
+			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
+			return stub.ElectionSetTurnHolder(this.turnHolder);
+		} catch (java.rmi.ConnectException e) {
+			System.out.println("Msg TurnHolder Fallito. QUESTO PEER E' MORTO!");
+		} catch (java.rmi.ConnectIOException e) {
+			System.out.println("Msg TurnHolder Fallito. QUESTO PEER E' MORTO!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
 		}
 		throw new CrashException("Impossibile inviare messaggio!");
 	}

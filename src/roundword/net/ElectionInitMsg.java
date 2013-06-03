@@ -23,45 +23,42 @@ public class ElectionInitMsg extends Msg {
 		this.delay = delay;
 	}
 	
-	public String execute() throws Exception {
-		for (int i=0; i<1; ++i) {
-			try {
-				Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
-				ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-				
-				// Provo a contattare il peer
-				String result = stub.ElectionInit();
-				System.out.println(result);
-				
-				if (result.equals("ok")) {
-					// Mi è arrivata una risposta dal un possibile coordinatore. Di sicuro non sono io
-					// Ma ora aspetto il messaggio di conferma dal coordinatore.
-					if (timerTask1 != null && timerTask2 != null) {
-						try {
-							timer.schedule(timerTask2, delay);
-						} catch (IllegalStateException e) {
-							// ignora, e non schedularlo di nuovo.
-						}
-						// Cancello il timer precedente:
-						timerTask1.cancel();
-						timerTask1 = null;
+	public String execute() throws CrashException {
+		try {
+			Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
+			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
+			
+			// Provo a contattare il peer
+			String result = stub.ElectionInit();
+			System.out.println(result);
+			
+			if (result.equals("ok")) {
+				// Mi è arrivata una risposta dal un possibile coordinatore. Di sicuro non sono io
+				// Ma ora aspetto il messaggio di conferma dal coordinatore.
+				if (timerTask1 != null && timerTask2 != null) {
+					try {
+						timer.schedule(timerTask2, delay);
+					} catch (IllegalStateException e) {
+						// ignora, e non schedularlo di nuovo.
 					}
-					return result;
-				} else {
-					throw new Exception(String.format("Ricevuta una risposta assurda dal server: ''", result));
+					// Cancello il timer precedente:
+					timerTask1.cancel();
+					timerTask1 = null;
 				}
-			} catch (java.rmi.ConnectException e) {
-				// riprova solo se l'eccezione era di connessione fallita
-				System.out.println("Msg Election Init Fallito. QUESTO PEER E' MORTO!");
-			} catch (java.rmi.ConnectIOException e) {
-				// riprova solo se l'eccezione era di connessione fallita
-				System.out.println("Msg Election Init Fallito. QUESTO PEER E' MORTO!");
-			} catch (Exception e) {
-				System.out.println("ECCEZIONE");
-				e.printStackTrace();
-				System.exit(1);
+				return result;
+			} else {
+				throw new Exception(String.format("Ricevuta una risposta assurda dal server: ''", result));
 			}
-			//Thread.sleep(100);
+		} catch (java.rmi.ConnectException e) {
+			// riprova solo se l'eccezione era di connessione fallita
+			System.out.println("Msg Election Init Fallito. QUESTO PEER E' MORTO!");
+		} catch (java.rmi.ConnectIOException e) {
+			// riprova solo se l'eccezione era di connessione fallita
+			System.out.println("Msg Election Init Fallito. QUESTO PEER E' MORTO!");
+		} catch (Exception e) {
+			System.out.println("ECCEZIONE");
+			e.printStackTrace();
+			System.exit(1);
 		}
 		throw new CrashException("Impossibile inviare messaggio!");
 	}

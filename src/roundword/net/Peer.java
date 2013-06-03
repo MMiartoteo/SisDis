@@ -10,6 +10,7 @@ public class Peer implements GameTable.EventListener {
 	GameTable gameTable; // The game table (the game logic controller)
 	
 	boolean local = false;// True solo se l'istanza corrente corrisponde al peer locale
+	boolean ready = false;// True solo se il Peer ha ricevuto Hello
 	//boolean active = true;// Se il peer è crashato o no
 	
 	List<Peer> peers;   // Da sta lista non togliamo nulla (almeno per ora)
@@ -104,6 +105,14 @@ public class Peer implements GameTable.EventListener {
 	
 	public boolean isActive() {
 		return player.isActive();
+	}
+	
+	public void setReady() {
+		ready = true;
+	}
+	
+	public boolean isReady() {
+		return ready;
 	}
 
 	public void setActiveStatus(boolean active) {
@@ -299,6 +308,8 @@ public class Peer implements GameTable.EventListener {
 						}
 					};
 					timer.schedule(firstPhaseElectionTask, delay);
+				} else {
+					System.out.println("** ATTENZIONE! 'firstPhaseElectionTask' era già non null... E' possibile?!");
 				}
 				/// NOTA: qui sarebbe meglio schedulare il timer task solo
 				/// dopo aver spedito almeno il primo messaggio.

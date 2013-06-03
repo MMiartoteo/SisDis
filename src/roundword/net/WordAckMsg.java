@@ -7,32 +7,25 @@ import java.util.TimerTask;
 public class WordAckMsg extends Msg {
 	
 	long id;
-	//~ Timer timer;
-	//~ TimerTask timerTask;
-	//~ long delay;
 	
-	public WordAckMsg(Peer sourcePeer, Peer destPeer, long id) {//, Timer timer, TimerTask timerTask, long delay) {
+	public WordAckMsg(Peer sourcePeer, Peer destPeer, long id) {
 		super(sourcePeer, destPeer);
 		this.id = id;
-		//~ this.timer = timer;
-		//~ this.timerTask = timerTask;
-		//~ this.delay = delay;
 	}
 	
-	public String execute() throws Exception {
-		Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
-		ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-		String response = null;
+	public String execute() throws CrashException {
 		try {
-			response = stub.wordAck(id);
+			Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
+			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
+			return stub.wordAck(id);
+		} catch (java.rmi.ConnectException e) {
+			System.out.println("Msg WordAckMsg Fallito. QUESTO PEER E' MORTO!");
+		} catch (java.rmi.ConnectIOException e) {
+			System.out.println("Msg WordAckMsg Fallito. QUESTO PEER E' MORTO!");
 		} catch (Exception e) {
-			throw new CrashException("Crash durante invio di messaggio WordAck");
-			/// TODO: CATTURA e fai qualcosa
-		} finally {
-			//~ if (timer != null) {
-				//~ timer.schedule(timerTask, delay); // delay is in milliseconds
-			//~ }
-			return response;
+			e.printStackTrace();
+			System.exit(1);
 		}
+		throw new CrashException("Crash durante invio di messaggio WordAck");
 	}
 }

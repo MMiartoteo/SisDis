@@ -4,7 +4,7 @@ import java.util.concurrent.*;
 
 public class ClientSide extends Thread {
 
-	public static final int SleepTimeOnEmptyQueue = 200;
+	//~ public static final int SleepTimeOnEmptyQueue = 200;
 
 	private BlockingQueue<Msg> msgQ;
 	
@@ -48,7 +48,7 @@ public class ClientSide extends Thread {
 		} catch (Exception e) {
 			System.err.println("Client exception: " + e.toString());
 			e.printStackTrace();
+			System.exit(-2);
 		}
-		// NOTA: Qui poi dovrai beccare gli errori di connessione per sgamare peer "crashed"
 	}
 }
