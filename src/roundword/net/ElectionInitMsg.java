@@ -53,12 +53,15 @@ public class ElectionInitMsg extends Msg {
 			} catch (java.rmi.ConnectException e) {
 				// riprova solo se l'eccezione era di connessione fallita
 				System.out.println("Msg Election Init Fallito. QUESTO PEER E' MORTO!");
+			} catch (java.rmi.ConnectIOException e) {
+				// riprova solo se l'eccezione era di connessione fallita
+				System.out.println("Msg Election Init Fallito. QUESTO PEER E' MORTO!");
 			} catch (Exception e) {
 				System.out.println("ECCEZIONE");
 				e.printStackTrace();
 				System.exit(1);
 			}
-			Thread.sleep(100);
+			//Thread.sleep(100);
 		}
 		throw new CrashException("Impossibile inviare messaggio!");
 	}
