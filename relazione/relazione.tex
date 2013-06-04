@@ -42,8 +42,8 @@
 \maketitle
 
 \begin{abstract}
-...
-\vspace*{100mm}
+% (non più di dieci righe): riassume di cosa tratta la relazione.
+
 \end{abstract}
 
 
@@ -52,9 +52,54 @@
 \section{Introduzione}
 % in cui si inquadra il problema affrontato, chiarendo gli obiettivi, riassumendo lo stato dell'arte, e descrivendo la struttura della relazione.
 
+La presente relazione tratta della realizzazione del progetto per il corso di sistemi distribuiti, dalla sua ideazione, alle scelte progettuali, agli aspetti implementativi, non senza includere difficoltà incontrate e ciò che abbiamo imparato da questa esperienza formativa.
+
+Un gioco molto famoso tra i bambini di ogni età, ma giocato anche tra adulti senza limiti di età, consiste nel formare sequenze di parole collegate tra di esse attraverso sillabe. Il gioco è molto semplice e non richiede nessuna strumentazione né attrezzature particolari, e può esser giocato in qualunque contesto. Per giocare, basta avere una comune conoscenza del vocabolario italiano ed essere in grado di suddividere le parole in sillabe. Può essere giocato da un numero minimo di due giocatori, e non vi è un limite massimo.
+
+\subsection{Regole del gioco}
+All'inizio del gioco, i giocatori decidono di comune accordo una sequenza di gioco, ovvero l'ordine dei turni (giocando dal vivo, ci si mette spesso in cerchio). Ogni giocatore, al proprio turno, produrrà una singola parola. Il primo giocatore sceglie una parola qualunque dal vocabolario italiano. Dal secondo giocatore in poi, scatta la regola per la scelta della parola:
+\begin{itemize}
+\item Sia $w$ la parola prodotta dal giocatore precedente. Ad esempio ``VERIFICARE''.
+\item Sia $w=w_1, w_2, \dots, w_n$ la sua suddivisione in sillabe. Ad esempio, ``VE'', ``RI'', ``FI'', ``CA'', ``RE''.
+\item Sia $w'=w'_1, w'_2, \dots, w'_m$ la parola inserita dal giocatore corrente, e la sua suddivisione in sillabe.
+\item La parola $w'$ è \emph{valida} se e solo se $w_n = w'_1$, ovvero se la prima sillaba della nuova parola è uguale all'ultima sillaba della parola precedente. Ad esempio, ``REGINA'', ``RECITA'' e ``RETICOLO'' sono tutte parole valide, mentre ``RIONE'', ``RESPIRARE'', ``MANO'' sono tutte parole non valide.
+\end{itemize}
+
+Ciò quindi crea una sequenza di parole tutte collegate tra di essere per mezzo dell'ultima e della prima sillaba tra ogni coppia di parole (eccetto la prima, che non è collegata a nessuna parola). Non essendo a conoscenza del nome del gioco (nonostante lo abbiamo giocato sin da bambini), abbiamo deciso di chiamarlo \emph{RoundWord} per il presente progetto.
+
+Per rendere più interessante il gioco, non basta che una parola sia \emph{valida} affinché si possano guadagnare dei punti per il proprio turno. Vi è un altro requisito fondamentale: la parola deve essere \emph{nuova}. Ovvero, la parola inserita non deve essere stata inserita precedentemente da alcun giocatore, durante il corso della corrente partita. Quindi, ogni giocatore deve tenere memoria della sequenza di parole generate da tutti i giocatori, ed evitare di riproporre una parola già proposta in precedenza.
+
+Per complicare ulteriormente il gioco (e per evitare che il gioco si blocca indefinitamente), ogni giocatore ha un limite di tempo entro il quale può proporre la sua parola. Tale limite di tempo viene concordato inizialmente tra i giocatori.
+
+Ogni giocatore, al proprio turno può guadagnare o perdere punti, secondo le seguenti regole:
+\begin{itemize}
+\item Se la parola è valida e non è stata proposta precedentemente durante la stessa partita, il giocatore guadagna XXX punti
+\item Se la parola è \emph{valida} ma non è \emph{nuova}: XX
+\item Se la parola non è valida: -XX
+\item Se il giocatore non è riuscito a produrre la parola entro il limite di tempo stabilito per un singolo turno, il giocatore perde XXX punti. Inoltre, il prossimo giocatore dovrà riprendere dalla parola dell'ultimo giocatore che era riuscito a produrre una parola \emph{valida} e \emph{nuova}.
+\end{itemize}
+
+Un giocatore può ritirarsi in qualunque momento. In quel caso, il gioco continua tra i giocatori rimanenti, richiudendo il cerchio nella maniera ovvia. Il gioco finisce quando un giocatore rimane da solo, oppure quando nessun giocatore riesce a produrre parole valide e nuove per XXX cicli di turno consecutivi.
+
+\subsection{Obiettivi del progetto}
+
+L'obiettivo principale del presente progetto è la realizzazione del gioco in un ambiente distribuito, in cui varie entità distribuite (che chiameremo \emph{peer}, vista la loro intrinseca natura client/server) comunicano tra loro attraverso una rete asincrona, non affidabile, come ad esempio Internet. In questo tipo di contesto sono necessari coordinazione tra i peer, gestione di stati condivisi. [ ... FARE BENE STA PARTE, ED ELENCARE BENE I REQUISITI SCRITTI NEL SITO ].
+
+
+
 
 \section{Aspetti progettuali}
 % in cui si illustra il progetto svolto; in particolare si discutono i problemi specifici affrontati, le soluzioni valutate e proposte, e l'architettura astratta del sistema sviluppato.
+
+\subsection{Interpretare RoundWord nei sistemi distribuiti}
+Interpretare questo gioco nell'ambito dei sistemi distribuiti non è particolarmente difficile. Infatti, ogni giocatore viene rappresentato da un \emph{peer} in una rete distribuita in stile peer-to-peer (senza overlay). I turni a ciclo suggeriscono l'idea di un protocollo in stile \emph{token-ring}, dove il detentore del turno viene equiparato al \emph{leader} attuale, e la leadership viene passata al prossimo peer allo scadere di ogni turno. Lo \emph{stato condiviso} tra i peer partecipanti consiste in:
+\begin{itemize}
+\item La lista dei peer attivi (non crashati)
+\item La lista dei punteggi dei rispettivi giocatori
+\item La lista completa delle parole valide e nuove generate dai giocatori
+\item L'identità del detentore del turno attuale (ovvero del leader attuale)
+\end{itemize}
+
 
 
 \section{Aspetti implementativi}
