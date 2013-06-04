@@ -55,7 +55,7 @@ public class ServerSide implements ServerSideInterface {
     }
     
     public String ElectionInit() {
-		assert peer.isReady();
+		assert peer.isReady(); /// NOTA: se ciò è falso è perché il turnHolder è morto prima di inviare Hello
 		System.out.println(String.format("Ricevuto ElectionInit"));
 		
 		// Comincio l'elezione se non l'avevo già iniziata in precedenza
@@ -121,6 +121,7 @@ public class ServerSide implements ServerSideInterface {
 		else {
 			assert msgOriginatorOrd == peer.getOrd();
 			System.out.println(String.format("La word è tornata indietro! lastSentMsgid=%d", peer.lastSentMsgId));
+			peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
 			
 			// Controllo l'id del messaggio, per scoprire se ho ricevuto un ack vecchio o corretto
 			if (id == peer.lastSentMsgId) {

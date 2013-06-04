@@ -158,9 +158,13 @@ public class Peer implements GameTable.EventListener {
 	}
 	
 	public void updateCrashedPeers(Set<Byte> crashedPeerOrds) {
+		for (byte b : crashedPeerOrds) {
+			System.out.println(String.format("MORTO: %s", b));
+		}
 		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
 			Peer p = peers.get(i);
-			if (crashedPeerOrds.contains(p.getOrd())) {
+			if (crashedPeerOrds.contains((byte)p.getOrd())) {
+				System.out.println(String.format("Setto peer %s morto!", p.getOrd()));
 				p.setActiveStatus(false);
 			}
 		}
