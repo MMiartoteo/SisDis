@@ -1,0 +1,80 @@
+% v2-acmlarge-sample.tex, dated March 6 2012
+% This is a sample file for ACM large trim journals
+%
+% Compilation using 'acmlarge.cls' - version 1.3, Aptara Inc.
+% (c) 2011 Association for Computing Machinery (ACM)
+%
+% Questions/Suggestions/Feedback should be addressed to => "acmtexsupport@aptaracorp.com".
+% Users can also go through the FAQs available on the journal's submission webpage.
+%
+% Steps to compile: latex, bibtex, latex latex
+%
+%\documentclass[prodmode,acmtap]{acmlarge}
+\documentclass[10.5pt]{article}
+
+
+%\usepackage[a4paper,pdftex]{geometry}
+\usepackage[utf8x]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{makeidx}
+\usepackage{graphicx}
+
+\linespread{1.1}
+
+% Package to generate and customize Algorithm as per ACM style
+%\usepackage[ruled]{algorithm2e}
+%\SetAlFnt{\algofont}
+%\SetAlCapFnt{\algofont}
+%\SetAlCapNameFnt{\algofont}
+%\SetAlCapHSkip{0pt}
+%\IncMargin{-\parindent}
+%\renewcommand{\algorithmcfname}{ALGORITHM}
+
+% Title portion
+\title{RoundWord\\
+\large{Progetto per il Corso di Sistemi Distribuiti, a.a. 2012-2013}}
+\author{MATTEO BRUCATO e MIRO MANNINO\\Università di Bologna}
+
+
+\begin{document}
+%\large
+
+\maketitle
+
+\begin{abstract}
+...
+\vspace*{100mm}
+\end{abstract}
+
+
+\tableofcontents
+
+\section{Introduzione}
+% in cui si inquadra il problema affrontato, chiarendo gli obiettivi, riassumendo lo stato dell'arte, e descrivendo la struttura della relazione.
+
+
+\section{Aspetti progettuali}
+% in cui si illustra il progetto svolto; in particolare si discutono i problemi specifici affrontati, le soluzioni valutate e proposte, e l'architettura astratta del sistema sviluppato.
+
+
+\section{Aspetti implementativi}
+% dettagli sulle scelte implementative, ed architettura specifica implementata. Inserire almeno il diagramma delle classi e uno delle interazioni secondo lo standard UML.
+
+
+\section{Valutazione}
+% confronto delle soluzioni proposte con soluzioni analoghe allo stato dell'arte.
+
+
+\section{Conclusioni}
+% commenti conclusivi su possibili miglioramenti di quanto discusso, e possibili linee di intervento futuro.
+
+
+
+
+% Bibliography
+\bibliographystyle{ACM-Reference-Format-Journals}
+\bibliography{riferimenti}
+
+
+\end{document}
+% End of v2-acmlarge-sample.tex (March 2012) - Gerry Murray, ACM
