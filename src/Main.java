@@ -63,7 +63,7 @@ public class Main {
 				});
 
 
-				starter.startGame(nickname, portno, registrarURL, artificial);
+				starter.initializeGame(nickname, portno, registrarURL, artificial);
 
 			} else {
 				System.out.println("No arguments, open the window to choose them");

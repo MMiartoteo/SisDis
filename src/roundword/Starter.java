@@ -41,8 +41,10 @@ public class Starter {
 	// ------------------------------------------------------------------------
 
 	EventListener eventListener;
-	Dictionary dictionary;
-
+	private Dictionary dictionary;
+	private GameTable table;
+	private boolean artificial;
+	
 	// ------------------------------------------------------------------------
 	// CONSTRUCTORS
 	// ------------------------------------------------------------------------
@@ -63,8 +65,9 @@ public class Starter {
 		this.eventListener = eventListener;
 	}
 
-	public void startGame(String player_name, int portno, String registrarURL, boolean artificial) {
-
+	public void initializeGame(String player_name, int portno, String registrarURL, boolean artificial) {
+		this.artificial = artificial;
+		
 		int SEC_WAIT = 2;
 
 		/// 1 - Contatta il registrar centrale
@@ -139,7 +142,7 @@ public class Starter {
 			Player new_player = new Player(p_name, player_ord);
 			players.add(new_player);
 
-			Peer new_peer = new Peer(new_player, p_host, p_portno);
+			Peer new_peer = new Peer(this, new_player, p_host, p_portno);
 			peers.add(new_peer);
 
 			if (player_name.equals(p_name) && portno == p_portno) {
@@ -158,7 +161,7 @@ public class Starter {
 			return;
 		}
 
-		GameTable table = new GameTable(players, localPlayer, dictionary);
+		table = new GameTable(players, localPlayer, dictionary);
 
 		p.setLocal();
 		p.setPeers(peers);
@@ -178,9 +181,9 @@ public class Starter {
 		 * 2) La lista delle parole fino ad ora giocate (vuota all'inizio)
 		 * ...
 		 * */
-
-		/* Start game */
-
+	}
+	
+	public void startGame() {
 		if (artificial) {
 			try {
 				Thread t = new Thread(new FakePlayer(table, Constants.dictionaryPath));

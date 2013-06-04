@@ -28,8 +28,9 @@ public class ServerSide implements ServerSideInterface {
 	}
 	
 	public String sayHello() {
-		System.out.println(String.format("Ricevuto HELLO, setto il peer come Ready"));
+		System.out.println(String.format("Ricevuto HELLO, setto il peer come Ready e faccio partire il gioco."));
 		peer.setReady();
+		peer.starter.startGame();
 		
 		// Fai il forward se non sei tu il turnista
 		if (!peer.isTurnHolder()) {

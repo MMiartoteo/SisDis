@@ -123,7 +123,7 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				starter.startGame(txtNickname.getText(), Integer.valueOf(txtPort.getText()), txtRegistrarURL.getText(), false);
+				starter.initializeGame(txtNickname.getText(), Integer.valueOf(txtPort.getText()), txtRegistrarURL.getText(), false);
 			}
 		});
 		t.start();

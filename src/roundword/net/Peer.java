@@ -6,6 +6,7 @@ import java.util.TimerTask;
 
 public class Peer implements GameTable.EventListener {
 	
+	Starter starter;
 	Player player;        // The associated player
 	GameTable gameTable; // The game table (the game logic controller)
 	
@@ -33,7 +34,8 @@ public class Peer implements GameTable.EventListener {
 	
 	boolean electionActive = false;
 	
-	public Peer(Player player, String IPaddr, int serverPortno) {
+	public Peer(Starter starter, Player player, String IPaddr, int serverPortno) {
+		this.starter = starter;
 		this.player = player;
 		this.IPaddr = IPaddr;
 		this.serverPortno = serverPortno;
@@ -199,8 +201,9 @@ public class Peer implements GameTable.EventListener {
 				System.exit(-1);
 			}
 		};
-		long delay = 10000*peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
+		long delay = 10*peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
 		timer.schedule(helloTask, delay);
+		System.out.println(String.format("%s) Aspetto %s secondi", getOrd(), String.valueOf(delay/1000.0)));
 		
 		// Invia il messaggio di Hello al peer successivo
 		send_msg(new HelloMsg(this, getNextActivePeer()));
