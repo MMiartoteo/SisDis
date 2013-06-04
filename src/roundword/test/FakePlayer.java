@@ -28,7 +28,7 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 
 	public void run() {
 		Random rnd = new Random();
-		while (true) {
+		while (!t.isGameFinished()) {
 
 			//Wait if the own player is playing
 			synchronized (this) {
@@ -82,7 +82,9 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 		}
 	}
 
-	public void gameFinished(Player winnerPlayer, List<Player> players) { }
+	public void gameFinished(Player winnerPlayer, List<Player> players) {
+
+	}
 
 	private void loadDictionary(String path) throws IOException {
 		dictionary = new ArrayList<String>();

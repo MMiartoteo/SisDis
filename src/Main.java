@@ -27,7 +27,7 @@ public class Main {
 			System.exit(-1);
 		}
 
-//		Tests.fakePlayers_test();
+		Tests.fakePlayers_test();
 //		Tests.dictionary_test();
 
 		try {
