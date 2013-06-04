@@ -3,6 +3,8 @@ import roundword.*;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Peer implements GameTable.EventListener {
 	
@@ -12,7 +14,6 @@ public class Peer implements GameTable.EventListener {
 	
 	boolean local = false;// True solo se l'istanza corrente corrisponde al peer locale
 	boolean ready = false;// True solo se il Peer ha ricevuto Hello
-	//boolean active = true;// Se il peer è crashato o no
 	
 	List<Peer> peers;   // Da sta lista non togliamo nulla (almeno per ora)
 	
@@ -31,6 +32,7 @@ public class Peer implements GameTable.EventListener {
 	
 	long lastSentMsgId = 0;
 	long lastSeenMsgId = 0;
+	byte lastSeenMsgOriginatorOrd = -1;
 	
 	boolean electionActive = false;
 	
@@ -144,6 +146,26 @@ public class Peer implements GameTable.EventListener {
 		return null;
 	}
 	
+	public Set<Byte> getCrashedPeerOrds() {
+		Set<Byte> crashedPeerOrds = new HashSet<Byte>();
+		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
+			Peer p = peers.get(i);
+			if (!p.isActive()) {
+				crashedPeerOrds.add((byte)p.getOrd());
+			}
+		}
+		return crashedPeerOrds;
+	}
+	
+	public void updateCrashedPeers(Set<Byte> crashedPeerOrds) {
+		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
+			Peer p = peers.get(i);
+			if (crashedPeerOrds.contains(p.getOrd())) {
+				p.setActiveStatus(false);
+			}
+		}
+	}
+	
 	
 	
 	
@@ -234,9 +256,9 @@ public class Peer implements GameTable.EventListener {
 		send_msg(new WordMsg(this, getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, delay));
 	}
 	
-	protected void forwardWord(long id, Word word) {
+	protected void forwardWord(long id, Word word, byte msgOriginatorOrd) {
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
-		send_msg(new WordMsg(this, getNextActivePeer(), id, word));
+		send_msg(new WordMsg(this, getNextActivePeer(), id, word, msgOriginatorOrd));
 		
 		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), getTurnHolder().getOrd()));
 		lastWordTask = new TimerTask() {

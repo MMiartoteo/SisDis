@@ -3,6 +3,7 @@ import roundword.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Set;
 
 
 public class ServerSide implements ServerSideInterface {
@@ -91,20 +92,34 @@ public class ServerSide implements ServerSideInterface {
 		return "ok";
 	}
 	
-	public String word(long id, Word word) {
+	public String word(long id, Word word, byte msgOriginatorOrd, Set<Byte> crashedPeerOrds) {
 		assert peer.isReady();
+		assert msgOriginatorOrd == peer.getTurnHolder().getOrd(); /// NOTA: <<--- PER DEBUG!
 		System.out.println(String.format("Ricevuto Word \"%s\" id=%d", word, id));
+		
+		System.out.println(String.format("Aggiorno la lista dei peer morti"));
+		peer.updateCrashedPeers(crashedPeerOrds);
 		
 		// Fai il forward se non sei tu il turnista (e setta la parola nella gui)
 		if (!peer.isTurnHolder()) {
-			System.out.println("Il peer attuale NON è il detentore del turno. Faccio forwarding.");
+			System.out.println("Il peer attuale NON è il detentore del turno. Faccio forwarding, e cancello timer WordAck2.");
+			if (peer.lastWordTask != null) {
+				peer.lastWordTask.cancel();
+				peer.lastWordTask = null;
+			}
+			peer.forwardWord(id, word, msgOriginatorOrd);
 			peer.lastSeenMsgId = id;
-			peer.forwardWord(id, word);
-			gameTable.addWord(word, 100); /// TODO <--- Poi metti vero valore per secondi
+			if (msgOriginatorOrd != peer.lastSeenMsgOriginatorOrd) {
+				gameTable.addWord(word, 100); /// TODO <--- Poi metti vero valore per secondi
+				peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
+			} else {
+				System.out.println(String.format("Questa parola mi è stata RIMANDATA DI NUOVO, non la riaggiungo al gameTable."));
+			}
 		}
 		
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
 		else {
+			assert msgOriginatorOrd == peer.getOrd();
 			System.out.println(String.format("La word è tornata indietro! lastSentMsgid=%d", peer.lastSentMsgId));
 			
 			// Controllo l'id del messaggio, per scoprire se ho ricevuto un ack vecchio o corretto
@@ -120,7 +135,7 @@ public class ServerSide implements ServerSideInterface {
 			else {
 				System.out.println("La parola è vecchia, faccio solo il forward.");
 				//peer.lastSeenMsgId = id;
-				peer.forwardWord(id, word);
+				peer.forwardWord(id, word, msgOriginatorOrd);
 			}
 		}
 		
@@ -132,12 +147,14 @@ public class ServerSide implements ServerSideInterface {
 	
 	public String wordAck(long id) {
 		assert peer.isReady();
+		assert !peer.isTurnHolder();
 		System.out.println(String.format("Ricevuto WordAck2 dal turnHolder"));
 		
 		// Controllo l'id del messaggio, per sgamare ack vecchi
 		if (id == peer.lastSeenMsgId) {
 			System.out.println("L'ack è corretto, cancello il relativo timer.");
 			peer.lastWordTask.cancel();
+			peer.lastWordTask = null;
 			// Next Turn
 			System.out.println("E passo al prossimo turno.");
 			peer.nextTurn();

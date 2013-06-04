@@ -12,6 +12,7 @@ public class WordMsg extends Msg {
 	Timer timer;
 	TimerTask timerTask;
 	long delay;
+	byte msgOriginatorOrd;
 	
 	/* Questa viene usata dal turnista, per avere anche un tempo di attesa */
 	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, Timer timer, TimerTask timerTask, long delay) {
@@ -21,20 +22,22 @@ public class WordMsg extends Msg {
 		this.timer = timer;
 		this.timerTask = timerTask;
 		this.delay = delay;
+		this.msgOriginatorOrd = (byte)sourcePeer.getOrd();
 	}
 	
 	/* Questa viene usata da chi fa solo forwarding */
-	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word) {
+	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, byte msgOriginatorOrd) {
 		super(sourcePeer, destPeer);
 		this.id = id;
 		this.word = word;
+		this.msgOriginatorOrd = msgOriginatorOrd;
 	}
 	
 	private void sendToNext() throws CrashException {
 		if (timer != null) {
 			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, timer, timerTask, delay));
 		} else {
-			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word));
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, msgOriginatorOrd));
 		}
 	}
 	
@@ -46,7 +49,7 @@ public class WordMsg extends Msg {
 			if (timer != null) {
 				timer.schedule(timerTask, delay); // delay is in milliseconds
 			}
-			return stub.word(id, this.word);
+			return stub.word(id, this.word, msgOriginatorOrd, sourcePeer.getCrashedPeerOrds());
 		} catch (java.rmi.ConnectException e) {
 			// Prova a inviare a quello dopo ancora...
 			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");
