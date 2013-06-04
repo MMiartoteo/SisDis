@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.util.*;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
@@ -146,5 +148,14 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 
 	@Override
 	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
+	}
+
+	@Override
+	public void gameFinished(Player winnerPlayer, List<Player> players) {
+		String wStr = "<div style=\"font-size: 40px\">" + ((winnerPlayer == gameTable.getLocalPlayer()) ? "Hai vinto!" : "Hai perso!") + "</div>";
+		JOptionPane.showMessageDialog(this, "<html><div style=\"font-size: 20px; text-align:center\">Gioco terminato<br/>"
+				+ wStr + "</div></html>",
+				"", JOptionPane.PLAIN_MESSAGE);
+		System.exit(-1);
 	}
 }

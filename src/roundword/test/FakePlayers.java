@@ -33,7 +33,7 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 			Random rnd = new Random();
 			int played = 0;
 
-			while (true) {
+			while (!t.isGameFinished()) {
 
 				//Wait if the own player is playing
 				synchronized (this) {
@@ -48,16 +48,20 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				Word w = null;
 				Player playingPlayer = t.getTurnHolder();
 
-				if (t.getWordsList().size() == 0) {
-					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
-				} else {
-					String syllabeToFind = t.getWordsList().get(0).getLastSyllableSubWord();
-					for (String s : dictionary) {
-						if ((s.length() >= syllabeToFind.length())
-								&& (syllabeToFind.compareTo(s.substring(0, syllabeToFind.length())) == 0)
-								&& (rnd.nextDouble() < 0.1)) {
-							w = new Word(s);
+				if (rnd.nextDouble() < 0.1) {
+
+					if (t.getWordsList().size() == 0) {
+						w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
+					} else {
+						String syllabeToFind = t.getWordsList().get(0).getLastSyllableSubWord();
+						for (String s : dictionary) {
+							if ((s.length() >= syllabeToFind.length())
+									&& (syllabeToFind.compareTo(s.substring(0, syllabeToFind.length())) == 0)
+									&& (rnd.nextDouble() < 0.1)) {
+								w = new Word(s);
+							}
 						}
+
 					}
 
 				}
@@ -73,7 +77,7 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				t.nextTurn();
 				System.out.println("NextTurn \n--\n");
 
-				if (++played > 8) {
+				if (++played > 8 && aLittleDeadPlayer != null) {
 					if (playingPlayer == aLittleDeadPlayer) {
 						aLittleDeadPlayer.setActiveStatus(false);
 					}
@@ -92,10 +96,14 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 
 		synchronized public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
 			if (newTurnHolder == t.getLocalPlayer()) localPlayerIsPlaying = true;
-			if (oldTurnHolder == t.getLocalPlayer()) {
+			else if (oldTurnHolder == t.getLocalPlayer()) {
 				localPlayerIsPlaying = false;
 				notify();
 			}
+
+		}
+
+		public void gameFinished(Player winnerPlayer, List<Player> players) {
 
 		}
 

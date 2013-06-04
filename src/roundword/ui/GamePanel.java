@@ -215,4 +215,8 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		}
 	}
 
+	@Override
+	public void gameFinished(Player winnerPlayer, List<Player> players) {
+
+	}
 }

@@ -65,4 +65,9 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 		model.playingPlayerChanges(oldTurnHolder, newTurnHolder);
 	}
 
+	@Override
+	public void gameFinished(Player winnerPlayer, List<Player> players) {
+
+	}
+
 }

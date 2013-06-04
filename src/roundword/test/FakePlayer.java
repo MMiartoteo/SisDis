@@ -82,6 +82,8 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 		}
 	}
 
+	public void gameFinished(Player winnerPlayer, List<Player> players) { }
+
 	private void loadDictionary(String path) throws IOException {
 		dictionary = new ArrayList<String>();
 		BufferedReader br = new BufferedReader(new FileReader(path));

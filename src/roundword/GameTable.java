@@ -26,6 +26,9 @@ public class GameTable implements Player.EventListener {
 
 		//Called when the playing player changes
 		void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder);
+
+		//Called when the game finished
+		void gameFinished(Player winnerPlayer, List<Player> players);
 	}
 
 	// ------------------------------------------------------------------------
@@ -64,6 +67,9 @@ public class GameTable implements Player.EventListener {
 	 * Dictionary. To check if a word is valid or not
 	 */
 	Dictionary dictionary;
+
+
+	boolean isGameFinished = false;
 
 
 	// ------------------------------------------------------------------------
@@ -136,12 +142,21 @@ public class GameTable implements Player.EventListener {
 	}
 
 	public void setTurnHolder(Player turnHolder) {
-		if (turnHolder == null) throw new NullPointerException("turnHolder is null");
+		setTurnHolder(turnHolder, false);
+	}
 
-		if (this.turnHolder != turnHolder) {
-			Player oldTurnHolder = this.turnHolder;
+	/** This can be called only by method of this class.
+	 *  In this way the nextTurn for example can call this one without checking some things that
+	 *  the nextTurn knows.
+	 * */
+	private void setTurnHolder(Player turnHolder, boolean avoidChecks) {
+		Player oldTurnHolder = this.turnHolder;
 
-			//Check that is actuve
+		if (!avoidChecks) {
+			if (this.turnHolder == turnHolder) return;
+			if (turnHolder == null) throw new NullPointerException("turnHolder is null");
+
+			//Check that is active
 			if (!turnHolder.isActive()) throw new IllegalArgumentException("the turnHolder must be active");
 
 			//Check for errors
@@ -150,12 +165,16 @@ public class GameTable implements Player.EventListener {
 				if (p == turnHolder) turnHolderFounded = true;
 			}
 			if (!turnHolderFounded) throw new IllegalArgumentException("the turnHolder must be in the playersList");
-
-			this.turnHolder = turnHolder;
-
-			//Callbacks call
-			for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
 		}
+
+		this.turnHolder = turnHolder;
+
+		if (!isGameFinished && gameCouldFinish()) {
+			finishTheGame();
+		}
+
+		//Callbacks call
+		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
 	}
 	
 	public List<Word> getWordsList() {
@@ -175,28 +194,34 @@ public class GameTable implements Player.EventListener {
 		EventListener.WordAddedState state = EventListener.WordAddedState.OK;
 
 		if (w == null) { //the player doesn't write anything
+			turnHolder.setLastResponseWrong(true);
 			turnHolder.addPoints(Constants.PointsForNotReply);
 			state = EventListener.WordAddedState.TIMEOUT_ELAPSED;
 		} else {
 			String wordStr = w.toString();
 			if (dictionary.contains(w)) {
 				if (lastWordSyl == null) { //No words before this
+					turnHolder.setLastResponseWrong(false);
 					words.add(0, w);
 					turnHolder.addPoints(w.getValue() + (int) Math.round(Constants.PointsPerMilliseconds * millisecondToReply));
 					state = EventListener.WordAddedState.OK;
 				} else if (words.contains(w)) {
+					turnHolder.setLastResponseWrong(false);
 					turnHolder.addPoints(Constants.PointsForPreviouslyAddedWord);
 					state = EventListener.WordAddedState.PREVIOUSLY_ADDED;
 				} else if (wordStr.length() >= lastWordSyl.length()
 						    && (wordStr.substring(0, lastWordSyl.length()).compareTo(lastWordSyl) == 0)) {
+					turnHolder.setLastResponseWrong(false);
 					words.add(0, w);
 					turnHolder.addPoints(w.getValue() + (int) Math.round(Constants.PointsPerMilliseconds * millisecondToReply));
 					state = EventListener.WordAddedState.OK;
 				} else {
+					turnHolder.setLastResponseWrong(true);
 					turnHolder.addPoints(Constants.PointsForWrongWord);
 					state = EventListener.WordAddedState.SYLLABE_INCORRECT;
 				}
 			} else { //the player insert a word that isn't in the dictionary
+				turnHolder.setLastResponseWrong(true);
 				turnHolder.addPoints(Constants.PointsForWrongWord);
 				state = EventListener.WordAddedState.NO_IN_DICTIONARY;
 			}
@@ -208,11 +233,36 @@ public class GameTable implements Player.EventListener {
 	}
 
 	/**
+	 * Check if the game must terminate. True if the game must be ended.
+	 * */
+	public boolean gameCouldFinish() {
+		boolean allNullWord = true;
+		boolean weAreAlone = true;
+		for (Player p : playersList) {
+			if (p.isActive() && !p.isLastResponseWrong) allNullWord = false;
+			if (p.isActive() && p != localPlayer) weAreAlone = false;
+		}
+		return allNullWord || weAreAlone;
+	}
+
+	private void finishTheGame() {
+		isGameFinished = true;
+
+		Player winnerPlayer = null;
+		for (Player p : playersList) {
+			if (winnerPlayer == null) winnerPlayer = p;
+			else if (winnerPlayer.getPoints() < p.getPoints()) winnerPlayer = p;
+		}
+		for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
+	}
+
+	/**
 	 * We go to the next turn, the playing player will be the next of the player list. If you want to set the turn
 	 * to another player, for example after a catastrophic event, you can use the {@code setTurnHolder}.
 	 * */
 	public void nextTurn() {
 		Player oldTurnHolder = turnHolder;
+		Player newTurnHolder = null;
 
 		boolean turnHolderFounded = false;
 		Iterator<Player> i = playersList.iterator();
@@ -231,7 +281,7 @@ public class GameTable implements Player.EventListener {
 
 			tempP = i.next();
 			if (tempP.isActive()) {
-				turnHolder = tempP;
+				newTurnHolder = tempP;
 				break;
 			}
 
@@ -240,11 +290,14 @@ public class GameTable implements Player.EventListener {
 			if (!i.hasNext()) i = playersList.iterator(); //rewind
 		}
 
-		//Callbacks call
-		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+		setTurnHolder(newTurnHolder, true);
 
 		System.out.println("######### NEXT TURN #########");
 		System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
+	}
+
+	public boolean isGameFinished() {
+		return isGameFinished;
 	}
 
 	// Listeners --------------------------------------------------------------

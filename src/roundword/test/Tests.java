@@ -33,7 +33,7 @@ public class Tests {
 
 		List<Player> players = new ArrayList<Player>();
 		Player localPlayer = new Player("CiccioBomba", 2);
-		Player aLittleDeadPlayer = new Player("QuasiMorto", 3);
+		Player aLittleDeadPlayer = new Player("QuasiMorto", 0);
 		players.add(new Player("Stupido", 0));
 		players.add(localPlayer);
 		players.add(new Player("Rimbambito", 2));

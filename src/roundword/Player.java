@@ -4,7 +4,6 @@ package roundword;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 public class Player {
 
@@ -37,7 +36,7 @@ public class Player {
 	
 	int points;
 	
-	//IP Address, or other information to contact him
+	boolean isLastResponseWrong;
 
 	/**
 	 * The callback that is call when a player change its points
@@ -59,6 +58,7 @@ public class Player {
 		this.nickName = nickname;
 		this.ord = ord;
 		this.active = true;
+		this.isLastResponseWrong = false;
 		points = 0;
 	}
 	
@@ -101,6 +101,14 @@ public class Player {
 	public void removeEventListener(EventListener listener) {
 		if (listener == null) throw new NullPointerException("listener is null");
 		eventListeners.remove(listener);
+	}
+
+	public void setLastResponseWrong(boolean b) {
+		isLastResponseWrong = b;
+	}
+
+	public boolean isLastResponseWrong() {
+		return isLastResponseWrong;
 	}
 
 	@Override

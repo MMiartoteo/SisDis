@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.BoxLayout;
 import javax.swing.border.EmptyBorder;
 import java.awt.Component;
+import java.util.List;
 import javax.swing.Box;
 
 public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
@@ -79,6 +80,11 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 
 	@Override
 	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
+
+	}
+
+	@Override
+	public void gameFinished(Player winnerPlayer, List<Player> players) {
 
 	}
 
