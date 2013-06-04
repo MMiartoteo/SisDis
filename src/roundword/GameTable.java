@@ -250,8 +250,10 @@ public class GameTable implements Player.EventListener {
 
 		Player winnerPlayer = null;
 		for (Player p : playersList) {
-			if (winnerPlayer == null) winnerPlayer = p;
-			else if (winnerPlayer.getPoints() < p.getPoints()) winnerPlayer = p;
+			if (p.isActive()) {
+				if (winnerPlayer == null) winnerPlayer = p;
+				else if (winnerPlayer.getPoints() < p.getPoints()) winnerPlayer = p;
+			}
 		}
 		for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
 	}
