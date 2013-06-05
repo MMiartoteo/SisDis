@@ -1,7 +1,10 @@
 lanciare il registrar con
 
-    python registrar_server.py
+    python registrar_server.py <numero_di_giocatori>
+		
+oppure per 3 giocatori
 
+		python registrar_server.py
 
 * poi lanciare due peer, in questo modo:
 

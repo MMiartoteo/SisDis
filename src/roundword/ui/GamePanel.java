@@ -199,8 +199,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 
 	@Override
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
-		System.out.println("NEW WORD ADDED INTERFACCIA");
-		refresh();
+		if (!gameTable.isGameFinished()) refresh();
 	}
 
 	@Override
@@ -210,9 +209,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 
 	@Override
 	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {
-		if (newTurnHolder == gameTable.getLocalPlayer()) {
-			startPlay();
-		}
+		if (!gameTable.isGameFinished() && newTurnHolder == gameTable.getLocalPlayer()) startPlay();
 	}
 
 	@Override

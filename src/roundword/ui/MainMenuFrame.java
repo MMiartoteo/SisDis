@@ -18,7 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
-public class ArgumentsChooser extends JFrame implements Starter.EventListener, ActionListener {
+public class MainMenuFrame extends JFrame implements Starter.EventListener, ActionListener {
 
 	private JPanel contentPane;
 	private JTextField txtNickname;
@@ -26,10 +26,11 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 	private JTextField txtPort;
 	private JLabel messagesLabel;
 	private JButton btnStartGame;
+	private JButton btnExit;
 
 	Starter starter;
 
-	public ArgumentsChooser(Starter starter) {
+	public MainMenuFrame(Starter starter) {
 		Random rnd = new Random();
 
 		this.starter = starter;
@@ -65,7 +66,7 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		panelForm.add(nicknameLabel);
 		
 		txtNickname = new JTextField();
-		txtNickname.setText(Constants.CasualNames[rnd.nextInt(Constants.CasualNames.length)]);
+		txtNickname.setText(Constants.nickName);
 		panelForm.add(txtNickname);
 		txtNickname.setColumns(10);
 		
@@ -73,7 +74,7 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		panelForm.add(portLabel);
 		
 		txtPort = new JTextField();
-		txtPort.setText(String.valueOf(6000 + rnd.nextInt(1000)));
+		txtPort.setText(String.valueOf(Constants.portNumber));
 		panelForm.add(txtPort);
 		txtPort.setColumns(10);
 		
@@ -81,7 +82,7 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		panelForm.add(registrarURLLabel);
 		
 		txtRegistrarURL = new JTextField();
-		txtRegistrarURL.setText("http://localhost:8080");
+		txtRegistrarURL.setText(Constants.serverURL);
 		panelForm.add(txtRegistrarURL);
 		txtRegistrarURL.setColumns(10);
 		
@@ -94,10 +95,19 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 		messagesLabel = new JLabel("");
 		statusBarPanel.add(messagesLabel, BorderLayout.CENTER);
 		starter.setMessageUpdateListener(this);
-		
+
+		JPanel buttonsPanel = new JPanel();
+		buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
+		buttonsPanel.setBackground(UIConstants.BackgroundColor);
+		statusBarPanel.add(buttonsPanel, BorderLayout.EAST);
+
+		btnExit = new JButton("Esci");
+		btnExit.addActionListener(this);
+		buttonsPanel.add(btnExit);
+
 		btnStartGame = new JButton("Start!");
 		btnStartGame.addActionListener(this);
-		statusBarPanel.add(btnStartGame, BorderLayout.EAST);
+		buttonsPanel.add(btnStartGame);
 	}
 
 	@Override
@@ -120,14 +130,45 @@ public class ArgumentsChooser extends JFrame implements Starter.EventListener, A
 	}
 
 	public void actionPerformed(ActionEvent actionEvent) {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				starter.initializeGame(txtNickname.getText(), Integer.valueOf(txtPort.getText()), txtRegistrarURL.getText(), false);
+		if (actionEvent.getSource() == btnStartGame) {
+			if (txtNickname.getText().length() == 0) {
+				messagesLabel.setText("Inserisci un nickname");
+				return;
+			} else {
+				Constants.nickName = txtNickname.getText();
 			}
-		});
-		t.start();
-		btnStartGame.setEnabled(false);
+
+			if (txtPort.getText().length() == 0) {
+				messagesLabel.setText("Inserisci un numero di porta");
+				return;
+			} else {
+				try {
+					Constants.portNumber = Integer.valueOf(txtPort.getText());
+				} catch (Exception ex) {
+					messagesLabel.setText("Inserisci un numero di porta valido");
+					return;
+				}
+			}
+
+			if (txtRegistrarURL.getText().length() == 0) {
+				messagesLabel.setText("Inserisci l'URL del registrar");
+				return;
+			} else {
+				Constants.serverURL = txtRegistrarURL.getText();
+			}
+
+			messagesLabel.setText("");
+			btnStartGame.setEnabled(false);
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					starter.initializeGame(Constants.nickName, Constants.portNumber, Constants.serverURL, false);
+				}
+			});
+			t.start();
+		} else {
+			System.exit(0);
+		}
 	}
 
 }

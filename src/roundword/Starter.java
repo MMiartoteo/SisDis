@@ -1,15 +1,11 @@
 package roundword;
 
 import org.json.JSONArray;
-import roundword.Dictionary;
-import roundword.GameTable;
-import roundword.Player;
-import roundword.Word;
 import roundword.net.Peer;
 import roundword.test.FakePlayer;
+import roundword.ui.MainMenuFrame;
 import roundword.ui.GameFrame;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,7 +37,6 @@ public class Starter {
 	// ------------------------------------------------------------------------
 
 	EventListener eventListener;
-	private Dictionary dictionary;
 	private GameTable table;
 	private boolean artificial;
 	
@@ -49,11 +44,22 @@ public class Starter {
 	// CONSTRUCTORS
 	// ------------------------------------------------------------------------
 
-	public Starter() throws Exception {
+	public Starter() {
+
+	}
+
+	// ------------------------------------------------------------------------
+	// FUNCTIONS
+	// ------------------------------------------------------------------------
+
+	public static void startMainMenuGame() {
 		try {
-			dictionary = new Dictionary(Constants.dictionaryPath);
-		} catch (IOException ex) {
-			throw new Exception("Can't load the dictionary");
+			Starter starter = new Starter();
+			MainMenuFrame ac = new MainMenuFrame(starter);
+			ac.setVisible(true);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
 		}
 	}
 
@@ -77,10 +83,11 @@ public class Starter {
 		 * */
 		String response = null;
 		while (true) {
-			if (eventListener != null) eventListener.messageUpdate("Contacting registrar...");
+			if (eventListener != null) eventListener.messageUpdate("Connessione in corso...");
 
 			HttpURLConnection connection = null;
 			try {
+				response = null;
 				URL serverAddress = new URL(String.format(registrarURL + "/%s/%s", player_name, portno));
 				connection = (HttpURLConnection)serverAddress.openConnection();
 				connection.setRequestMethod("GET");
@@ -96,8 +103,9 @@ public class Starter {
 				response = sb.toString();
 				if (eventListener != null) eventListener.messageUpdate(response);
 			} catch (java.net.ConnectException e) {
-				System.out.println("Cannot connect to the registrar. Is it active?");
-				System.exit(-1);
+				System.out.println("Impossibile contattare il registrar.");
+				if (eventListener != null) eventListener.gameFailedToStart("Impossibile contattare il registrar.");
+				return;
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} catch (ProtocolException e) {
@@ -107,11 +115,17 @@ public class Starter {
 			} finally{
 				//close the connection, set all objects to null
 				connection.disconnect();
-				if (response.split("\n")[0].equals("nickname-present")) {
-					if (eventListener != null) eventListener.gameFailedToStart(String.format("The nickname %s has already been taken. Choose a different nickname.", player_name));
-					return;
+				if (response != null) {
+					if (response.split("\n")[0].equals("nickname-present")) {
+						if (eventListener != null) eventListener.gameFailedToStart(String.format("Il nickname %s è già stato scelto.", player_name));
+						return;
+					} else if (response.split("\n")[0].equals("start")) {
+						break;
+					} else if (response.split("\n")[0].equals("wait")) {
+						int neededPlayers = Integer.valueOf(response.split("\n")[1]);
+						if (eventListener != null) eventListener.messageUpdate(String.format(neededPlayers > 1 ? "In attesa di altri %d giocatori" : "In attesa di un altro giocatore", neededPlayers));
+					}
 				}
-				else if (response.split("\n")[0].equals("start")) break;
 			}
 
 			try {
@@ -161,7 +175,7 @@ public class Starter {
 			return;
 		}
 
-		table = new GameTable(players, localPlayer, dictionary);
+		table = new GameTable(players, localPlayer, Constants.dictionary);
 
 		p.setLocal();
 		p.setPeers(peers);

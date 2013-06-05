@@ -12,6 +12,7 @@ import javax.swing.border.MatteBorder;
 
 import roundword.GameTable;
 import roundword.Player;
+import roundword.Starter;
 import roundword.Word;
 
 public class GameFrame extends JFrame implements GameTable.EventListener {
@@ -152,13 +153,21 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 
 	@Override
 	public void gameFinished(Player winnerPlayer, List<Player> players) {
-		String wStr = "<div style=\"font-size: 40px\">"
-				+ ((winnerPlayer == gameTable.getLocalPlayer()) ? "Hai vinto!" : "Hai perso!") + "</div>"
-				+ "<br/><div style=\"font-size: 20px\"> Il vincitore è: <b>" + winnerPlayer.toString() + "</b></div>";
+		String wStr = "<div style=\"font-size: 40px\">";
+
+		if (winnerPlayer == gameTable.getLocalPlayer()) {
+			wStr += "Hai vinto!</div>";
+		} else {
+			wStr += "Hai perso!</div><br/><div style=\"font-size: 20px\"> Il vincitore è: <b>"
+				 + winnerPlayer.toString() + "</b></div>";
+		}
 
 		JOptionPane.showMessageDialog(this,
 				"<html><div style=\"font-size: 20px; text-align:center\">Gioco terminato<br/>" + wStr + "</div></html>",
 				"", JOptionPane.PLAIN_MESSAGE);
-		System.exit(-1);
+
+		//Back to main menu
+		Starter.startMainMenuGame();
+
 	}
 }

@@ -1,5 +1,8 @@
 package roundword;
 
+import java.io.IOException;
+import java.util.Random;
+
 public class Constants {
 	
 	public static final int PointsForWrongWord = -80;
@@ -17,5 +20,28 @@ public class Constants {
 	public static final int TimeoutMilliseconds = 5000;
 
 	public static final double PointsPerMilliseconds = 0.02;
+
+
+	/* Save the information from a game to another */
+	public static String nickName;
+	public static int portNumber;
+	public static String serverURL;
+
+	public static Dictionary dictionary;
+
+	static {
+		Random rnd = new Random();
+		nickName = Constants.CasualNames[rnd.nextInt(Constants.CasualNames.length)];
+		portNumber = 6000 + rnd.nextInt(1000);
+		serverURL = "http://localhost:8080";
+
+		try {
+			dictionary = new Dictionary(Constants.dictionaryPath);
+		} catch (IOException ex) {
+			System.out.println("Can't load the dictionary");
+			System.exit(-1);
+		}
+	}
+
 
 }

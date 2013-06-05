@@ -42,16 +42,20 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 
 			Word w = null;
 
-			if (t.getWordsList().size() == 0) {
-				w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
-			} else {
-				String syllabeToFind = t.getWordsList().get(0).getLastSyllableSubWord();
-				for (String s : dictionary) {
-					if ((s.length() >= syllabeToFind.length())
-							&& (syllabeToFind.compareTo(s.substring(0, syllabeToFind.length())) == 0)
-							&& (rnd.nextDouble() < 0.05)) {
-						w = new Word(s);
+			if (rnd.nextDouble() < 0.1) {
+
+				if (t.getWordsList().size() == 0) {
+					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
+				} else {
+					String syllabeToFind = t.getWordsList().get(0).getLastSyllableSubWord();
+					for (String s : dictionary) {
+						if ((s.length() >= syllabeToFind.length())
+								&& (syllabeToFind.compareTo(s.substring(0, syllabeToFind.length())) == 0)
+								&& (rnd.nextDouble() < 0.05)) {
+							w = new Word(s);
+						}
 					}
+
 				}
 
 			}
