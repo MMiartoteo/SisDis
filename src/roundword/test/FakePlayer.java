@@ -42,7 +42,7 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 
 			Word w = null;
 
-			if (rnd.nextDouble() < 0.1) {
+			//if (rnd.nextDouble() < 0.1) {
 
 				if (t.getWordsList().size() == 0) {
 					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
@@ -58,7 +58,7 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 
 				}
 
-			}
+			//}
 
 			//Add the word
 			if (w != null) System.out.println("Word: " + w + ": " + w.getValue());
