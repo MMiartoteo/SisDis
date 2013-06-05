@@ -167,6 +167,8 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 				"", JOptionPane.PLAIN_MESSAGE);
 
 		//Back to main menu
+		this.setVisible(false);
+		this.dispose();
 		Starter.startMainMenuGame();
 
 	}
