@@ -81,7 +81,7 @@ public class Peer implements GameTable.EventListener {
 			sendHello();
 		}
 		
-		// Fai partire i vari timer per beccare la morte del turnHolder
+		// Fai partire il timer per beccare la morte del turnHolder
 		rescheduleTurnHolderTimer();
 	}
 	
@@ -143,7 +143,6 @@ public class Peer implements GameTable.EventListener {
 				return p;
 			}
 		}
-		//return null;
 	}
 	
 	public Set<Byte> getCrashedPeerOrds() {
