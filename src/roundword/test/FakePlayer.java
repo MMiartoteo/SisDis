@@ -30,7 +30,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 
 	public void run() {
 		Random rnd = new Random();
-		while (!stop) {
+		loop: while (!stop) {
 
 			//Wait if the own player is playing
 			synchronized (this) {
@@ -38,7 +38,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 					try {
 						wait();
 					} catch (InterruptedException e) {
-						if (stop) return; //We need to exit if our hour has became
+						if (stop) break loop; //We need to exit if our hour has became
 					}
 				}
 			}
@@ -50,7 +50,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 
 			Word w = null;
 
-			//if (rnd.nextDouble() < 0.1) {
+			if (rnd.nextDouble() < 0.2) {
 
 				if (t.getWordsList().size() == 0) {
 					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
@@ -66,7 +66,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 
 				}
 
-			//}
+			}
 
 			//Add the word
 			if (w != null) System.out.println("Word: " + w + ": " + w.getValue());
@@ -77,6 +77,9 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 			localPlayerIsPlaying = false;
 
 		}
+
+		System.exit(0);
+
 	}
 
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
