@@ -58,6 +58,10 @@ public class WordMsg extends Msg {
 			// Prova a inviare a quello dopo ancora...
 			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");
 			sendToNext();
+		} catch (java.rmi.UnmarshalException e) {
+			// Prova a inviare a quello dopo ancora...
+			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");
+			sendToNext();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

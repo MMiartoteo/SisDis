@@ -22,6 +22,9 @@ public class HelloMsg extends Msg {
 			} catch (java.rmi.ConnectIOException e) {
 				// riprova solo se l'eccezione era di connessione fallita
 				System.out.println("Hello fallito...");
+			} catch (java.rmi.UnmarshalException e) {
+				// riprova solo se l'eccezione era di connessione fallita
+				System.out.println("Hello fallito...");
 			}
 			Thread.sleep(NetConstants.HelloRetryMilliseconds);
 		}

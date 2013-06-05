@@ -22,6 +22,8 @@ public class WordAckMsg extends Msg {
 			System.out.println("Msg WordAckMsg Fallito. QUESTO PEER E' MORTO!");
 		} catch (java.rmi.ConnectIOException e) {
 			System.out.println("Msg WordAckMsg Fallito. QUESTO PEER E' MORTO!");
+		} catch (java.rmi.UnmarshalException e) {
+			System.out.println("Msg WordAckMsg Fallito. QUESTO PEER E' MORTO!");
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
