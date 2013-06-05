@@ -11,12 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class FakePlayers implements Runnable, GameTable.EventListener {
+public class FakePlayers extends Thread implements GameTable.EventListener {
 
 		List<String> dictionary;
 
 		GameTable t;
 		volatile boolean localPlayerIsPlaying;
+		volatile boolean stop = false;
 		Player aLittleDeadPlayer;
 
 		Runnable endTimeListener;
@@ -33,11 +34,13 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 			Random rnd = new Random();
 			int played = 0;
 
-			while (!t.isGameFinished()) {
+			while (!stop) {
 
 				//Wait if the own player is playing
 				synchronized (this) {
-					if (localPlayerIsPlaying) try { wait(); } catch (InterruptedException e) {}
+					while (localPlayerIsPlaying) try { wait(); } catch (InterruptedException e) {
+						if (stop) return;
+					}
 				}
 
 				//Simulate that the other player is thinking
@@ -84,6 +87,7 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 				}
 
 			}
+
 		}
 
 		public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
@@ -104,7 +108,8 @@ public class FakePlayers implements Runnable, GameTable.EventListener {
 		}
 
 		public void gameFinished(Player winnerPlayer, List<Player> players) {
-
+			stop = true;
+			this.interrupt();
 		}
 
 		private void loadDictionary(String path) throws IOException {

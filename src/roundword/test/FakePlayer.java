@@ -12,12 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-public class FakePlayer implements Runnable, GameTable.EventListener {
+public class FakePlayer extends Thread implements GameTable.EventListener {
 
 	List<String> dictionary;
 
 	GameTable t;
+
 	volatile boolean localPlayerIsPlaying;
+	volatile boolean stop = false;
 
 	public FakePlayer(GameTable gameTable, String dictionaryPath) throws IOException {
 		this.t = gameTable;
@@ -28,11 +30,17 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 
 	public void run() {
 		Random rnd = new Random();
-		while (!t.isGameFinished()) {
+		while (!stop) {
 
 			//Wait if the own player is playing
 			synchronized (this) {
-				if (!localPlayerIsPlaying) try { wait(); } catch (InterruptedException e) {}
+				while (!localPlayerIsPlaying) {
+					try {
+						wait();
+					} catch (InterruptedException e) {
+						if (stop) return; //We need to exit if our hour has became
+					}
+				}
 			}
 
 			//Simulate that we are thinking
@@ -87,7 +95,8 @@ public class FakePlayer implements Runnable, GameTable.EventListener {
 	}
 
 	public void gameFinished(Player winnerPlayer, List<Player> players) {
-
+		stop = true;
+		this.interrupt();
 	}
 
 	private void loadDictionary(String path) throws IOException {

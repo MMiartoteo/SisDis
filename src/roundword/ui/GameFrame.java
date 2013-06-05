@@ -166,10 +166,13 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 				"<html><div style=\"font-size: 20px; text-align:center\">Gioco terminato<br/>" + wStr + "</div></html>",
 				"", JOptionPane.PLAIN_MESSAGE);
 
+		//Exit
+		System.exit(0);
+
 		//Back to main menu
-		this.setVisible(false);
-		this.dispose();
-		Starter.startMainMenuGame();
+		//this.setVisible(false);
+		//this.dispose();
+		//Starter.startMainMenuGame();
 
 	}
 }

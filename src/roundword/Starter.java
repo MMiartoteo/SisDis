@@ -200,8 +200,8 @@ public class Starter {
 	public void startGame() {
 		if (artificial) {
 			try {
-				Thread t = new Thread(new FakePlayer(table, Constants.dictionaryPath));
-				t.start();
+				FakePlayer fp = new FakePlayer(table, Constants.dictionaryPath);
+				fp.start();
 			} catch (Exception ex) {
 				if (eventListener != null) eventListener.gameFailedToStart("Impossible to create a fake player");
 			}

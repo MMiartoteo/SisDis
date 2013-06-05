@@ -45,8 +45,8 @@ public class Tests {
 
 		/* Test fake players */
 		try {
-			Thread th = new Thread(new FakePlayers(table, Constants.dictionaryPath, aLittleDeadPlayer));
-			th.start();
+			FakePlayers fp = new FakePlayers(table, Constants.dictionaryPath, aLittleDeadPlayer);
+			fp.start();
 		} catch (Exception e) {
 		}
 	}

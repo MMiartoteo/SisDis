@@ -20,6 +20,7 @@ public class TimePanel extends JPanel {
 	JLabel lblTime;
 
 	Runnable endTimeListener;
+	volatile boolean stop;
 
 	/**
 	 * Create the panel.
@@ -66,6 +67,7 @@ public class TimePanel extends JPanel {
 	 * Start the timer, to count how many time the user takes to write the words
 	 */
 	public long startTimer() {
+		stop = false;
 		startTime = System.currentTimeMillis();
 		refresher = new Thread(new Runnable() {
 			public void run() {
@@ -73,15 +75,15 @@ public class TimePanel extends JPanel {
 				double remainingTime;
 				DecimalFormat df = new DecimalFormat(DigitalFormatPattern);
 
-				while (!Thread.currentThread().isInterrupted()) {
+				while (!stop) {
 					currentTime = System.currentTimeMillis();
 					remainingTime = Constants.TimeoutMilliseconds - (currentTime - startTime);
 					if (remainingTime <= 0) {
 						if (endTimeListener != null) endTimeListener.run();
-						Thread.currentThread().interrupt();
+						break;
 					}
 					lblTime.setText(df.format(remainingTime/1000));
-					try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+					try { Thread.sleep(100); } catch (InterruptedException e) { }
 				}
 				lblTime.setText(df.format(0));
 			}
@@ -97,8 +99,20 @@ public class TimePanel extends JPanel {
 	 * end the timer, return the remaining time to reply
 	 * */
 	public long endTimer() {
+		long time = Constants.TimeoutMilliseconds - (System.currentTimeMillis() - startTime);
+		if (time < 0) time = 0;
+
+		stop = true;
 		refresher.interrupt();
-		return Constants.TimeoutMilliseconds - (System.currentTimeMillis() - startTime);
+		try {
+			refresher.join();
+		} catch (InterruptedException e) { }
+
+		//Make sure that the gui print 0.00, even if the messagebox is shown
+		DecimalFormat df = new DecimalFormat(DigitalFormatPattern);
+		lblTime.setText(df.format(0));
+
+		return time;
 	}
 
 	public void setEndTimeListener(Runnable listener) {

@@ -170,11 +170,15 @@ public class GameTable implements Player.EventListener {
 		this.turnHolder = turnHolder;
 
 		if (!isGameFinished && gameCouldFinish()) {
-			finishTheGame();
-		}
 
-		//Callbacks call
-		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+			finishTheGame();
+
+		} else {
+
+			//Callbacks call
+			for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
+
+		}
 	}
 	
 	public List<Word> getWordsList() {
