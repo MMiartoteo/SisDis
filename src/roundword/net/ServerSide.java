@@ -92,7 +92,7 @@ public class ServerSide implements ServerSideInterface {
 		return "ok";
 	}
 	
-	public String word(long id, Word word, byte msgOriginatorOrd, Set<Byte> crashedPeerOrds) {
+	public String word(long id, Word word, long millisecondToReply, byte msgOriginatorOrd, Set<Byte> crashedPeerOrds) {
 		assert peer.isReady();
 		assert msgOriginatorOrd == peer.getTurnHolder().getOrd(); /// NOTA: <<--- PER DEBUG!
 		System.out.println(String.format("Ricevuto Word \"%s\" id=%d", word, id));
@@ -107,10 +107,10 @@ public class ServerSide implements ServerSideInterface {
 				peer.lastWordTask.cancel();
 				peer.lastWordTask = null;
 			}
-			peer.forwardWord(id, word, msgOriginatorOrd);
+			peer.forwardWord(id, word, millisecondToReply, msgOriginatorOrd);
 			peer.lastSeenMsgId = id;
 			if (msgOriginatorOrd != peer.lastSeenMsgOriginatorOrd) {
-				gameTable.addWord(word, 100); /// TODO <--- Poi metti vero valore per secondi
+				gameTable.addWord(word, millisecondToReply);
 				peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
 			} else {
 				System.out.println(String.format("Questa parola mi è stata RIMANDATA DI NUOVO, non la riaggiungo al gameTable."));
@@ -136,7 +136,7 @@ public class ServerSide implements ServerSideInterface {
 			else {
 				System.out.println("La parola è vecchia, faccio solo il forward.");
 				//peer.lastSeenMsgId = id;
-				peer.forwardWord(id, word, msgOriginatorOrd);
+				peer.forwardWord(id, word, millisecondToReply, msgOriginatorOrd);
 			}
 		}
 		

@@ -9,16 +9,18 @@ public class WordMsg extends Msg {
 	
 	long id;
 	Word word;
+	long millisecondsToReply;
 	Timer timer;
 	TimerTask timerTask;
 	long delay;
 	byte msgOriginatorOrd;
 	
 	/* Questa viene usata dal turnista, per avere anche un tempo di attesa */
-	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, Timer timer, TimerTask timerTask, long delay) {
+	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, long millisecondsToReply, Timer timer, TimerTask timerTask, long delay) {
 		super(sourcePeer, destPeer);
 		this.id = id;
 		this.word = word;
+		this.millisecondsToReply = millisecondsToReply;
 		this.timer = timer;
 		this.timerTask = timerTask;
 		this.delay = delay;
@@ -26,18 +28,19 @@ public class WordMsg extends Msg {
 	}
 	
 	/* Questa viene usata da chi fa solo forwarding */
-	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, byte msgOriginatorOrd) {
+	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, long millisecondsToReply, byte msgOriginatorOrd) {
 		super(sourcePeer, destPeer);
 		this.id = id;
 		this.word = word;
+		this.millisecondsToReply = millisecondsToReply;
 		this.msgOriginatorOrd = msgOriginatorOrd;
 	}
 	
 	private void sendToNext() throws CrashException {
 		if (timer != null) {
-			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, timer, timerTask, delay));
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, millisecondsToReply, timer, timerTask, delay));
 		} else {
-			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, msgOriginatorOrd));
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, millisecondsToReply, msgOriginatorOrd));
 		}
 	}
 	
@@ -49,7 +52,7 @@ public class WordMsg extends Msg {
 			if (timer != null) {
 				timer.schedule(timerTask, delay); // delay is in milliseconds
 			}
-			return stub.word(id, this.word, msgOriginatorOrd, sourcePeer.getCrashedPeerOrds());
+			return stub.word(id, word, millisecondsToReply, msgOriginatorOrd, sourcePeer.getCrashedPeerOrds());
 		} catch (java.rmi.ConnectException e) {
 			// Prova a inviare a quello dopo ancora...
 			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");

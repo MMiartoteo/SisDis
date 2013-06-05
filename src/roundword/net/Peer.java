@@ -182,12 +182,12 @@ public class Peer implements GameTable.EventListener {
 	public void newWordAdded(Player p, Word word, long milliseconds, WordAddedState state) {
 		if (!this.isTurnHolder()) return; // We manage only the word created by the local player
 		System.out.println("EVENTO newWordAdded");
-		sendWord(word);
+		sendWord(word, milliseconds);
 	}
 	public void playersPointsUpdate() {}
 	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {}
 	public void gameFinished(Player winnerPlayer, List<Player> players) {
-		System.out.println("Partita terminata, il vincitore è: " + winnerPlayer<);
+		System.out.println("Partita terminata, il vincitore è: " + winnerPlayer);
 	}
 	
 	
@@ -246,7 +246,7 @@ public class Peer implements GameTable.EventListener {
 	/* ---------------------- */
 	/* -------- WORD -------- */
 	/* ---------------------- */
-	protected void sendWord(final Word word) {
+	protected void sendWord(final Word word, final long milliseconds) {
 		System.out.println(String.format("%s) Invio Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		
 		lastSentMsgId++;
@@ -256,16 +256,16 @@ public class Peer implements GameTable.EventListener {
 			@Override
 			public void run() {
 				System.out.println("Timer Word Ack scaduto! Faccio ripartire la Word.");
-				sendWord(word);
+				sendWord(word, milliseconds);
 			}
 		};
 		long delay = peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
-		send_msg(new WordMsg(this, getNextActivePeer(), lastSentMsgId, word, timer, lastWordTask, delay));
+		send_msg(new WordMsg(this, getNextActivePeer(), lastSentMsgId, word, milliseconds, timer, lastWordTask, delay));
 	}
 	
-	protected void forwardWord(long id, Word word, byte msgOriginatorOrd) {
+	protected void forwardWord(long id, Word word, long milliseconds, byte msgOriginatorOrd) {
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
-		send_msg(new WordMsg(this, getNextActivePeer(), id, word, msgOriginatorOrd));
+		send_msg(new WordMsg(this, getNextActivePeer(), id, word, milliseconds, msgOriginatorOrd));
 		
 		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), getTurnHolder().getOrd()));
 		lastWordTask = new TimerTask() {
