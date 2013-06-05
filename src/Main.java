@@ -1,17 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-
 import roundword.*;
-import roundword.ui.*;
-import roundword.net.*;
-import roundword.test.*;
-
-import java.net.*;
-import java.io.*;
-import java.util.Set;
-
-import org.json.*;
-import org.json.zip.*;
 
 import javax.swing.*;
 
@@ -36,9 +23,9 @@ public class Main {
 		if (args.length >= 3) {
 			Starter starter = new Starter();
 
-			String nickname = args[0];
-			int portno = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
-			String registrarURL = args[2];
+			Constants.nickName = args[0];
+			Constants.portNumber = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
+			Constants.registrarURL = args[2];
 
 			//Decide if we want an artificial player
 			boolean artificial = false;
@@ -46,7 +33,7 @@ public class Main {
 				artificial = true;
 			}
 
-			System.out.println(nickname + ", " + portno + ", " + registrarURL);
+			System.out.println(Constants.nickName + ", " + Constants.portNumber + ", " + Constants.registrarURL);
 
 			starter.setMessageUpdateListener(new Starter.EventListener() {
 				public void messageUpdate(String msg) {
@@ -64,7 +51,7 @@ public class Main {
 			});
 
 
-			starter.initializeGame(nickname, portno, registrarURL, artificial);
+			starter.initializeGame(Constants.nickName, Constants.portNumber, Constants.registrarURL, artificial);
 
 		} else {
 			System.out.println("No arguments, open the main menu to choose them");

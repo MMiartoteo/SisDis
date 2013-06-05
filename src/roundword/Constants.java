@@ -25,7 +25,7 @@ public class Constants {
 	/* Save the information from a game to another */
 	public static String nickName;
 	public static int portNumber;
-	public static String serverURL;
+	public static String registrarURL;
 
 	public static Dictionary dictionary;
 
@@ -33,7 +33,7 @@ public class Constants {
 		Random rnd = new Random();
 		nickName = Constants.CasualNames[rnd.nextInt(Constants.CasualNames.length)];
 		portNumber = 6000 + rnd.nextInt(1000);
-		serverURL = "http://localhost:8080";
+		registrarURL = "http://localhost:8080";
 
 		try {
 			dictionary = new Dictionary(Constants.dictionaryPath);

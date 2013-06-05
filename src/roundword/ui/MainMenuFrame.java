@@ -9,7 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 import javax.swing.JButton;
-import javax.swing.Box;
 
 import roundword.Constants;
 import roundword.Starter;
@@ -82,7 +81,7 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 		panelForm.add(registrarURLLabel);
 		
 		txtRegistrarURL = new JTextField();
-		txtRegistrarURL.setText(Constants.serverURL);
+		txtRegistrarURL.setText(Constants.registrarURL);
 		panelForm.add(txtRegistrarURL);
 		txtRegistrarURL.setColumns(10);
 		
@@ -154,7 +153,7 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 				messagesLabel.setText("Inserisci l'URL del registrar");
 				return;
 			} else {
-				Constants.serverURL = txtRegistrarURL.getText();
+				Constants.registrarURL = txtRegistrarURL.getText();
 			}
 
 			messagesLabel.setText("");
@@ -162,7 +161,7 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					starter.initializeGame(Constants.nickName, Constants.portNumber, Constants.serverURL, false);
+					starter.initializeGame(Constants.nickName, Constants.portNumber, Constants.registrarURL, false);
 				}
 			});
 			t.start();
