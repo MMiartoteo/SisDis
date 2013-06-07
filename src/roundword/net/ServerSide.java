@@ -92,10 +92,13 @@ public class ServerSide implements ServerSideInterface {
 		return "ok";
 	}
 
-	public String word(long id, Word word, long millisecondToReply, byte msgOriginatorOrd, Set<Byte> crashedPeerOrds) {
+
+	public String word(long turnId, Word word, long millisecondToReply, Set<Byte> crashedPeerOrds) {
 		assert peer.isReady();
-		assert msgOriginatorOrd == peer.getTurnHolder().getOrd(); /// NOTA: <<--- PER DEBUG!
-		System.out.println(String.format("Ricevuto Word \"%s\" id=%d", word, id));
+		//assert msgOriginatorOrd == peer.getTurnHolder().getOrd(); /// NOTA: <<--- PER DEBUG!
+		assert turnId == peer.turnId || turnId == peer.turnId + 1;
+		
+		System.out.println(String.format("Ricevuto Word \"%s\" id=%d", word, turnId));
 		
 		System.out.println(String.format("Aggiorno la lista dei peer morti"));
 		peer.updateCrashedPeers(crashedPeerOrds);
@@ -107,24 +110,31 @@ public class ServerSide implements ServerSideInterface {
 				peer.lastWordTask.cancel();
 				peer.lastWordTask = null;
 			}
-			peer.forwardWord(id, word, millisecondToReply, msgOriginatorOrd);
-			peer.lastSeenMsgId = id;
-			if (msgOriginatorOrd != peer.lastSeenMsgOriginatorOrd) {
-				gameTable.addWord(word, millisecondToReply);
-				peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
-			} else {
+			peer.forwardWord(turnId, word, millisecondToReply);
+			
+			if (turnId == peer.turnId) {
 				System.out.println(String.format("Questa parola mi è stata RIMANDATA DI NUOVO, non la riaggiungo al gameTable."));
+			} else {
+				assert turnId == peer.turnId + 1;
+				peer.turnId = turnId;
+				gameTable.addWord(word, millisecondToReply);
 			}
+			//~ if (msgOriginatorOrd != peer.lastSeenMsgOriginatorOrd) {
+				//~ gameTable.addWord(word, millisecondToReply);
+				//~ peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
+			//~ } else {
+				//~ System.out.println(String.format("Questa parola mi è stata RIMANDATA DI NUOVO, non la riaggiungo al gameTable."));
+			//~ }
 		}
 		
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
 		else {
-			assert msgOriginatorOrd == peer.getOrd();
-			System.out.println(String.format("La word è tornata indietro! lastSentMsgid=%d", peer.lastSentMsgId));
-			peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
+			//assert msgOriginatorOrd == peer.getOrd();
+			System.out.println(String.format("La word è tornata indietro! turnId=%d", peer.turnId));
+			//peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
 			
 			// Controllo l'id del messaggio, per scoprire se ho ricevuto un ack vecchio o corretto
-			if (id == peer.lastSentMsgId) {
+			if (turnId == peer.turnId) {
 				System.out.println("L'ack è corretto, cancello il relativo timer.");
 				peer.lastWordTask.cancel();
 				System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
@@ -136,7 +146,7 @@ public class ServerSide implements ServerSideInterface {
 			else {
 				System.out.println("La parola è vecchia, faccio solo il forward.");
 				//peer.lastSeenMsgId = id;
-				peer.forwardWord(id, word, millisecondToReply, msgOriginatorOrd);
+				peer.forwardWord(turnId, word, millisecondToReply);
 			}
 		}
 		
@@ -146,13 +156,14 @@ public class ServerSide implements ServerSideInterface {
 		return "ok";
 	}
 	
-	public String wordAck(long id) {
+	public String wordAck(long turnId) {
 		assert peer.isReady();
 		assert !peer.isTurnHolder();
+		
 		System.out.println(String.format("Ricevuto WordAck2 dal turnHolder"));
 		
 		// Controllo l'id del messaggio, per sgamare ack vecchi
-		if (id == peer.lastSeenMsgId) {
+		if (turnId == peer.turnId) {
 			System.out.println("L'ack è corretto, cancello il relativo timer.");
 			peer.lastWordTask.cancel();
 			peer.lastWordTask = null;
@@ -161,7 +172,7 @@ public class ServerSide implements ServerSideInterface {
 			peer.nextTurn();
 		}
 		
-		// E' l'ack di un turno vecchio, lo ignoro brutalmente
+		// E' l'ack di un turno vecchio, ERRORE GRAVE!
 		/// NOTA: TEORICAMENTE STA COSA NON DOVREBBE MAI SUCCEDERE...
 		else {
 			System.out.println("L'ack è vecchio, ignoro il messaggio.");
