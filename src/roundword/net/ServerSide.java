@@ -91,7 +91,7 @@ public class ServerSide implements ServerSideInterface {
 		
 		return "ok";
 	}
-	
+
 	public String word(long id, Word word, long millisecondToReply, byte msgOriginatorOrd, Set<Byte> crashedPeerOrds) {
 		assert peer.isReady();
 		assert msgOriginatorOrd == peer.getTurnHolder().getOrd(); /// NOTA: <<--- PER DEBUG!

@@ -290,7 +290,7 @@ public class Peer implements GameTable.EventListener {
 		// Io già posso settare il turno nel prossimo giocatore
 		nextTurn();
 	}
-	
+
 	/* ---------------------- */
 	/* ------ ELECTION ------ */
 	/* ---------------------- */
