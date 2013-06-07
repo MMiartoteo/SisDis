@@ -44,7 +44,6 @@ public class ClientSide extends Thread {
 		} catch (CrashException e) {
 			System.out.println("Setto il peer come non Active");
 			m.destPeer.setActiveStatus(false);
-			/// TODO: Qui bisognerebbe anche informare gli altri peer...
 		} catch (Exception e) {
 			System.err.println("Client exception: " + e.toString());
 			e.printStackTrace();
