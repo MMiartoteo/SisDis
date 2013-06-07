@@ -141,31 +141,26 @@ public class GameTable implements Player.EventListener {
 		return turnHolder;
 	}
 
-	public void setTurnHolder(Player turnHolder) {
-		setTurnHolder(turnHolder, false);
-	}
-
 	/** This can be called only by method of this class.
 	 *  In this way the nextTurn for example can call this one without checking some things that
 	 *  the nextTurn knows.
 	 * */
-	private void setTurnHolder(Player turnHolder, boolean avoidChecks) {
+	public void setTurnHolder(Player turnHolder) {
 		Player oldTurnHolder = this.turnHolder;
 
-		if (!avoidChecks) {
-			if (this.turnHolder == turnHolder) return;
-			if (turnHolder == null) throw new NullPointerException("turnHolder is null");
 
-			//Check that is active
-			if (!turnHolder.isActive()) throw new IllegalArgumentException("the turnHolder must be active");
+		if (this.turnHolder == turnHolder) return;
+		if (turnHolder == null) throw new NullPointerException("turnHolder is null");
 
-			//Check for errors
-			boolean turnHolderFounded = false;
-			for (Player p : playersList) {
-				if (p == turnHolder) turnHolderFounded = true;
-			}
-			if (!turnHolderFounded) throw new IllegalArgumentException("the turnHolder must be in the playersList");
+		//Check that is active
+		if (!turnHolder.isActive()) throw new IllegalArgumentException("the turnHolder must be active");
+
+		//Check for errors
+		boolean turnHolderFounded = false;
+		for (Player p : playersList) {
+			if (p == turnHolder) turnHolderFounded = true;
 		}
+		if (!turnHolderFounded) throw new IllegalArgumentException("the turnHolder must be in the playersList");
 
 		this.turnHolder = turnHolder;
 
@@ -260,46 +255,6 @@ public class GameTable implements Player.EventListener {
 			}
 		}
 		for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
-	}
-
-	/**
-	 * We go to the next turn, the playing player will be the next of the player list. If you want to set the turn
-	 * to another player, for example after a catastrophic event, you can use the {@code setTurnHolder}.
-	 * */
-	public void nextTurn() {
-		Player oldTurnHolder = turnHolder;
-		Player newTurnHolder = null;
-
-		boolean turnHolderFounded = false;
-		Iterator<Player> i = playersList.iterator();
-		while (i.hasNext()) {
-			if (oldTurnHolder == i.next()) {
-				turnHolderFounded = true;
-				break;
-			}
-		}
-		if (!turnHolderFounded) throw new RuntimeException("can't found the current playing player");
-
-		//Find the first active player to assign the turn
-		Player tempP;
-		if (!i.hasNext()) i = playersList.iterator(); //rewind
-		while (i.hasNext()) {
-
-			tempP = i.next();
-			if (tempP.isActive()) {
-				newTurnHolder = tempP;
-				break;
-			}
-
-			if (tempP == oldTurnHolder) throw new RuntimeException("no player founded that can get the turn");
-
-			if (!i.hasNext()) i = playersList.iterator(); //rewind
-		}
-
-		setTurnHolder(newTurnHolder, true);
-
-		System.out.println("######### NEXT TURN #########");
-		System.out.println(String.format("ORA TOCCA A: %s %s", turnHolder.getNickName(), turnHolder.getOrd()));
 	}
 
 	public boolean isGameFinished() {

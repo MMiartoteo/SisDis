@@ -1,4 +1,5 @@
 import roundword.*;
+import roundword.test.Tests;
 
 import javax.swing.*;
 
