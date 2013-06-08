@@ -42,7 +42,10 @@ public class ServerSide implements ServerSideInterface {
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
 		else {
 			System.out.println(String.format("HELLO è tornato indietro! Cancello il timer relativo."));
-			peer.helloTask.cancel();
+			if (peer.helloTask != null) {
+				peer.helloTask.cancel();
+				peer.helloTask = null;
+			}
 
 			/// DEBUG: Comincio elezione (poi non servirà nella versione finale), perché in realtà sono io il turnista!
 			peer.startTurnHolderElection();
@@ -153,7 +156,10 @@ public class ServerSide implements ServerSideInterface {
 				// Controllo l'id del messaggio, per scoprire se ho ricevuto un ack vecchio o corretto
 				if (turnId == peer.turnId) {
 					System.out.println("L'ack è corretto, cancello il relativo timer.");
-					peer.lastWordTask.cancel();
+					if (peer.lastWordTask != null) {
+						peer.lastWordTask.cancel();
+						peer.lastWordTask = null;
+					}
 
 					if (winnerOrd != -1 && somethingChange) {
 						/* Nel caso in cui sia un messaggio di vittoria e questo ritorna, ma facendo il giro qualcuno è morto
@@ -195,8 +201,10 @@ public class ServerSide implements ServerSideInterface {
 			// Controllo l'id del messaggio, per sgamare ack vecchi
 			if (turnId == peer.turnId) {
 				System.out.println("L'ack è corretto, cancello il relativo timer.");
-				peer.lastWordTask.cancel();
-				peer.lastWordTask = null;
+				if (peer.lastWordTask != null) {
+					peer.lastWordTask.cancel();
+					peer.lastWordTask = null;
+				}
 				// Next Turn
 				System.out.println("E passo al prossimo turno.");
 				peer.nextTurn();

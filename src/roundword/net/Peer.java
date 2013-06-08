@@ -244,6 +244,7 @@ public class Peer implements GameTable.EventListener {
 		System.out.println(String.format("%s) Invio HELLO a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		
 		// Setta il timerTask nel caso in cui il messaggio non torna (ack non ricevuto)
+		if (helloTask != null) helloTask.cancel();
 		helloTask = new TimerTask() {
 			@Override
 			public void run() {
@@ -280,6 +281,7 @@ public class Peer implements GameTable.EventListener {
 		}
 		
 		// Setta il timerTask nel caso in cui il messaggio non torna (ack non ricevuto)
+		if (lastWordTask != null) lastWordTask.cancel();
 		lastWordTask = new TimerTask() {
 			@Override
 			public void run() {
@@ -296,6 +298,7 @@ public class Peer implements GameTable.EventListener {
 		send_msg(new WordMsg(this, getNextActivePeer(), turnId, word, milliseconds, winnerOrd));
 		
 		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), getTurnHolder().getOrd()));
+		if (lastWordTask != null) lastWordTask.cancel();
 		lastWordTask = new TimerTask() {
 			@Override
 			public void run() {
