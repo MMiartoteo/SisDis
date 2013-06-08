@@ -50,7 +50,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 
 			Word w = null;
 
-			if (rnd.nextDouble() < 0.2) {
+			if (rnd.nextDouble() < 0.4) {
 
 				if (t.getWordsList().size() == 0) {
 					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
@@ -71,15 +71,20 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 			//Add the word
 			if (w != null) System.out.println("Word: " + w + ": " + w.getValue());
 			else System.out.println("No words founded");
-			t.addWord(w, rnd.nextInt(5));
+			t.addWord(w, rnd.nextInt(5), true);
 
 			//Wait for the next turn
 			localPlayerIsPlaying = false;
 
 		}
 
-		System.exit(0);
-
+		/*
+			Facendo morire qui il fakeplayer, e se chi aveva il turno al momento della fine del gioco era proprio il
+			un fakeplayer, allora succederà che questo invii il messaggio word a tutti, e poi appena riceve il messaggio
+			word di ritorno comincia a mandare gli ack a tutti, compreso se stesso, dove chiama la finishGame, e quindi
+			terminerà. In questo modo però gli altri nodi devono risvegliarsi e mandare il messaggio di word.
+		 */
+		//System.exit(0);
 	}
 
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {

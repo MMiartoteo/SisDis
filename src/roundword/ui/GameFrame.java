@@ -152,27 +152,35 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 	}
 
 	@Override
-	public void gameFinished(Player winnerPlayer, List<Player> players) {
-		String wStr = "<div style=\"font-size: 40px\">";
+	public void gameFinished(final Player winnerPlayer, List<Player> players) {
 
-		if (winnerPlayer == gameTable.getLocalPlayer()) {
-			wStr += "Hai vinto!</div>";
-		} else {
-			wStr += "Hai perso!</div><br/><div style=\"font-size: 20px\"> Il vincitore è: <b>"
-				 + winnerPlayer.toString() + "</b></div>";
-		}
+		final Component c = this;
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String wStr = "<div style=\"font-size: 40px\">";
 
-		JOptionPane.showMessageDialog(this,
-				"<html><div style=\"font-size: 20px; text-align:center\">Gioco terminato<br/>" + wStr + "</div></html>",
-				"", JOptionPane.PLAIN_MESSAGE);
+				if (winnerPlayer == gameTable.getLocalPlayer()) {
+					wStr += "Hai vinto!</div>";
+				} else {
+					wStr += "Hai perso!</div><br/><div style=\"font-size: 20px\"> Il vincitore è: <b>"
+							+ winnerPlayer.toString() + "</b></div>";
+				}
 
-		//Exit
-		System.exit(0);
+				JOptionPane.showMessageDialog(c,
+						"<html><div style=\"font-size: 20px; text-align:center\">Gioco terminato<br/>" + wStr + "</div></html>",
+						"", JOptionPane.PLAIN_MESSAGE);
 
-		//Back to main menu
-		//this.setVisible(false);
-		//this.dispose();
-		//Starter.startMainMenuGame();
+				//Exit
+				System.exit(0);
+
+				//Back to main menu
+				//this.setVisible(false);
+				//this.dispose();
+				//Starter.startMainMenuGame();
+			}
+		});
+		t.start();
 
 	}
 }

@@ -18,7 +18,13 @@ public class GameTable implements Player.EventListener {
 
 		public enum WordAddedState {OK, TIMEOUT_ELAPSED, NO_IN_DICTIONARY, SYLLABE_INCORRECT, PREVIOUSLY_ADDED};
 
-		//Called when a new word {@code word} is added by the player {@code player}
+		/**
+		 * Called when a new word {@code word} is added by the player {@code player}
+		 * @param player is the player that inserted the word
+		 * @param word is the inserted word
+		 * @param milliseconds is the time that the player spend to think and write the word
+		 * @param state the state of the word
+		* */
 		void newWordAdded(Player player, Word word, long milliseconds, WordAddedState state);
 
 		//Called when a/some player/s changes its point
@@ -70,6 +76,7 @@ public class GameTable implements Player.EventListener {
 
 
 	boolean isGameFinished = false;
+	Player winnerPlayer;
 
 
 	// ------------------------------------------------------------------------
@@ -164,16 +171,9 @@ public class GameTable implements Player.EventListener {
 
 		this.turnHolder = turnHolder;
 
-		if (!isGameFinished && gameCouldFinish()) {
+		//Callbacks call
+		for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
 
-			finishTheGame();
-
-		} else {
-
-			//Callbacks call
-			for (EventListener el : eventListeners) el.turnHolderChanged(oldTurnHolder, turnHolder);
-
-		}
 	}
 	
 	public List<Word> getWordsList() {
@@ -187,7 +187,7 @@ public class GameTable implements Player.EventListener {
 	 * in this case the user will have a negative point addition.
 	 * param: millisecondToReply the milliseconds that the user takes to write the word (used to calculate the points)
 	 * */
-	public void addWord(Word w, long millisecondToReply) {
+	public void addWord(Word w, long millisecondToReply, boolean checkGameEnd) {
 
 		String lastWordSyl = (words.size() > 0)? words.get(0).getLastSyllableSubWord() : null;
 		EventListener.WordAddedState state = EventListener.WordAddedState.OK;
@@ -226,6 +226,13 @@ public class GameTable implements Player.EventListener {
 			}
 		}
 
+		if (checkGameEnd && gameCouldFinish()) {
+			isGameFinished = true;
+			System.out.println("###################################");
+			System.out.println("GAMETABLE: \n" + "La partita può terminare, vincitore: " + calculateTheWinner());
+			System.out.println("###################################");
+		}
+
 		//Callbacks call
 		Player p = turnHolder; //the listener can change the turn, we save it to make sure that is right
 		for (EventListener el : eventListeners) el.newWordAdded(p, w, millisecondToReply, state);
@@ -244,9 +251,32 @@ public class GameTable implements Player.EventListener {
 		return allNullWord || weAreAlone;
 	}
 
-	private void finishTheGame() {
-		isGameFinished = true;
+	/**
+	 * Set the temporary winner of the game. This could change if someone dies. The real player is determined when the
+	 * {@code finishTheGame} is called.
+	 */
+	public void setWinner(Player w) {
 
+		//Check for errors
+		boolean playerFounded = false;
+		for (Player p : playersList) {
+			if (p == w) playerFounded = true;
+		}
+		if (!playerFounded) throw new IllegalArgumentException("the player must be in the playersList");
+
+		isGameFinished = true;
+		winnerPlayer = w;
+	}
+
+	public Player getWinner() {
+		return winnerPlayer;
+	}
+
+	/**
+	 * Calculate the winner. This must be done only by a single user when this game is done in multiplayer
+	 * @return
+	 */
+	public Player calculateTheWinner() {
 		Player winnerPlayer = null;
 		for (Player p : playersList) {
 			if (p.isActive()) {
@@ -254,6 +284,13 @@ public class GameTable implements Player.EventListener {
 				else if (winnerPlayer.getPoints() < p.getPoints()) winnerPlayer = p;
 			}
 		}
+		return winnerPlayer;
+	}
+
+	/**
+	 * Confirm the winner, ending the game (i.e. a commit for the winner)
+	 */
+	public void finishTheGame() {
 		for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
 	}
 

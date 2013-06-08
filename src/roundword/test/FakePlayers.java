@@ -75,7 +75,7 @@ public class FakePlayers extends Thread implements GameTable.EventListener {
 
 				if (w != null) System.out.println("Word: " + w + ": " + w.getValue());
 				else System.out.println("No words founded");
-				t.addWord(w, 1);
+				t.addWord(w, 1, true);
 
 				System.out.println("PlayingPlayer: " + t.getTurnHolder() + ": " + t.getTurnHolder().getPoints());
 				nextTurn();
