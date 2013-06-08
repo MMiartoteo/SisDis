@@ -35,6 +35,9 @@ public class GameTable implements Player.EventListener {
 
 		//Called when the game finished
 		void gameFinished(Player winnerPlayer, List<Player> players);
+
+		//A general failure of the game
+		void failure(String msg);
 	}
 
 	// ------------------------------------------------------------------------
@@ -76,7 +79,7 @@ public class GameTable implements Player.EventListener {
 
 
 	boolean isGameFinished = false;
-	boolean winnerCommitted = false;
+	boolean isWinnerCommitted = false;
 	Player winnerPlayer;
 
 
@@ -292,14 +295,23 @@ public class GameTable implements Player.EventListener {
 	 * Confirm the winner, ending the game (i.e. a commit for the winner)
 	 */
 	public void finishTheGame() {
-		if (!winnerCommitted) {
+		if (!isWinnerCommitted) {
 			for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
 		}
-		winnerCommitted = true;
+		isWinnerCommitted = true;
 	}
 
 	public boolean isGameFinished() {
 		return isGameFinished;
+	}
+
+	/**
+	 * Force the game to finish because an error occurred
+	 * */
+	public void forceEndGame(String why) {
+		isGameFinished = true;
+		isWinnerCommitted = true;
+		for (EventListener el : eventListeners) el.failure(why);
 	}
 
 	// Listeners --------------------------------------------------------------

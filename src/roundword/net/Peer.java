@@ -220,6 +220,9 @@ public class Peer implements GameTable.EventListener {
 		System.out.println("######################################\n" +
 				"Partita terminata, vincitore: " + winnerPlayer + "\n######################################");
 	}
+	public synchronized void failure(String msg) {
+
+	}
 	
 	
 	

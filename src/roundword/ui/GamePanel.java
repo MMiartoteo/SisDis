@@ -219,4 +219,9 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		timePanel.endTimer();
 		txtWord.setText("");
 	}
+
+	@Override
+	public void failure(String msg) {
+
+	}
 }
