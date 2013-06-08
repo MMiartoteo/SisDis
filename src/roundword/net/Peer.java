@@ -30,11 +30,9 @@ public class Peer implements GameTable.EventListener {
 	TimerTask firstPhaseElectionTask; // Per catturare la morte dei turnHolder candidati durante l'elezione
 	TimerTask secondPhaseElectionTask; // Per catturare la morte del turnHolder nella seconda fase dell'elezione
 	
-	// Gestione degli id di alcuni messaggi
+	// Id del turno. Viene incrementato dal turnholder prima di inviare la nuova
+	// parola per la prima volta. Ogni re-invio mantiene lo stesso id.
 	long turnId = 0;
-	//long lastSentMsgId = 0;
-	//long lastSeenMsgId = 0;
-	//byte lastSeenMsgOriginatorOrd = -1;
 	
 	boolean electionActive = false;
 	
@@ -45,7 +43,6 @@ public class Peer implements GameTable.EventListener {
 		this.serverPortno = serverPortno;
 		this.timer = new Timer("Timer Messaggi");
 	}
-	
 	
 	
 	/* ############################## */
@@ -86,6 +83,7 @@ public class Peer implements GameTable.EventListener {
 		// Fai partire il timer per beccare la morte del turnHolder
 		rescheduleTurnHolderTimer();
 	}
+	
 	
 	/* ############################## */
 	/*             VARIE              */
@@ -182,11 +180,6 @@ public class Peer implements GameTable.EventListener {
 	}
 	
 	
-	
-	
-	
-	
-	
 	/* ##############################  */
 	/*       EVENTI DI GAMETABLE       */
 	/* ##############################  */
@@ -223,10 +216,6 @@ public class Peer implements GameTable.EventListener {
 	}
 	
 	
-	
-	
-	
-	
 	/* ############################## */
 	/*   COMUNICAZIONI COL GAMETABLE  */
 	/* ############################## */
@@ -242,10 +231,6 @@ public class Peer implements GameTable.EventListener {
 			}
 		}
 	}
-	
-	
-	
-	
 	
 	
 	/* ############################## */
@@ -414,10 +399,6 @@ public class Peer implements GameTable.EventListener {
 			}
 		}
 	}
-	
-	
-	
-	
 	
 	
 	/* ############################## */

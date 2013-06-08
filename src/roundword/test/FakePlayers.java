@@ -52,7 +52,7 @@ public class FakePlayers extends Thread implements GameTable.EventListener {
 				Word w = null;
 				Player playingPlayer = t.getTurnHolder();
 
-				if (rnd.nextDouble() < 0.1z) {
+				if (rnd.nextDouble() < 0.1) {
 
 					if (t.getWordsList().size() == 0) {
 						w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));

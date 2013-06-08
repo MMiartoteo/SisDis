@@ -25,7 +25,7 @@ public class Main {
 			Starter starter = new Starter();
 
 			Constants.nickName = args[0];
-			Constants.portNumber = Integer.parseInt(args[1]); // TODO <--- REGISTRALA ANCHE NEL PEER?
+			Constants.portNumber = Integer.parseInt(args[1]);
 			Constants.registrarURL = args[2];
 
 			//Decide if we want an artificial player
