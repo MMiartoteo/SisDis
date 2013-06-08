@@ -189,7 +189,9 @@ public class Peer implements GameTable.EventListener {
 	public void playersPointsUpdate() {}
 	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {}
 	public void gameFinished(Player winnerPlayer, List<Player> players) {
+		System.out.println("##################################################");
 		System.out.println("Partita terminata, il vincitore è: " + winnerPlayer);
+		System.out.println("##################################################");
 	}
 	
 	
