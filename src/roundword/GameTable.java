@@ -76,6 +76,7 @@ public class GameTable implements Player.EventListener {
 
 
 	boolean isGameFinished = false;
+	boolean winnerCommitted = false;
 	Player winnerPlayer;
 
 
@@ -291,7 +292,10 @@ public class GameTable implements Player.EventListener {
 	 * Confirm the winner, ending the game (i.e. a commit for the winner)
 	 */
 	public void finishTheGame() {
-		for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
+		if (!winnerCommitted) {
+			for (EventListener el : eventListeners) el.gameFinished(winnerPlayer, playersList);
+		}
+		winnerCommitted = true;
 	}
 
 	public boolean isGameFinished() {
