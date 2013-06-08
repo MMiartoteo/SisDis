@@ -35,15 +35,17 @@ public class ElectionInitMsg extends Msg {
 			if (result.equals("ok")) {
 				// Mi è arrivata una risposta dal un possibile coordinatore. Di sicuro non sono io
 				// Ma ora aspetto il messaggio di conferma dal coordinatore.
-				if (timerTask1 != null && timerTask2 != null) {
-					try {
-						timer.schedule(timerTask2, delay);
-					} catch (IllegalStateException e) {
-						// ignora, e non schedularlo di nuovo.
+				synchronized (sourcePeer) {
+					if (timerTask1 != null && timerTask2 != null) {
+						try {
+							timer.schedule(timerTask2, delay);
+						} catch (IllegalStateException e) {
+							// ignora, e non schedularlo di nuovo.
+						}
+						// Cancello il timer precedente:
+						timerTask1.cancel();
+						timerTask1 = null;
 					}
-					// Cancello il timer precedente:
-					timerTask1.cancel();
-					timerTask1 = null;
 				}
 				return result;
 			} else {

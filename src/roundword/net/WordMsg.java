@@ -51,11 +51,19 @@ public class WordMsg extends Msg {
 		try {
 			Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
 			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-			String response = null;
-			if (timer != null) {
-				timer.schedule(timerTask, delay); // delay is in milliseconds
+			String response;
+
+			synchronized (sourcePeer) {
+
+				if (timer != null) {
+					timer.schedule(timerTask, delay); // delay is in milliseconds
+				}
+
+				response = stub.word(id, word, millisecondsToReply, winnerOrd, sourcePeer.getCrashedPeerOrds());
+
 			}
-			return stub.word(id, word, millisecondsToReply, winnerOrd, sourcePeer.getCrashedPeerOrds());
+
+			return response;
 		} catch (java.rmi.ConnectException e) {
 			// Prova a inviare a quello dopo ancora...
 			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");
