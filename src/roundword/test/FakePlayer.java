@@ -87,16 +87,16 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 			terminerà. In questo modo però gli altri nodi devono risvegliarsi e mandare il messaggio di word.
 		 */
 		//System.exit(0);
-		deadThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) { }
-				System.exit(0);
-			}
-		});
-		deadThread.start();
+//		deadThread = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				try {
+//					Thread.sleep(5000);
+//				} catch (InterruptedException e) { }
+//				System.exit(0);
+//			}
+//		});
+//		deadThread.start();
 	}
 
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
