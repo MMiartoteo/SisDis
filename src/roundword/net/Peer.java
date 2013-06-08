@@ -158,17 +158,27 @@ public class Peer implements GameTable.EventListener {
 		return crashedPeerOrds;
 	}
 	
-	public void updateCrashedPeers(Set<Byte> crashedPeerOrds) {
+	public boolean updateCrashedPeers(Set<Byte> crashedPeerOrds) {
+		boolean somethingChanged = false;
+
+		//DEBUG
 		for (byte b : crashedPeerOrds) {
 			System.out.println(String.format("MORTO: %s", b));
 		}
+
 		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
 			Peer p = peers.get(i);
 			if (crashedPeerOrds.contains((byte)p.getOrd())) {
+
+				//DEBUG
 				System.out.println(String.format("Setto peer %s morto!", p.getOrd()));
+
+				if (p.isActive()) somethingChanged = true;
 				p.setActiveStatus(false);
 			}
 		}
+
+		return somethingChanged;
 	}
 	
 	
@@ -189,8 +199,26 @@ public class Peer implements GameTable.EventListener {
 	public void playersPointsUpdate() {}
 	public void turnHolderChanged(Player oldTurnHolder, Player newTurnHolder) {}
 	public void gameFinished(Player winnerPlayer, List<Player> players) {
+
+		if (firstPhaseElectionTask != null) {
+			firstPhaseElectionTask.cancel();
+			firstPhaseElectionTask = null;
+		}
+		if (secondPhaseElectionTask != null) {
+			secondPhaseElectionTask.cancel();
+			secondPhaseElectionTask = null;
+		}
+		if (lastWordTask != null) {
+			lastWordTask.cancel();
+			lastWordTask = null;
+		}
+		if (lastElectionTask != null) {
+			lastElectionTask.cancel();
+			lastElectionTask = null;
+		}
+
 		System.out.println("##################################################");
-		System.out.println("Partita terminata, il vincitore è: " + winnerPlayer);
+		System.out.println("Partita terminata, vincitore: " + winnerPlayer);
 		System.out.println("##################################################");
 	}
 	
@@ -203,11 +231,15 @@ public class Peer implements GameTable.EventListener {
 	/*   COMUNICAZIONI COL GAMETABLE  */
 	/* ############################## */
 	protected void nextTurn() {
-		for (int i=(getTurnHolder().getOrd()+1)%peers.size(); ; i=(i+1)%peers.size()) {
-			if (!peers.get(i).isActive()) continue;
-			assert i!=getTurnHolder().getOrd(); // <-- Significa che non ci sono più Peer attivi!
-			gameTable.setTurnHolder(peers.get(i).player);
-			return;
+		if (gameTable.isGameFinished()) {
+			gameTable.finishTheGame();
+		} else {
+			for (int i=(getTurnHolder().getOrd()+1)%peers.size(); ; i=(i+1)%peers.size()) {
+				if (!peers.get(i).isActive()) continue;
+				assert i!=getTurnHolder().getOrd(); // <-- Significa che non ci sono più Peer attivi!
+				gameTable.setTurnHolder(peers.get(i).player);
+				return;
+			}
 		}
 	}
 	
@@ -230,8 +262,8 @@ public class Peer implements GameTable.EventListener {
 		helloTask = new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("HELLO NON E' TORNATO INDIETRO! ERRORE TERRIBILE! TERMINO PARTITA!");
-				System.exit(-1);
+			System.out.println("HELLO NON E' TORNATO INDIETRO! ERRORE TERRIBILE! TERMINO PARTITA!");
+			System.exit(-1);
 			}
 		};
 		long delay = 10*peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
@@ -254,29 +286,36 @@ public class Peer implements GameTable.EventListener {
 		System.out.println(String.format("%s) Invio Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
 		
 		//turnId++;
+
+		// Calcola il vincitore
+		byte winnerOrd = -1;
+		if (gameTable.isGameFinished()) {
+			gameTable.setWinner(gameTable.calculateTheWinner());
+			winnerOrd = (byte)gameTable.getWinner().getOrd();
+		}
 		
 		// Setta il timerTask nel caso in cui il messaggio non torna (ack non ricevuto)
 		lastWordTask = new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("Timer Word Ack scaduto! Faccio ripartire la Word.");
-				sendWord(word, milliseconds);
+			System.out.println("Timer Word Ack scaduto! Faccio ripartire la Word.");
+			sendWord(word, milliseconds);
 			}
 		};
 		long delay = peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
-		send_msg(new WordMsg(this, getNextActivePeer(), turnId, word, milliseconds, timer, lastWordTask, delay));
+		send_msg(new WordMsg(this, getNextActivePeer(), turnId, word, milliseconds, winnerOrd, timer, lastWordTask, delay));
 	}
 	
-	protected void forwardWord(long turnId, Word word, long milliseconds) {
+	protected void forwardWord(long turnId, Word word, long milliseconds, byte winnerOrd) {
 		System.out.println(String.format("%s) Forwardo Word a peer successore %s", getOrd(), getNextActivePeer().getOrd()));
-		send_msg(new WordMsg(this, getNextActivePeer(), turnId, word, milliseconds));
+		send_msg(new WordMsg(this, getNextActivePeer(), turnId, word, milliseconds, winnerOrd));
 		
 		System.out.println(String.format("%s) E aspetto un Ack dal peer di turno %s", getOrd(), getTurnHolder().getOrd()));
 		lastWordTask = new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("Timer WordAck2 scaduto! Il coordinatore è morto, INDIRE ELEZIONE!!");
-				startTurnHolderElection();
+			System.out.println("Timer WordAck2 scaduto! Il coordinatore è morto, INDIRE ELEZIONE!!");
+			startTurnHolderElection();
 			}
 		};
 		timer.schedule(lastWordTask, peers.size()*(NetConstants.T_trans+NetConstants.T_proc));
@@ -339,6 +378,11 @@ public class Peer implements GameTable.EventListener {
 							// Se scade, devi settare te stesso come coordinatore e dirlo a quelli dopo di te.
 							System.out.println("Timer ElectionInit1 scaduto! Setto me come TurnHolder e lo dico a tutti.");
 							gameTable.setTurnHolder(player);
+							if (gameTable.isGameFinished()) {
+								System.out.println("Il gioco è finito, quindi devo solamente inviare il messaggio di word nullo per il vincitore");
+								sendWord(null, 0); //questo verrà poi scartato perchè l'id non è cambiato
+							}
+
 							electionActive = false;
 							startTurnHolderElection();
 						}

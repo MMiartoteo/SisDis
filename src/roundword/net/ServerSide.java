@@ -93,7 +93,7 @@ public class ServerSide implements ServerSideInterface {
 	}
 
 
-	public String word(long turnId, Word word, long millisecondToReply, Set<Byte> crashedPeerOrds) {
+	public String word(long turnId, Word word, long millisecondToReply, byte winnerOrd, Set<Byte> crashedPeerOrds) {
 		assert peer.isReady();
 		//assert msgOriginatorOrd == peer.getTurnHolder().getOrd(); /// NOTA: <<--- PER DEBUG!
 		assert turnId == peer.turnId || turnId == peer.turnId + 1;
@@ -101,7 +101,7 @@ public class ServerSide implements ServerSideInterface {
 		System.out.println(String.format("Ricevuto Word \"%s\" id=%d", word, turnId));
 		
 		System.out.println(String.format("Aggiorno la lista dei peer morti"));
-		peer.updateCrashedPeers(crashedPeerOrds);
+		boolean somethingChange = peer.updateCrashedPeers(crashedPeerOrds);
 		
 		// Fai il forward se non sei tu il turnista (e setta la parola nella gui)
 		if (!peer.isTurnHolder()) {
@@ -110,14 +110,22 @@ public class ServerSide implements ServerSideInterface {
 				peer.lastWordTask.cancel();
 				peer.lastWordTask = null;
 			}
-			peer.forwardWord(turnId, word, millisecondToReply);
-			
+			peer.forwardWord(turnId, word, millisecondToReply, winnerOrd);
+
+			/* settiamo il vincitore, lo facciamo anche quando non è la prima volta che vediamo il messaggio word, perché
+			 * il turnholder potrebbe aver cambiato idea su chi sia il vincitore.
+			 */
+			if (winnerOrd != -1) {
+				System.out.println("######## Ho ricevuto un candidato per essere vincitore: " + peer.peers.get(winnerOrd).player);
+				gameTable.setWinner(peer.peers.get(winnerOrd).player);
+			}
+
 			if (turnId == peer.turnId) {
 				System.out.println(String.format("Questa parola mi è stata RIMANDATA DI NUOVO, non la riaggiungo al gameTable."));
 			} else {
 				assert turnId == peer.turnId + 1;
 				peer.turnId = turnId;
-				gameTable.addWord(word, millisecondToReply);
+				gameTable.addWord(word, millisecondToReply, false);
 			}
 			//~ if (msgOriginatorOrd != peer.lastSeenMsgOriginatorOrd) {
 				//~ gameTable.addWord(word, millisecondToReply);
@@ -137,8 +145,17 @@ public class ServerSide implements ServerSideInterface {
 			if (turnId == peer.turnId) {
 				System.out.println("L'ack è corretto, cancello il relativo timer.");
 				peer.lastWordTask.cancel();
-				System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
-				peer.sendWordAck();
+
+				if (winnerOrd != -1 && somethingChange) {
+					/* Nel caso in cui sia un messaggio di vittoria e questo ritorna, ma facendo il giro qualcuno è morto
+					* ed io non lo sapevo, allora reinvio il messaggio word, in modo che venga calcolato il nuovo vincitore */
+					System.out.println("Reinvio il messaggio di word di fine gioco, perché qualcuno è morto durante la consegna.");
+ 					peer.sendWord(word, millisecondToReply);
+
+				} else {
+					System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
+					peer.sendWordAck();
+				}
 			}
 			
 			// In questo caso l'ack è per una parola vecchia, faccio forwarding
@@ -146,7 +163,7 @@ public class ServerSide implements ServerSideInterface {
 			else {
 				System.out.println("La parola è vecchia, faccio solo il forward.");
 				//peer.lastSeenMsgId = id;
-				peer.forwardWord(turnId, word, millisecondToReply);
+				peer.forwardWord(turnId, word, millisecondToReply, winnerOrd);
 			}
 		}
 		
