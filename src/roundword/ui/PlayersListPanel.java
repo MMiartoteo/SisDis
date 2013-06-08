@@ -70,4 +70,9 @@ public class PlayersListPanel extends JPanel implements GameTable.EventListener 
 
 	}
 
+	@Override
+	public void failure(String msg) {
+
+	}
+
 }

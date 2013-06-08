@@ -214,6 +214,9 @@ public class Peer implements GameTable.EventListener {
 		System.out.println("Partita terminata, vincitore: " + winnerPlayer);
 		System.out.println("##################################################");
 	}
+	public synchronized void failure(String msg) {
+
+	}
 	
 	
 	/* ############################## */

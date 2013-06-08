@@ -87,16 +87,16 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 			terminerà. In questo modo però gli altri nodi devono risvegliarsi e mandare il messaggio di word.
 		 */
 		//System.exit(0);
-//		deadThread = new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				try {
-//					Thread.sleep(5000);
-//				} catch (InterruptedException e) { }
-//				System.exit(0);
-//			}
-//		});
-//		deadThread.start();
+		deadThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) { }
+				System.exit(0);
+			}
+		});
+		deadThread.start();
 	}
 
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
@@ -117,6 +117,11 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 	public void gameFinished(Player winnerPlayer, List<Player> players) {
 		stop = true;
 		this.interrupt();
+	}
+
+	public void failure(String msg) {
+		System.out.println("Errore: " + msg);
+		System.exit(-1);
 	}
 
 	private void loadDictionary(String path) throws IOException {

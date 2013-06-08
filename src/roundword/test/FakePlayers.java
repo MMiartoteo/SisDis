@@ -153,6 +153,11 @@ public class FakePlayers extends Thread implements GameTable.EventListener {
 			this.interrupt();
 		}
 
+		@Override
+		public void failure(String msg) {
+
+		}
+
 		private void loadDictionary(String path) throws IOException {
 			dictionary = new ArrayList<String>();
 			BufferedReader br = new BufferedReader(new FileReader(path));

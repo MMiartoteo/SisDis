@@ -183,4 +183,19 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 		t.start();
 
 	}
+
+	@Override
+	public void failure(final String msg) {
+		final Component c = this;
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				JOptionPane.showMessageDialog(c, "Il gioco è stato terminato: " + msg, "", JOptionPane.PLAIN_MESSAGE);
+
+				//Exit
+				System.exit(0);
+			}
+		});
+		t.start();
+	}
 }
