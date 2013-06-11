@@ -103,7 +103,7 @@ public class ServerSide implements ServerSideInterface {
 	}
 
 
-	public String word(long turnId, Word word, long millisecondToReply, byte winnerOrd, Set<Byte> crashedPeerOrds) {
+	public String word(long turnId, Word word, long remainingTimeMilliseconds, byte winnerOrd, Set<Byte> crashedPeerOrds) {
 		synchronized (peer) {
 
 			assert peer.isReady();
@@ -122,7 +122,7 @@ public class ServerSide implements ServerSideInterface {
 					peer.lastWordTask.cancel();
 					peer.lastWordTask = null;
 				}
-				peer.forwardWord(turnId, word, millisecondToReply, winnerOrd);
+				peer.forwardWord(turnId, word, remainingTimeMilliseconds, winnerOrd);
 
 				/* settiamo il vincitore, lo facciamo anche quando non è la prima volta che vediamo il messaggio word, perché
 				 * il turnholder potrebbe aver cambiato idea su chi sia il vincitore.
@@ -137,10 +137,10 @@ public class ServerSide implements ServerSideInterface {
 				} else {
 					assert turnId == peer.turnId + 1;
 					peer.turnId = turnId;
-					gameTable.addWord(word, millisecondToReply, false);
+					gameTable.addWord(word, remainingTimeMilliseconds, false);
 				}
 				//~ if (msgOriginatorOrd != peer.lastSeenMsgOriginatorOrd) {
-					//~ gameTable.addWord(word, millisecondToReply);
+					//~ gameTable.addWord(word, remainingTimeMilliseconds);
 					//~ peer.lastSeenMsgOriginatorOrd = msgOriginatorOrd;
 				//~ } else {
 					//~ System.out.println(String.format("Questa parola mi è stata RIMANDATA DI NUOVO, non la riaggiungo al gameTable."));
@@ -165,7 +165,7 @@ public class ServerSide implements ServerSideInterface {
 						/* Nel caso in cui sia un messaggio di vittoria e questo ritorna, ma facendo il giro qualcuno è morto
 						* ed io non lo sapevo, allora reinvio il messaggio word, in modo che venga calcolato il nuovo vincitore */
 						System.out.println("Reinvio il messaggio di word di fine gioco, perché qualcuno è morto durante la consegna.");
-						peer.sendWord(word, millisecondToReply);
+						peer.sendWord(word, remainingTimeMilliseconds);
 
 					} else {
 						System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
@@ -178,7 +178,7 @@ public class ServerSide implements ServerSideInterface {
 				else {
 					System.out.println("La parola è vecchia, faccio solo il forward.");
 					//peer.lastSeenMsgId = id;
-					peer.forwardWord(turnId, word, millisecondToReply, winnerOrd);
+					peer.forwardWord(turnId, word, remainingTimeMilliseconds, winnerOrd);
 				}
 			}
 

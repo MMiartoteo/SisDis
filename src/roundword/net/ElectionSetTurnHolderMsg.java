@@ -3,9 +3,11 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class ElectionSetTurnHolderMsg extends Msg {
-	
-	public static final int T_trans = 100; // milliseconds
-	public static final int T_proc  = 100; // milliseconds
+
+
+	//TODO: duplicati?
+	public static final int T_trans = 200; // milliseconds
+	public static final int T_proc  = 200; // milliseconds
 	public static final int T = 2*T_trans + T_proc;
 	
 	int turnHolder;

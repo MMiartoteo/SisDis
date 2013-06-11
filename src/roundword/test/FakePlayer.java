@@ -52,7 +52,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 
 			Word w = null;
 
-			if (rnd.nextDouble() < 0.4) {
+			if (rnd.nextDouble() < 0.9) {
 
 				if (t.getWordsList().size() == 0) {
 					w = new Word(dictionary.get(rnd.nextInt(dictionary.size())));
@@ -73,7 +73,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 			//Add the word
 			if (w != null) System.out.println("Word: " + w + ": " + w.getValue());
 			else System.out.println("No words founded");
-			t.addWord(w, rnd.nextInt(5), true);
+			t.addWord(w, rnd.nextInt(2000), true);
 
 			//Wait for the next turn
 			localPlayerIsPlaying = false;
