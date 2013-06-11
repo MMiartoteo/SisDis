@@ -9,7 +9,7 @@ public class WordMsg extends Msg {
 	
 	long id;
 	Word word;
-	long millisecondsToReply;
+	long remainingTimeMilliseconds;
 	byte winnerOrd;
 	Timer timer;
 	TimerTask timerTask;
@@ -17,11 +17,11 @@ public class WordMsg extends Msg {
 	//byte msgOriginatorOrd;
 	
 	/* Questa viene usata dal turnista, per avere anche un tempo di attesa */
-	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, long millisecondsToReply, byte winnerOrd, Timer timer, TimerTask timerTask, long delay) {
+	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, long remainingTimeMilliseconds, byte winnerOrd, Timer timer, TimerTask timerTask, long delay) {
 		super(sourcePeer, destPeer);
 		this.id = id;
 		this.word = word;
-		this.millisecondsToReply = millisecondsToReply;
+		this.remainingTimeMilliseconds = remainingTimeMilliseconds;
 		this.winnerOrd = winnerOrd;
 		this.timer = timer;
 		this.timerTask = timerTask;
@@ -30,20 +30,20 @@ public class WordMsg extends Msg {
 	}
 
 	/* Questa viene usata da chi fa solo forwarding */
-	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, long millisecondsToReply, byte winnerOrd) {//, byte msgOriginatorOrd) {
+	public WordMsg(Peer sourcePeer, Peer destPeer, long id, Word word, long remainingTimeMilliseconds, byte winnerOrd) {//, byte msgOriginatorOrd) {
 		super(sourcePeer, destPeer);
 		this.id = id;
 		this.word = word;
-		this.millisecondsToReply = millisecondsToReply;
+		this.remainingTimeMilliseconds = remainingTimeMilliseconds;
 		this.winnerOrd = winnerOrd;
 		//this.msgOriginatorOrd = msgOriginatorOrd;
 	}
 	
 	private void sendToNext() throws CrashException {
 		if (timer != null) {
-			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, millisecondsToReply, winnerOrd, timer, timerTask, delay));
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, remainingTimeMilliseconds, winnerOrd, timer, timerTask, delay));
 		} else {
-			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, millisecondsToReply, winnerOrd));//, msgOriginatorOrd));
+			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, remainingTimeMilliseconds, winnerOrd));//, msgOriginatorOrd));
 		}
 	}
 	
@@ -59,7 +59,7 @@ public class WordMsg extends Msg {
 					timer.schedule(timerTask, delay); // delay is in milliseconds
 				}
 
-				response = stub.word(id, word, millisecondsToReply, winnerOrd, sourcePeer.getCrashedPeerOrds());
+				response = stub.word(id, word, remainingTimeMilliseconds, winnerOrd, sourcePeer.getCrashedPeerOrds());
 
 			}
 
