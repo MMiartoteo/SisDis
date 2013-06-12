@@ -12,6 +12,10 @@
 %\documentclass[prodmode,acmtap]{acmlarge}
 \documentclass[10.5pt]{article}
 
+\addtolength{\voffset}{-50pt}
+\addtolength{\hoffset}{-50pt}
+\addtolength{\textwidth}{100pt}
+\addtolength{\textheight}{100pt}
 
 %\usepackage[a4paper,pdftex]{geometry}
 \usepackage[utf8x]{inputenc}
@@ -146,13 +150,23 @@ La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene infor
 
 L'entità più semplice, chiamata \texttt{FakePlayer}, che rappresenta un agente che gioca automaticamente, consiste ad esempio in un semplice loop, che inserisce una parola, e che rimane in attesa fin tanto che il \texttt{GameTable} non genera un evento, in modo da segnalare che tale agente è il detentore del prossimo turno. 
 
+\begin{figure}
+	\begin{center}
+		\hspace*{-0.3in}
+		\includegraphics[scale=0.55]{imgs/Sequence1.pdf}
+		\caption{}
+	\end{center}
+\end{figure}
+
 Al contrario, un giocatore reale ha tanti oggetti, che rappresentano varie componenti dell'interfaccia. Ognuno di essi può fungere anche da listener, in modo da poter aggiornare le varie informazioni che gli competono. Inoltre, l'interfaccia ha anche un ruolo attivo, poiché inserisce le parole che sono state scritte dall'utente, calcolando anche il tempo impiegato per farlo.
 
 Più complicato è invece un giocatore controllato da un peer remoto. Il \texttt{Peer}, che funge anche da listener, può reagire ad un evento, quale ad esempio l'inserimento di una nuova parola, mandando dei messaggi per informare anche agli altri peer di tale evento. Può poi inserire nuove parole sulla base dei messaggi ricevuti dagli altri peer, cambiare lo stato di un giocatore (ad esempio a causa di un crash), oppure decidere chi possederà il prossimo turno in base sullo stato degli altri peer.
 
 \begin{figure}
+	\vspace*{-1in}
 	\begin{center}
-		\includegraphics[scale=0.5]{imgs/ClassDiagram1.png}
+		\hspace*{-0.5in}
+		\includegraphics[scale=0.95]{imgs/ClassDiagram1.pdf}
 		\caption{}
 	\end{center}
 \end{figure}
@@ -162,11 +176,15 @@ Più complicato è invece un giocatore controllato da un peer remoto. Il \texttt
 Descrizione peer, clientside, serverside, ecc...
 
 \begin{figure}
+	\vspace*{-0.5in}
 	\begin{center}
-		\includegraphics[scale=0.4]{imgs/ClassDiagram2.png}
+		\hspace*{-0.45in}
+		\includegraphics[scale=0.75]{imgs/ClassDiagram2.pdf}
 		\caption{}
 	\end{center}
 \end{figure}
+
+
 
 
 
