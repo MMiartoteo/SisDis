@@ -3,7 +3,7 @@
   realizations="true" associations="true" dependencies="true" nesting-relationships="true">  
   <enumeration id="1" language="java" name="roundword.GameTable.EventListener.WordAddedState" project="ProjSD" 
     file="/ProjSD/src/roundword/GameTable.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="154" y="696"/>    
+    <position height="-1" width="-1" x="156" y="658"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
@@ -12,7 +12,7 @@
   </enumeration>  
   <interface id="2" language="java" name="roundword.GameTable.EventListener" project="ProjSD" 
     file="/ProjSD/src/roundword/GameTable.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="193" y="505"/>    
+    <position height="-1" width="-1" x="195" y="478"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
@@ -30,7 +30,7 @@
   </class>  
   <interface id="4" language="java" name="roundword.Player.EventListener" project="ProjSD" 
     file="/ProjSD/src/roundword/Player.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="642" y="421"/>    
+    <position height="-1" width="-1" x="616" y="400"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
@@ -39,7 +39,7 @@
   </interface>  
   <class id="5" language="java" name="roundword.Player" project="ProjSD" file="/ProjSD/src/roundword/Player.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="626" y="133"/>    
+    <position height="-1" width="-1" x="595" y="138"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
@@ -48,27 +48,27 @@
   </class>  
   <class id="6" language="java" name="roundword.Word" project="ProjSD" file="/ProjSD/src/roundword/Word.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="629" y="632"/>    
+    <position height="-1" width="-1" x="601" y="597"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+      <attributes public="true" package="true" protected="true" private="false"/>      
+      <operations public="true" package="false" protected="true" private="false"/>    
     </display>  
   </class>  
   <class id="7" language="java" name="roundword.Dictionary" project="ProjSD" 
     file="/ProjSD/src/roundword/Dictionary.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="403" y="693"/>    
+    <position height="-1" width="-1" x="384" y="660"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+      <operations public="true" package="true" protected="true" private="false"/>    
     </display>  
   </class>  
   <association id="8">    
     <bendpoint x="400" y="436"/>    
     <end type="SOURCE" refId="3" navigable="false">      
       <attribute id="9" name="dictionary">        
-        <position height="18" width="64" x="408" y="556"/>      
+        <position height="18" width="64" x="400" y="529"/>      
       </attribute>      
       <multiplicity id="10" minimum="0" maximum="1"/>    
     </end>    
@@ -76,90 +76,92 @@
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="11">    
-    <bendpoint x="362" y="200"/>    
-    <bendpoint x="443" y="201"/>    
+    <bendpoint x="132" y="383"/>    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="12" name="winnerPlayer">        
-        <position height="18" width="83" x="363" y="177"/>      
+      <attribute id="12" name="eventListeners">        
+        <position height="18" width="91" x="39" y="377"/>      
       </attribute>      
-      <multiplicity id="13" minimum="0" maximum="1">        
-        <position height="16" width="25" x="466" y="239"/>      
+      <multiplicity id="13" minimum="0" maximum="2147483647">        
+        <position height="16" width="23" x="138" y="375"/>      
       </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <realization id="14">    
-    <bendpoint x="489" y="373"/>    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="4"/>  
-  </realization>  
-  <association id="15">    
-    <bendpoint x="399" y="69"/>    
-    <bendpoint x="454" y="69"/>    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="16" name="localPlayer">        
-        <position height="18" width="72" x="395" y="50"/>      
-      </attribute>      
-      <multiplicity id="17" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="18">    
-    <bendpoint x="138" y="402"/>    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="19" name="eventListeners">        
-        <position height="18" width="91" x="46" y="405"/>      
-      </attribute>      
-      <multiplicity id="20" minimum="0" maximum="2147483647"/>    
     </end>    
     <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="21">    
-    <bendpoint x="398" y="2"/>    
-    <bendpoint x="464" y="2"/>    
+  <association id="14">    
+    <bendpoint x="362" y="200"/>    
+    <bendpoint x="443" y="201"/>    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="22" name="turnHolder">        
-        <position height="18" width="69" x="398" y="-23"/>      
+      <attribute id="15" name="winnerPlayer">        
+        <position height="18" width="83" x="356" y="180"/>      
       </attribute>      
-      <multiplicity id="23" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="24">    
-    <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="25" name="playersList">        
-        <position height="18" width="70" x="387" y="118"/>      
-      </attribute>      
-      <multiplicity id="26" minimum="0" maximum="2147483647">        
-        <position height="16" width="23" x="470" y="143"/>      
+      <multiplicity id="16" minimum="0" maximum="1">        
+        <position height="16" width="25" x="435" y="206"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <nesting id="27">    
-    <bendpoint x="236" y="396"/>    
+  <association id="17">    
+    <bendpoint x="604" y="352"/>    
+    <end type="SOURCE" refId="5" navigable="false">      
+      <attribute id="18" name="eventListeners">        
+        <position height="18" width="91" x="507" y="334"/>      
+      </attribute>      
+      <multiplicity id="19" minimum="0" maximum="2147483647">        
+        <position height="16" width="23" x="613" y="335"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="20">    
+    <bendpoint x="489" y="373"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="4"/>  
+  </realization>  
+  <nesting id="21">    
+    <bendpoint x="241" y="384"/>    
     <end type="SOURCE" refId="3"/>    
     <end type="TARGET" refId="2"/>  
   </nesting>  
-  <nesting id="28">    
-    <bendpoint x="691" y="359"/>    
+  <nesting id="22">    
+    <bendpoint x="671" y="347"/>    
     <end type="SOURCE" refId="5"/>    
     <end type="TARGET" refId="4"/>  
   </nesting>  
-  <association id="29">    
-    <bendpoint x="604" y="352"/>    
-    <end type="SOURCE" refId="5" navigable="false">      
-      <attribute id="30" name="eventListeners">        
-        <position height="18" width="91" x="514" y="350"/>      
+  <association id="23">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="24" name="playersList">        
+        <position height="18" width="70" x="367" y="123"/>      
       </attribute>      
-      <multiplicity id="31" minimum="0" maximum="2147483647"/>    
+      <multiplicity id="25" minimum="0" maximum="2147483647">        
+        <position height="16" width="23" x="436" y="148"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="4" navigable="true"/>    
+    <end type="TARGET" refId="5" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="26">    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="27" name="words">        
+        <position height="18" width="44" x="445" y="421"/>      
+      </attribute>      
+      <multiplicity id="28" minimum="0" maximum="2147483647"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="29">    
+    <bendpoint x="378" y="67"/>    
+    <bendpoint x="454" y="69"/>    
+    <end type="SOURCE" refId="3" navigable="false">      
+      <attribute id="30" name="localPlayer">        
+        <position height="18" width="72" x="375" y="49"/>      
+      </attribute>      
+      <multiplicity id="31" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <nesting id="32">    
@@ -167,13 +169,17 @@
     <end type="TARGET" refId="1"/>  
   </nesting>  
   <association id="33">    
+    <bendpoint x="383" y="0"/>    
+    <bendpoint x="451" y="0"/>    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="34" name="words">        
-        <position height="18" width="44" x="430" y="493"/>      
+      <attribute id="34" name="turnHolder">        
+        <position height="18" width="69" x="381" y="-19"/>      
       </attribute>      
-      <multiplicity id="35" minimum="0" maximum="2147483647"/>    
+      <multiplicity id="35" minimum="0" maximum="1">        
+        <position height="16" width="25" x="430" y="6"/>      
+      </multiplicity>    
     </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
+    <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" 
