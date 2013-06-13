@@ -77,10 +77,10 @@ Non essendo a conoscenza del nome del gioco (nonostante lo abbiamo giocato sin d
 All'inizio del gioco, i giocatori decidono di comune accordo una sequenza di gioco, ovvero l'ordine dei turni (giocando dal vivo, ci si mette spesso in cerchio). Ogni giocatore, al proprio turno, produrrà una singola parola. Il primo giocatore sceglie una parola qualunque, che deve essere \emph{presente nel dizionario} italiano utilizzato dal gioco. Dal secondo giocatore in poi, scatta la regola per la scelta della parola:
 
 \begin{itemize}
-\item Sia $w$ la parola prodotta dal giocatore precedente. Ad esempio ``VERIFICARE''.
-\item Sia $w=w_1, w_2, \dots, w_n$ la sua suddivisione in sillabe. Ad esempio, ``VE'', ``RI'', ``FI'', ``CA'', ``RE''.
+\item Sia $w$ la parola prodotta dal giocatore precedente. Ad esempio ``VERIFICA''.
+\item Sia $w=w_1, w_2, \dots, w_n$ la sua suddivisione in sillabe. Ad esempio, ``VE'', ``RI'', ``FI'', ``CA''.
 \item Sia $w'=w'_1, w'_2, \dots, w'_m$ la parola inserita dal giocatore corrente, e la sua suddivisione in sillabe.
-\item La parola $w'$ è \emph{valida} se è presente nel dizionario e se $w_n = w'_1$, ovvero se la prima sillaba della nuova parola è uguale all'ultima sillaba della parola precedente. Ad esempio, ``REGINA'', ``RECITA'' e ``RETICOLO'' sono tutte parole valide, mentre ``RIONE'', ``RESPIRARE'', ``MANO'' sono tutte parole non valide.
+\item La parola $w'$ è \emph{valida} se è presente nel dizionario e se $w_n = w'_1$, ovvero se la prima sillaba della nuova parola è uguale all'ultima sillaba della parola precedente. Ad esempio, ``CARTA'', ``CARI'' e ``CARATTERISTICA'' sono tutte parole valide, mentre ``RIONE'', ``RESPIRARE'', ``MANO'' sono tutte parole non valide.
 \end{itemize}
 
 Ciò quindi crea una sequenza di parole tutte collegate tra di essere per mezzo dell'ultima e della prima sillaba tra ogni coppia di parole. 
@@ -217,7 +217,7 @@ In figura \ref{fig:sequence1} possiamo osservare il comportamento della parte di
 		\hspace*{-0.45in}
 		\includegraphics[scale=0.75]{imgs/ClassDiagram2.pdf}
 		\label{fig:class_diagram2}
-		\caption{Il diagramma delle classi di tutta la parte di comunicazione del gioco.}
+		\caption{Il diagramma delle classi di tutta la parte di comunicazione del gioco. Da notare \texttt{ServerSideInterface} che estende la classe \texttt{Remote}, e quindi viene solamente utilizzata per Java RMI, in modo che i client side dei vari peer possano chiamare in remoto i metodi del \texttt{ServerSide}.}
 	\end{center}
 \end{figure}
 
