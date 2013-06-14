@@ -104,10 +104,13 @@ Un giocatore può ritirarsi in qualunque momento. In quel caso, il gioco continu
 
 \subsection{Obiettivi del progetto}
 
-L'obiettivo principale del presente progetto è la realizzazione del gioco in un ambiente distribuito, in cui varie entità distribuite (che chiameremo \emph{peer}, vista la loro intrinseca natura client/server) comunicano tra loro attraverso una rete asincrona, non affidabile, come quella di Internet. In questo tipo di contesto sono necessari coordinazione tra i peer, gestione di stati condivisi. [ ... FARE BENE STA PARTE, ED ELENCARE BENE I REQUISITI SCRITTI NEL SITO ].
+L'obiettivo principale del presente progetto è la realizzazione del gioco in un ambiente distribuito, in cui varie entità distribuite (che chiameremo \emph{peer}, vista la loro intrinseca natura client/server) comunicano tra loro attraverso una rete asincrona, non affidabile, come quella di Internet. In questo tipo di contesto sono necessari coordinazione tra i peer e gestione di stati condivisi. Infatti, lo stato del gioco, composto di elementi che devono essere condivisi tra i vari peer in maniera coerente, non può risiedere in un unico peer che funge da nodo centrale.
 
+Sono state fatte delle semplificazioni per non dovere affrontare errori difficili da risolvere, che sono le stesse riportate dalle specifiche del progetto: per prima cosa si assume di avere delle comunicazioni affidabili (ovvero non è possibile che si guastino), ed i processi possono avere solamente guasti di tipo crash. Ciò significa che assumiamo sempre che un peer che non riusciamo a contattare, per un certo periodo di tempo, sia un peer che ha subito un crash, piuttosto che un peer che non riusciamo a contattare per via di un fallimento della rete, o per via di una temporanea indisponibilità del peer stesso. 
 
+Alcuni problemi correlati a queste assunzioni sono comunque stati risolti. Si pensi ad esempio che un peer che precedentemente dichiarato crashato, poiché lento o per ritardi di comunicazione, torna a comunicare con i peer della rete, viene comunque ignorato: il giocatore vedrà un messaggio che lo avverte del fatto che la propria connessione è troppo lenta e che quindi è stato cacciato fuori la partita, come avviene in molti giochi commerciali.
 
+Inoltre, secondo le specifiche, come paradigma di comunicazione, è stato utilizzato remote invocation, in particolare il Remote Method Invocation (RMI) di Java. Ciò fornisce un modo semplice ed ad alto livello per comunicare tra i vari peer, che ha semplificato molto l'implementazione delle comunicazioni tra di essi, in quanto tale middleware permette di mascherare l'eterogeneità tra le varie macchine. Ciononostante non è sufficiente da solo per fornire tutte le funzionalità di un ambiente distribuito, come la coordinazione, la gestione degli errori e del tempo.
 
 \section{Aspetti progettuali}
 % in cui si illustra il progetto svolto; in particolare si discutono i problemi specifici affrontati, le soluzioni valutate e proposte, e l'architettura astratta del sistema sviluppato.
@@ -151,27 +154,11 @@ Ad esempio, per gestire l'evento del giocatore locale che ha inserito una parola
 
 \subsubsection{Inizializzazione della partita}
 
-La parte di inizializzazione della partita è stata progettata utilizzando un server centrale. Questo perché richiesto dalle specifiche del progetto in sé, ma è un assunzione abbastanza realistica, poiché è necessario dare una disponibilità a giocare utilizzando un server noto (che abbia un indirizzo conosciuto).
+La parte di inizializzazione della partita è stata progettata utilizzando un server centrale. Questo perché richiesto dalle specifiche del progetto in sé, ma è un assunzione abbastanza realistica: è necessario dare una disponibilità a giocare utilizzando un server noto (che abbia un indirizzo conosciuto).
 
 Tale server, chiamato \textit{registrar}, è un server HTTP che provvede a raccogliere gli indirizzi IP dei vari giocatori, le loro porte utilizzate ed i loro nickname. Tale server è configurato per creare partite di $N$ giocatori, e quindi lascia iniziare la partita dopo che sono state fatte $N$ richieste. 
 
-Al momento del raggiungimento delle $N$ richieste, il registrar manda ad ogni giocatore la lista degli utenti che parteciperanno alla partita. Tale lista $[p_1, p_2, p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni.
-
-Da questo momento ogni giocatore invia un messaggio di \textit{hello}. Tale messaggio è necessario per attendere che tutti i peer abbiano ricevuto la lista dei giocatori ed abbiano attivo RMI per poter ricevere dei messaggi. Prendendo come esempio il peer $p_i$, questo manderà il messaggio di hello al proprio successore $p_{i+1}$, che a sua volta lo inoltrerà facendo compiere un giro intero attorno all'anello, in modo che arrivi nuovamente a $p_i$. Quest'ultimo, al momento dell'invio del messaggio di hello, setta un timeout, che lo aiuterà ad accorgersi del fatto che tale messaggio non è ancora ritornato, poiché qualche nodo lungo il percorso non era ancora attivo. A questo punto il peer $p_i$ ritenta l'invio per un numero predefinito di volte. 
-
-....
-
-Sappiamo che prima di una risposta da parte del server non sappiamo chi è il prossimo nodo della lista, ovvero chi è il nostro successore. Una volta restituita la lista dei giocatori, possiamo cominciare a giocare, ma può anche accadere che qualche peer non sia ancora a conoscenza della lista dei giocatori e contattandolo lo troveremmo irragiungibile.
-
-
-
-Nel caso dovesse continuare ancora a fallire il peer $p_i$ decreta il fatto di non poter cominciare la partita, e quindi termina; lo stesso viene fatto dagli altri nodi che si trovano nella stessa situazione.
-
-Tale assunzione è stata fatta poiché, i
-
-TODO: discutere del fatto se crasha un peer, il messaggio di hello che fa se non ritorna ecc. timeout...
-
-...
+Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni giocatore, la lista degli utenti che parteciperanno alla partita. Tale lista $[p_1, p_2, .., p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni. Tale liste di giocatori arrivano ai vari peer in momenti differenti, e per questo motivo è necessario che tutti i peer siano a conoscenza del fatto che tutti gli altri abbiano ricevuto tale lista. Se così non fosse il peer che detiene il turno, iniziando a giocare, potrebbe assumere falsamente che alcuni peer abbiano subito un guasto (questi prima di ricevere la lista dei giocatori non possono far nulla). Il peer che deve per primo iniziare a giocare (ha il turno), invia pertanto un messaggio di \textit{hello}, attendendo che questo ritorni indietro. Nel caso in cui tale messaggio non dovesse ritornare (si utilizza un timeout), la partita viene annullata, per fare sì che se ne possa ricreare una nuova. 
 
 \subsubsection{Comunicazione}
 
