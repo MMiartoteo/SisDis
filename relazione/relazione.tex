@@ -162,6 +162,7 @@ Il server centrale, chiamato \textit{registrar}, è un server HTTP che provvede 
 
 Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni giocatore, la lista degli utenti (e relativi peer) che parteciperanno alla partita. Tale lista $[p_1, p_2, .., p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni di gioco. Ogni lista di giocatori arriva ai vari peer in momenti differenti, e per questo motivo è necessario che tutti i peer siano a conoscenza del fatto che tutti gli altri l'abbiano già ricevuta prima di poter iniziare la partita. Se così non fosse il peer che detiene il turno, iniziando a giocare, potrebbe assumere falsamente che alcuni peer abbiano subito un guasto. Il peer che deve per primo iniziare a giocare (ha il turno), invia pertanto un messaggio di \textit{Hello}, attendendo che questo ritorni indietro. Nel caso in cui tale messaggio non dovesse ritornare (si utilizza un timeout), la partita viene annullata, per fare sì che se ne possa ricreare una nuova. 
 
+\subsubsection{Comunicazione}
 
 \subsection{Gestione dei turni}
 
