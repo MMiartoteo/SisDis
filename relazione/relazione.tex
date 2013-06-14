@@ -129,7 +129,7 @@ Interpretare questo gioco nell'ambito dei sistemi distribuiti non è particolarm
 
 \begin{figure}
 \centering
-\includegraphics[scale=1]{imsg/architettura-astratta.jpg}
+\includegraphics[scale=1]{imsg/architettura-astratta.pdf}
 \caption{Architettura astratta del sistema}
 \label{img:architettura-astratta}
 \end{figure}
@@ -150,19 +150,23 @@ Ogni peer gestisce gli eventi generati dal giocatore locale e dai giocatori remo
 Per gestire le comunicazioni con gli altri peer, il modulo è suddiviso in due sotto-moduli: uno che funge da client (chiamato \emph{client side}) e uno che funge da server (chiamato \emph{server side}). Il client side gestisce i messaggi in uscita (non è altro che un thread fornito di una coda di messaggi), mentre il server side gestice i messaggi in entrata ed esegue tutte le azioni opportune, in base al tipo di messaggio ed ai dati in esso contenuti. 
 Ad esempio, per gestire l'evento del giocatore locale che ha inserito una parola, un peer crea un messaggio specificando il peer destinatario e lo pone in uscita aggiungendolo semplicemente alla coda di messaggi in uscita del proprio client side; successivamente, tale messaggio verrà processato e inviato chiamando l'opportuna funzione del server side del peer destinatario.
 
-\subsection{Problemi affrontati}
+
+\subsection{Protocolli distribuiti}
+Nel seguito, descriveremo i protocolli di comunicazione e interazione distribuita facenti parte del modulo di comunicazione.
 
 \subsubsection{Inizializzazione della partita}
 
-La parte di inizializzazione della partita è stata progettata utilizzando un server centrale. Questo perché richiesto dalle specifiche del progetto in sé, ma è un assunzione abbastanza realistica: è necessario dare una disponibilità a giocare utilizzando un server noto (che abbia un indirizzo conosciuto).
+La procedura di inizializzazione della partita utilizza un server centrala ed è l'unica procedura del gioco che prevede componenti centralizzate. Tale scelta, oltre che essere prevista nelle specifiche, è un'importante semplificazione che elimina il bisogno di complicate procedure di discovery distribuite. Ma è anche un'assunzione realistica e molto usata in parecchi giochi commerciali.
 
-Tale server, chiamato \textit{registrar}, è un server HTTP che provvede a raccogliere gli indirizzi IP dei vari giocatori, le loro porte utilizzate ed i loro nickname. Tale server è configurato per creare partite di $N$ giocatori, e quindi lascia iniziare la partita dopo che sono state fatte $N$ richieste. 
+Il server centrale, chiamato \textit{registrar}, è un server HTTP che provvede a raccogliere gli indirizzi IP e le porte dei vari peer che vogliono giocare, ed i nickname dei relativi giocatori. Tale server viene configurato in esecuzione per creare partite di $N$ giocatori, e quindi dà il via libera solo dopo che sono state fatte $N$ richieste proveniente da altrettanti giocatori differenti.
 
-Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni giocatore, la lista degli utenti che parteciperanno alla partita. Tale lista $[p_1, p_2, .., p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni. Tale liste di giocatori arrivano ai vari peer in momenti differenti, e per questo motivo è necessario che tutti i peer siano a conoscenza del fatto che tutti gli altri abbiano ricevuto tale lista. Se così non fosse il peer che detiene il turno, iniziando a giocare, potrebbe assumere falsamente che alcuni peer abbiano subito un guasto (questi prima di ricevere la lista dei giocatori non possono far nulla). Il peer che deve per primo iniziare a giocare (ha il turno), invia pertanto un messaggio di \textit{hello}, attendendo che questo ritorni indietro. Nel caso in cui tale messaggio non dovesse ritornare (si utilizza un timeout), la partita viene annullata, per fare sì che se ne possa ricreare una nuova. 
+Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni giocatore, la lista degli utenti (e relativi peer) che parteciperanno alla partita. Tale lista $[p_1, p_2, .., p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni di gioco. Ogni lista di giocatori arriva ai vari peer in momenti differenti, e per questo motivo è necessario che tutti i peer siano a conoscenza del fatto che tutti gli altri l'abbiano già ricevuta prima di poter iniziare la partita. Se così non fosse il peer che detiene il turno, iniziando a giocare, potrebbe assumere falsamente che alcuni peer abbiano subito un guasto. Il peer che deve per primo iniziare a giocare (ha il turno), invia pertanto un messaggio di \textit{Hello}, attendendo che questo ritorni indietro. Nel caso in cui tale messaggio non dovesse ritornare (si utilizza un timeout), la partita viene annullata, per fare sì che se ne possa ricreare una nuova. 
 
 \subsubsection{Comunicazione}
 
 Da notare, dalla descrizione della parte di comunicazione, che c'è un disaccoppiamento tra il peer e l'invio dei messaggi. Questo perché, per implementare il progetto, è stato utilizzato il paradigma di invocazione a metodo remoto, in particolare \textit{Java RMI}. Inviare un messaggio equivale pertanto ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario. Detto ciò è stato deciso di creare un thread separato (il client side) che si occupasse solo dell'invio dei messaggi, in modo da non bloccare l'intera applicazione per lunghi periodi (si pensi all'attesa causata da un peer che non risponde, oppure ad un messaggio che altro non è che una chiamata ricorsiva). In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
+
+
 
 
 \section{Aspetti implementativi}
