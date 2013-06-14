@@ -129,7 +129,7 @@ Interpretare questo gioco nell'ambito dei sistemi distribuiti non è particolarm
 
 \begin{figure}
 \centering
-\includegraphics[scale=1]{imsg/architettura-astratta.pdf}
+\includegraphics[scale=0.6]{imgs/ArchitetturaAstratta.pdf}
 \caption{Architettura astratta del sistema}
 \label{img:architettura-astratta}
 \end{figure}
@@ -162,10 +162,54 @@ Il server centrale, chiamato \textit{registrar}, è un server HTTP che provvede 
 
 Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni giocatore, la lista degli utenti (e relativi peer) che parteciperanno alla partita. Tale lista $[p_1, p_2, .., p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni di gioco. Ogni lista di giocatori arriva ai vari peer in momenti differenti, e per questo motivo è necessario che tutti i peer siano a conoscenza del fatto che tutti gli altri l'abbiano già ricevuta prima di poter iniziare la partita. Se così non fosse il peer che detiene il turno, iniziando a giocare, potrebbe assumere falsamente che alcuni peer abbiano subito un guasto. Il peer che deve per primo iniziare a giocare (ha il turno), invia pertanto un messaggio di \textit{Hello}, attendendo che questo ritorni indietro. Nel caso in cui tale messaggio non dovesse ritornare (si utilizza un timeout), la partita viene annullata, per fare sì che se ne possa ricreare una nuova. 
 
-\subsubsection{Comunicazione}
 
-Da notare, dalla descrizione della parte di comunicazione, che c'è un disaccoppiamento tra il peer e l'invio dei messaggi. Questo perché, per implementare il progetto, è stato utilizzato il paradigma di invocazione a metodo remoto, in particolare \textit{Java RMI}. Inviare un messaggio equivale pertanto ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario. Detto ciò è stato deciso di creare un thread separato (il client side) che si occupasse solo dell'invio dei messaggi, in modo da non bloccare l'intera applicazione per lunghi periodi (si pensi all'attesa causata da un peer che non risponde, oppure ad un messaggio che altro non è che una chiamata ricorsiva). In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
+\subsection{Gestione dei turni}
 
+Il protocollo di gestione dei turni svolge molteplici funzionalità. Da un lato permette al detentore del turno attuale di inviare la parola scelta dall'utente agli altri giocatori partecipanti, da un altro permette di individuare eventuali guasti (di tipo crash) durante l'esecuzione del gioco.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.9]{imgs/Esempi.pdf}
+\caption{Invio del messaggio Word e gestione dei guasti.}
+\label{img:word}
+\end{figure}
+
+I turni ruotano in senso orario, secondo l'ordine stabilito dal registrar al momento dell'inizializzazione. Il peer corrente (denominato \emph{turnHolder}), dopo che il giocatore ha deciso la parola, deve inviarla a tutti gli altri peer. L'invio della parola procede ad anello, attraverso un messaggio \emph{Word}, come illustrato in Figura~\ref{img:word}(a). Il turnHolder invia infatti la parola solo al peer successivo. Quest'ultimo, sapendo di non essere il turnHolder, provvederà al semplice forward della parola al peer ancora successivo. Ogni turno è identificato in maniera univoca da un \emph{turnId}, fatto incrementare solo dal turnHolder al momento opportuno (creazione di una nuova parola). Ogni volta che un peer effettua un forward, però, deve attendere un ulteriore messaggio da parte del turnHolder, denominato \emph{WorkdAck}, prima di poter passare al turno di gioco successivo. Questo messaggio è necessario per catturare il guasto relativo al crash del turnHolder stesso dopo il completamento dell'anello. In Figura~\ref{img:word}(a) è evidente come il messaggio WorkAck non sia inviato anch'esso ad anello, ma sia inviato in sequenza direttamente ad ogni peer (una sorta di multicast).
+
+Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al turnHolder dal fatto che il messaggio Word da lui inviato gli sia tornato indietro. Ciò infatti significa due cose: che l'anello è chiuso e che tutti i peer ancora attivi hanno ricevuto la nuova parola. Il secondo ack è esplicito, ed è caratterizzato dal messaggio di WordAck inviato dal turnHolder solo se il giro del messaggio Word è stato completato. Tale messaggio sancisce la fine del turno attuale e indica che anche il turnHolder ha effettuato il cambio di turno con successo.
+
+\subsection{Gestione dei guasti}
+Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder.
+
+\paragraph{Crash di un peer generico}
+Il primo caso è raffigurato in Figura~\ref{img:word}(b). Quando un forwarder (o il turnHolder) prova a contattare un peer che è crashato, l'eccezione generata (impossibilità di connettersi al nodo) fa sì che il peer si accorga dell'errore. Il peer allora proverà semplicemente a inviare il messaggio al primo peer attivo immediatamente successivo al peer crashato. Al messaggio Word verrà incorporata l'informazione sul peer morto, in modo tale che tutti i nodi ne siano a conoscenza.
+
+\paragraph{Crash di un forwarder}
+Se invece a crashare è un forwarder, dopo aver ricevuto la parola, ad accorgersene sarà il turnHolder, in quanto scatterà il primo timeout (\emph{timeout 1}). Tale timeout viene fatto partire dal turnHolder all'invio del messaggio Word, proprio per catturare il crash di nodi forwarder. Questo caso è illustrato in Figura~\ref{img:word}(c). Una volta scattato il timeout, il turnHolder invierà nuovamente il messaggio Word, con lo stesso turnId.
+
+\paragraph{Crash del turnHolder}
+Infine, potrebbe essere il turnHoder stesso a crashare. Questo è il caso più delicato, ed anche il più difficile da gestire. Infatti, il turnHolder potrebbe crashare in vari momenti: (1) prima di avere inviato il messaggio Word, oppure (2) dopo averlo inviato, prima di aver ricevuto il messaggio indietro dall'anello, e infine (3) dopo aver ricevuto indietro il messaggio Word dall'anello.
+
+Il terzo caso è raffigurato in Figura~\ref{img:word}(d) ed è gestito attraverso un ulteriore timeout che tutti gli altri peer settano dopo aver ricevuto il messaggio Word dal turnHolder (o indirettamente, dai forwarder). I peer attendono un ulteriore acknowledgment dal turnHolder, denominato WordAck, prima di poter settare il cambio del turno. Questo ack è necessario per rispondere ai requisiti del progetto, ovvero per poter gestire almeno due guasti contemporanei di tipo crash. Se un peer non riceve tale messaggio entro il timeout, il turnHolder attuale viene considerato crashato ed è necessario stabilire chi è il detentore del turno attuale (attraverso un algoritmo simile all'elezione del leader).
+
+Il secondo caso è simile al terzo, in quanto i peer che hanno ricevuto il messaggio Word faranno partire il timeout per il messaggio di WordAck, il quale scatterà e il crash del turnHolder verrà catturata e gestita allo stesso modo.
+
+Il primo caso, invece, è il più delicato. Il turnHolder potrebbe crashare prima ancora di avere inviato il messaggio Word la prima volta. In questo caso, è necessario che gli altri peer siano in grado di identificare una morte arbitraria del turnHolder. Ciò viene fatto attraverso un ulteriore timeout, che ogni peer gestisce durante tutto il tempo del gioco. Secondo questo protocollo, il turnHolder è considerato come un leader che cede il comando ogni turno. Ogni peer si aspetta di ricevere messaggi dal leader (direttamente o indirettamente, come nel caso di un messaggio Word forwardato) entro un certo tempo. Se ciò non avviene, bisogna lanciare un algoritmo di ri-elezione del leader, per individuare chi è il prossimo turnHolder ancora attivo. Questo algoritmo è discusso nella sezione successiva.
+
+
+
+\subsection{Elezione del turnHolder}
+
+
+
+
+
+
+%%%%%%%%%%%%%% QUESTA E' DA SPOSTARE
+%\subsubsection{Comunicazione}
+
+%Da notare, dalla descrizione della parte di comunicazione, che c'è un disaccoppiamento tra il peer e l'invio dei messaggi. Questo perché, per implementare il progetto, è stato utilizzato il paradigma di invocazione a metodo remoto, in particolare \textit{Java RMI}. Inviare un messaggio equivale pertanto ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario. Detto ciò è stato deciso di creare un thread separato (il client side) che si occupasse solo dell'invio dei messaggi, in modo da non bloccare l'intera applicazione per lunghi periodi (si pensi all'attesa causata da un peer che non risponde, oppure ad un messaggio che altro non è che una chiamata ricorsiva). In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
