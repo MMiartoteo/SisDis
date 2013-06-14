@@ -81,6 +81,8 @@ public class Peer implements GameTable.EventListener {
 		// a ricevere e inviare messaggi
 		if (this.isTurnHolder()) {
 			sendHello();
+		} else {
+
 		}
 		
 		// Fai partire il timer per beccare la morte del turnHolder
@@ -265,7 +267,7 @@ public class Peer implements GameTable.EventListener {
 		helloTask = new TimerTask() {
 			@Override
 			public void run() {
-			System.out.println("HELLO NON E' TORNATO INDIETRO! ERRORE TERRIBILE! TERMINO PARTITA!");
+			System.out.println("HELLO NON E' TORNATO INDIETRO!");
 			System.exit(-1);
 			}
 		};

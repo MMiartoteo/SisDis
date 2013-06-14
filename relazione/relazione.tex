@@ -136,11 +136,23 @@ La parte di inizializzazione della partita è stata progettata utilizzando un se
 
 Tale server, chiamato \textit{registrar}, è un server HTTP che provvede a raccogliere gli indirizzi IP dei vari giocatori, le loro porte utilizzate ed i loro nickname. Tale server è configurato per creare partite di $N$ giocatori, e quindi lascia iniziare la partita dopo che sono state fatte $N$ richieste. 
 
-Al momento del raggiungimento delle $N$ richieste, il registrar manda ad ogni giocatore la lista degli utenti che parteciperanno alla partita. Tale lista è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni.
+Al momento del raggiungimento delle $N$ richieste, il registrar manda ad ogni giocatore la lista degli utenti che parteciperanno alla partita. Tale lista $[p_1, p_2, p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni.
 
-Da questo momento ogni giocatore invia un messaggio di \textit{hello} che stabilisce quando tutti i giocatori sono pronti per poter cominciare la partita.
+Da questo momento ogni giocatore invia un messaggio di \textit{hello}. Tale messaggio è necessario per attendere che tutti i peer abbiano ricevuto la lista dei giocatori ed abbiano attivo RMI per poter ricevere dei messaggi. Prendendo come esempio il peer $p_i$, questo manderà il messaggio di hello al proprio successore $p_{i+1}$, che a sua volta lo inoltrerà facendo compiere un giro intero attorno all'anello, in modo che arrivi nuovamente a $p_i$. Quest'ultimo, al momento dell'invio del messaggio di hello, setta un timeout, che lo aiuterà ad accorgersi del fatto che tale messaggio non è ancora ritornato, poiché qualche nodo lungo il percorso non era ancora attivo. A questo punto il peer $p_i$ ritenta l'invio per un numero predefinito di volte. 
+
+....
+
+Sappiamo che prima di una risposta da parte del server non sappiamo chi è il prossimo nodo della lista, ovvero chi è il nostro successore. Una volta restituita la lista dei giocatori, possiamo cominciare a giocare, ma può anche accadere che qualche peer non sia ancora a conoscenza della lista dei giocatori e contattandolo lo troveremmo irragiungibile.
+
+
+
+Nel caso dovesse continuare ancora a fallire il peer $p_i$ decreta il fatto di non poter cominciare la partita, e quindi termina; lo stesso viene fatto dagli altri nodi che si trovano nella stessa situazione.
+
+Tale assunzione è stata fatta poiché, i
 
 TODO: discutere del fatto se crasha un peer, il messaggio di hello che fa se non ritorna ecc. timeout...
+
+...
 
 \subsubsection{Comunicazione}
 
@@ -186,7 +198,7 @@ In figura \ref{fig:class_diagram1} possiamo osservare il diagramma delle classi 
 
 \begin{figure}
 	\begin{center}
-		\hspace*{-0.3in}
+		\hspace*{-0.2in}
 		\includegraphics[scale=0.55]{imgs/Sequence1.pdf}
 		\label{fig:sequence1}
 		\caption{}
