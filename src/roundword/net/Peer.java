@@ -425,6 +425,7 @@ public class Peer implements GameTable.EventListener {
 	/* ############################## */
 	/*             PRIVATI            */
 	/* ############################## */
+	
 	private void start_server_side() {
 		server = new ServerSide(this, gameTable);
 	}
