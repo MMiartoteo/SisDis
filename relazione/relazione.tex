@@ -51,7 +51,7 @@
 \end{abstract}
 
 
-\tableofcontents
+%\tableofcontents
 
 \section{Introduzione}
 % in cui si inquadra il problema affrontato, chiarendo gli obiettivi, riassumendo lo stato dell'arte, e descrivendo la struttura della relazione.
@@ -65,12 +65,12 @@ Un gioco molto famoso tra i bambini di ogni età, ma giocato anche tra adulti se
 
 Non essendo a conoscenza del nome del gioco (nonostante lo abbiamo giocato sin da bambini), abbiamo deciso di chiamarlo \emph{RoundWord} per il presente progetto.
 
-\begin{figure}
-	\begin{center}
-		\includegraphics[scale=0.5]{imgs/screenshot.png}
-		\caption{Una screenshot del gioco dove Giacomo detiene il turno e pertanto deve inserire una parola. Notare anche che Marco si è ritirato, oppure ha avuto un crash.}
-	\end{center}
-\end{figure}
+%\begin{figure}
+%	\begin{center}
+%		\includegraphics[scale=0.5]{imgs/screenshot.png}
+%		\caption{Una screenshot del gioco dove Giacomo detiene il turno e pertanto deve inserire una parola. Notare %anche che Marco si è ritirato, oppure ha avuto un crash.}
+%	\end{center}
+%\end{figure}
 
 
 \subsection{Regole del gioco}
@@ -212,7 +212,7 @@ L'algoritmo Bully è tale da gestire anche i guasti eventuali durante l'elezione
 
 \subsubsection{Terminazione della partita}
 
-Per la terminazione della partita è necessario che tutti i peer siano d'accordo su un unico vincitore. A decretare che la partita può essere terminata è quel peer che ha scritto una parola con punteggio negativo, a seguito di un intero ciclo dove ogni peer ha avuto un punteggio negativo. Il peer quindi può inviare tale informazione 
+Per la terminazione della partita è necessario che tutti i peer siano d'accordo su un unico vincitore, coerentemente con le informazioni dei punteggi di tutti i giocatori e dei peer che hanno subito un guasto. La terminazione di una partita può essere decretata da quel peer che ha proposto una parola con punteggio negativo, a seguito di un intero ciclo di turni dove ogni peer ha a sua volta ottenuto un punteggio negativo. Tale peer, essendo il detentore del turno, può quindi decidere chi sia il vincitore ed inviare tale informazione a tutti gli altri nodi, direttamente utilizzando il messaggio di word, in modo che la decisione sia coerente con tutti gli altri. Questo calcola il vincitore sulla base dei punteggi dei giocatori, che i messaggi di word hanno garantito essere uguali per tutti i nodi. Ciò che non sappiamo con precisione istantanea sono invece le informazioni sui peer che hanno subito un guasto. Per questo motivo il turnHolder decide il vincitore sulla base delle informazioni che ha al momento dell'invio del messaggio di word. Se tale messaggio, dopo avere compiuto un giro attorno all'anello, dovesse rilevare altri morti, allora il turnHolder dovrebbe ricalcolare il vincitore, e se questo fosse diverso dovrebbe reinviare lo stesso messaggio di Word, cambiando solamente il vincitore. In tal modo gestiamo il caso in cui venga decretato come vincitore un peer che abbia poi subito un guasto. Da notare che, grazie alla gestione degli id dei messaggi di Word, gli ulteriori messaggi che vengono spediti vengono ignorati (ovvero non vengono aggiunte le parole nel tavolo di gioco, viene però cambiato il vincitore). Successivamente il messaggio di WordAck, che viene solitamente utilizzato per avanzare il turno, può essere visto come un commit, che conferma definitivamente il vincitore. Pertanto, alla ricezione di tale messaggio, il peer mostra a video il vincitore, decretando quindi la fine del gioco.
 
 \section{Aspetti implementativi}
 % dettagli sulle scelte implementative, ed architettura specifica implementata. Inserire almeno il diagramma delle classi e uno delle interazioni secondo lo standard UML.
@@ -227,7 +227,7 @@ La classe \texttt{Word} rappresenta una parola del gioco. Consiste di una sempli
 
 La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene informazioni quali: la lista delle parole che sono state inserite, come anche la lista dei giocatori, ed il giocatore che detiene il turno. Inoltre ha dei metodi per modificare lo stato del gioco, come quello per determinare chi è il prossimo detentore del turno, o per inserire una nuova parola. Tale classe non ha un'idea del fatto di come viene controllato un giocatore; seguendo il design pattern chiamato \textit{Observer Pattern}, la classe è stata progettata per generare degli eventi, quali ad esempio l'inserimento di una nuova parola, il cambio del turno, o la terminazione del gioco. 
 
-Sono poi presenti diversi listener che rispondono in maniera passiva a questi eventi seguendo delle azioni opportune. Queste stesse entità che fungono anche da listener, possono comunque avere dei ruoli attivi, come ad esempio l'inserimento di nuove parole. L'entità più semplice, chiamata \texttt{FakePlayer}, che rappresenta un agente che gioca automaticamente, consiste ad esempio in un semplice loop, che inserisce una parola, e che rimane in attesa fin tanto che il \texttt{GameTable} non genera un evento, in modo da segnalare che tale agente è il detentore del prossimo turno. Al contrario, un giocatore reale ha tanti oggetti, che rappresentano varie componenti dell'interfaccia. Ognuno di essi può fungere anche da listener, in modo da poter aggiornare le varie informazioni che gli competono. Questa ha anche un ruolo attivo, poiché inserisce le parole che sono state scritte dall'utente, calcolando anche il tempo impiegato per farlo. Anche il \texttt{Peer} funge da listener. Può reagire ad un evento come l'inserimento di una nuova parola, mandando dei messaggi per informare anche agli altri peer di tale evento, oppure può inserire nuove parole sulla base dei messaggi ricevuti dagli altri peer.
+%Sono poi presenti diversi listener che rispondono in maniera passiva a questi eventi seguendo delle azioni opportune. Queste stesse entità che fungono anche da listener, possono comunque avere dei ruoli attivi, come ad esempio l'inserimento di nuove parole. L'entità più semplice, chiamata \texttt{FakePlayer}, che rappresenta un agente che gioca automaticamente, consiste ad esempio in un semplice loop, che inserisce una parola, e che rimane in attesa fin tanto che il \texttt{GameTable} non genera un evento, in modo da segnalare che tale agente è il detentore del prossimo turno. Al contrario, un giocatore reale ha tanti oggetti, che rappresentano varie componenti dell'interfaccia. Ognuno di essi può fungere anche da listener, in modo da poter aggiornare le varie informazioni che gli competono. Questa ha anche un ruolo attivo, poiché inserisce le parole che sono state scritte dall'utente, calcolando anche il tempo impiegato per farlo. Anche il \texttt{Peer} funge da listener. Può reagire ad un evento come l'inserimento di una nuova parola, mandando dei messaggi per informare anche agli altri peer di tale evento, oppure può inserire nuove parole sulla base dei messaggi ricevuti dagli altri peer.
 
 \begin{figure}
 	\vspace*{-1in}
@@ -298,18 +298,16 @@ Ognuno di questi viene creato e distrutto in momenti differenti. Ad esempio \tex
 
 Il gioco che è stato implementato segue le caratteristiche del classico gioco che ha avuto tanto successo, chiamato \textit{Ruzzle}, versione virtuale del noto gioco \textit{Il Paroliere}. Allo stesso modo si è pensato quale potesse essere un gioco con le stesse caratteristiche, che potesse essere anche implementato come progetto per questo corso di Sistemi Distribuiti. Tale gioco è molto citato nei libri ed in giro per il Web, ma viene pressoché giocato senza l'ausilio di un computer, o comunque senza l'ausilio di un entità completamente automatica che controlli la validità delle parole (ad esempio si utilizzano dei forum con dei moderatori umani). Questo probabilmente perché è molto difficile riuscire a costruire un algoritmo che faccia una sillabazione perfetta, per via delle tante eccezioni che sono presenti. Per questo motivo è già stato un passo avanti riuscire ad creare qualcosa di innovativo in questo senso, riuscendo a superare tali difficoltà.
 
-Il registrar è stato realizzato con HTTP, e questo è simile a ciò che viene fatto nei giochi commerciali, dove abbiamo un sito dedicato, ad esempio utilizzando Google App Engine, che svolge tale funzione. Da questo punto di vista quindi ci riteniamo coerenti con la nostra scelta, anche se ciò è significato complicare l'implementazione rispetto ad un implementazione in Java RMI, in modo da avere un architettura meno chiusa, e più facilmente estendibile.
-
-TODO: Valutazioni a livello di comunicazione?
+Il registrar è stato realizzato con HTTP, e questo è simile a ciò che viene fatto nei giochi commerciali, dove abbiamo un sito dedicato, che svolge tale funzione. Da questo punto di vista quindi ci riteniamo soddisfatti della nostra scelta, anche se ciò ha complicato l'implementazione, se comparata ad un server che utilizzi Java RMI.
 
 \section{Conclusioni}
 % commenti conclusivi su possibili miglioramenti di quanto discusso, e possibili linee di intervento futuro.
-
 
 Sarebbe interessante portare avanti questo progetto anche in ambiente mobile, dove sicuramente un gioco simile può avere successo. Per quanto riguarda la giocabilità ci sono diverse proposte e migliorie. Prima di tutto potrebbe essere più divertente creare dizionari divisi per sezioni, in modo da limitare l'inserimento delle parole solamente a quelle di una determinata categoria scelta all'inizio del gioco. Inoltre, sarebbe interessante, in seguito ad uno studio di usabilità decidere se prevedere casi di terminazione che potrebbero divertire di più i giocatori, come ad esempio la vittoria di un giocatore che realizza moltissimi punti con una sola parola. Poi potrebbe essere anche utile sfruttare tutta la parte già realizzata dei giocatori automatici per rimpiazzare i giocatori che hanno avuto un crash.
 
 Alcuni protocolli utilizzati per la parte di comunicazione potrebbero essere migliorati. Ad esempio si potrebbe considerare di far partire il gioco, nonostante l'inizializzazione sia fallita, dopo un certo numero di secondi, lasciando al gioco stesso il compito di dichiarare chi ha avuto un guasto e chi no. Ciò è stato tralasciato poiché le specifiche del progetto non prevedevano guasti che non fossero di tipo crash, ma sarebbe comunque utile, ai fini della giocabilità, migliorare questa parte. Inoltre, anche la parte che trova quali peer sono morti potrebbe essere migliorata, con un messaggio che gira continuamente nella rete. Tale approccio è comunque stato scartato poiché più difficile da gestire, ma potrebbe velocizzare la partita, dichiarando in maniera più rapida che chi detiene il turno ha subito un guasto.
 
+Ci riteniamo comunque soddisfatti di aver realizzato questo sistema distribuito, toccando con mano i concetti teorici visti a lezione. D'altra parte è stato anche molto affascinante poter utilizzare un paradigma così potente, che permette una progettazione ed una stesura del codice molto chiara ed efficace.
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}
