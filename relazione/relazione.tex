@@ -80,10 +80,10 @@ All'inizio del gioco, i giocatori decidono di comune accordo una sequenza di gio
 \item Sia $w$ la parola prodotta dal giocatore precedente. Ad esempio ``VERIFICA''.
 \item Sia $w=w_1, w_2, \dots, w_n$ la sua suddivisione in sillabe. Ad esempio, ``VE'', ``RI'', ``FI'', ``CA''.
 \item Sia $w'=w'_1, w'_2, \dots, w'_m$ la parola inserita dal giocatore corrente, e la sua suddivisione in sillabe.
-\item La parola $w'$ è \emph{valida} se è presente nel dizionario e se $w_n = w'_1$, ovvero se la prima sillaba della nuova parola è uguale all'ultima sillaba della parola precedente. Ad esempio, ``CARTA'', ``CARI'' e ``CARATTERISTICA'' sono tutte parole valide, mentre ``RIONE'', ``RESPIRARE'', ``MANO'' sono tutte parole non valide.
+\item La parola $w'$ è \emph{valida} se è presente nel dizionario e se $w_n = w'_1$, ovvero se la prima sillaba della nuova parola è uguale all'ultima sillaba della parola precedente. Ad esempio, ``CARI'' e ``CARATTERISTICA'' sono tutte parole valide, mentre ``CARTA'', ``RESPIRARE'' e ``MANO'' sono tutte parole non valide.
 \end{itemize}
 
-Ciò quindi crea una sequenza di parole tutte collegate tra di essere per mezzo dell'ultima e della prima sillaba tra ogni coppia di parole. 
+Ciò quindi crea una sequenza di parole tutte collegate tra di esse per mezzo dell'ultima e della prima sillaba tra ogni coppia di parole. 
 
 Per rendere più interessante il gioco, non basta che una parola sia \emph{valida} affinché si possano guadagnare dei punti per il proprio turno. Vi è un altro requisito fondamentale: la parola deve essere \emph{nuova}. Ovvero, la parola inserita non deve essere stata inserita precedentemente da alcun giocatore, durante il corso della corrente partita. Quindi, ogni giocatore deve tenere memoria della sequenza di parole generate da tutti i giocatori, ed evitare di riproporre una parola già inserita precedentemente. Per aiutare l'utente a capire le parole che sono state inserite, vengono visualizzate le ultime 6 parole.
 
@@ -93,14 +93,14 @@ Ogni giocatore, al proprio turno, può guadagnare o perdere punti, secondo le se
 \begin{itemize}
 \item Se la parola non è presente nel dizionario perde 80 punti.
 \item Se la parola non è valida perde 80 punti.
-\item Se la parola è \emph{valida}, ma non è \emph{nuova}, perde 100 punti.
-\item Se il giocatore non è riuscito a produrre la parola entro il limite di tempo stabilito per un singolo turno, perde 60 punti.
-\item Se la parola è valida e non è stata proposta precedentemente durante la stessa partita, il giocatore guadagna un numero di punti che dipende dalle lettere utilizzate (e.g. 1 punto per la lettera A, 8 per la lettera G), dalla lunghezza della parola (i.e. 5 punti in più per ogni lettera inserita dopo la quinta), e dai millesimi di secondo impiegati (i.e. 0.02 punti per ogni millisecondo che l'utente aveva ancora a disposizione per rispondere).
+\item Se la parola è \emph{valida}, ma non è \emph{nuova}, perde 50 punti.
+\item Se il giocatore non è riuscito a produrre la parola entro il limite di tempo stabilito per un singolo turno, perde 100 punti.
+\item Se la parola è valida e non è stata proposta precedentemente durante la stessa partita, il giocatore guadagna un numero di punti che dipende dalle lettere utilizzate, in base alla distribuzione delle lettere nelle parole italiane (e.g. 1 punto per la lettera A, 8 per la lettera G), dalla lunghezza della parola (i.e. 5 punti in più per ogni lettera inserita dopo la quinta), e dai millesimi di secondo impiegati (i.e. 0.02 punti per ogni millisecondo che l'utente aveva ancora a disposizione per rispondere).
 \end{itemize}
 
-Da notare che, nel caso un giocatore abbia una perdita dei punti, la parola proposta non viene aggiunta alla lista delle parole utilizzate, il prossimo giocatore dovrà pertanto riprendere dalla parola dell'ultimo giocatore che era riuscito ad inserire una parola.
+Da notare che, nel caso un giocatore perda dei punti durante il proprio turno, la parola proposta non viene aggiunta alla lista delle parole utilizzate, il prossimo giocatore dovrà pertanto riprendere dalla parola dell'ultimo giocatore che era riuscito ad inserire una parola valida e nuova.
 
-Un giocatore può ritirarsi in qualunque momento. In quel caso, il gioco continua tra i giocatori rimanenti, richiudendo il cerchio nella maniera naturale. Il gioco finisce quando un giocatore rimane da solo, oppure quando nessun giocatore riesce a produrre parole valide e nuove per un intero ciclo di gioco.
+Un giocatore può ritirarsi in qualunque momento. In quel caso, il gioco continua tra i giocatori rimanenti, richiudendo il cerchio nella maniera naturale. Il gioco finisce quando un giocatore rimane da solo, oppure quando nessun giocatore riesce a produrre parole valide e nuove per un intero ciclo di gioco. Nel primo caso, il vincitore è l'unico ``superstite''. Nel secondo caso è quello con il punteggio maggiore tra i giocatori superstiti.
 
 \subsection{Obiettivi del progetto}
 
@@ -113,20 +113,39 @@ L'obiettivo principale del presente progetto è la realizzazione del gioco in un
 % in cui si illustra il progetto svolto; in particolare si discutono i problemi specifici affrontati, le soluzioni valutate e proposte, e l'architettura astratta del sistema sviluppato.
 
 \subsection{Interpretare RoundWord come un sistema distribuito}
-Interpretare questo gioco nell'ambito dei sistemi distribuiti non è particolarmente difficile. Infatti, ogni giocatore controllato da un \emph{peer}, in una rete distribuita in stile peer-to-peer (senza overlay). I turni a ciclo suggeriscono l'idea di un protocollo in stile \emph{token-ring}, dove il detentore del turno viene equiparato al \emph{leader} attuale, e la leadership viene passata al prossimo peer allo scadere di ogni turno. Lo \emph{stato condiviso} tra i peer partecipanti consiste in:
+Interpretare questo gioco nell'ambito dei sistemi distribuiti non è particolarmente difficile. Infatti, ogni giocatore è controllato da un \emph{peer}, in una rete distribuita in stile peer-to-peer (senza overlay). I turni a ciclo suggeriscono l'idea di un protocollo in stile \emph{token-ring}, dove il detentore del turno viene equiparato al \emph{leader} attuale, e la leadership viene passata al prossimo peer allo scadere di ogni turno (per questo motivo ci riferiremo a \emph{leader}, \emph{detentore del turno} o \emph{coordinatore} come sinonimi). Lo \emph{stato condiviso} tra i peer partecipanti consiste in:
 \begin{itemize}
-\item La lista dei peer attivi (non crashati)
-\item La lista dei punteggi dei rispettivi giocatori
+\item La lista dei peer (crashati e non crashati).
+\item La lista dei punteggi dei rispettivi giocatori.
 \item La lista completa delle parole inserite dai giocatori.
-\item L'identità del detentore del turno attuale (ovvero del leader attuale)
+\item L'identità del detentore del turno attuale (ovvero del leader attuale).
 \end{itemize}
 
 
 \subsection{Architettura astratta}
 
-Il sistema è composto di tre aree ben distinte: modello del gioco, controllori dei giocatori e comunicazione. La parte di modellazione del gioco si compone di tutte quelle classi che realizzano il gioco, senza prendere in considerazione il fatto che questo possa essere giocato in rete, e senza una concezione di interfaccia GUI. Tale modello ignora pertanto come i vari giocatori interagiscono, fornendo solamente dei metodi per cambiare lo stato del gioco, e generando eventi per segnalare tali cambiamenti. I controllori dei giocatori possono essere di tre tipi: un'interfaccia grafica che comunica con il giocatore reale permettendogli di poter giocare, un peer remoto che interagisce sfruttando la parte di comunicazione, o un giocatore automatico (principalmente utilizzato per debug, ma che comunque non si esclude possa essere utilizzato come un rimpiazzo per i giocatori che hanno subito un guasto).
+\begin{figure}
+\centering
+\includegraphics[scale=1]{imsg/architettura-astratta.jpg}
+\caption{Architettura astratta del sistema}
+\label{img:architettura-astratta}
+\end{figure}
 
-La parte di comunicazione ha come incarico quello di interagire con gli altri peer presenti nel sistema, in modo da comunicare le parole che sono state inserite dal giocatore locale, e comunicare al modello del gioco quali sono quelle inserite dagli altri peer. Ogni peer ha pertanto il compito di gestire un particolare giocatore, eseguendo delle azioni opportune per ogni tipo di evento generato dal gioco. Utilizza due parti distinte che lo completano: una parte che funge da client (chiamata \emph{client side}) ed una parte che funge da server (chiamata \emph{server side}). Il client side non è un entità che si occupa di mandare i messaggi, e non è altro che un thread fornito di una coda di messaggi in uscita. Il server side invece è la parte che si occupa di ricevere tali messaggi e di eseguire le azioni opportune, in base al tipo di messaggio ed ai dati in esso contenuti. Facendo un esempio per riassumere, ogni peer, per gestire l'evento del giocatore locale che ha inserito una parola, crea un messaggio (o più messaggi) specificando il peer destinatario, e quindi lo invia aggiungendolo alla coda di uscita del proprio client side; successivamente tale messaggio viene processato e viene inviato chiamando l'opportuna funzione del server side del destinatario. 
+Il sistema, a livello astratto, è composto da tre componenti principali ben distinte tra loro: (1) il \emph{modello del gioco}, (2) il \emph{controllore dei giocatori} e (3) il \emph{modulo di comunicazione}. Le tre componenti sono rappresentate in Figura~\ref{img:architettura-astratta}.
+
+La parte di modellazione del gioco racchiude a sua volta tutte le componenti che modellano il gioco, come ad esempio il tavolo di gioco, i giocatori e la gestione delle parole del dizionario.
+Questo modulo ignora il fatto che il gioco venga eseguito in rete o in locale, con utenti reali o intelligenze artificiali.
+Pertanto, esso fornisce solamente dei metodi per cambiare lo stato del gioco, e genera eventi per segnalare tali cambiamenti.
+
+Il controllore dei giocatori gestisce le azioni dei giocatori e ne riporta le scelte sul modello di gioco. Per semplicità (e per maggior divertimento) abbiamo previsto che il gioco possa essere giocato sia da utenti reali che da intelligenze artificiali (AI). Una semplice AI è stata anche realizzata nel corso del progetto. Il controllore può essere quindi di due tipi: una GUI, per chiedere e ricevere input dall'utente e fornirgli output, e una AI, che simula le azioni di un giocatore ``reale''.
+%possono essere di tre tipi: un'interfaccia grafica che comunica con il giocatore reale permettendogli di poter giocare, un peer remoto che interagisce sfruttando la parte di comunicazione, o un giocatore automatico (principalmente utilizzato per debug, ma che comunque non si esclude possa essere utilizzato come un rimpiazzo per i giocatori che hanno subito un guasto).
+
+Il modulo di comunicazione è la parte centrale del sistema distribuito, in quanto gestisce l'interazione tra i peer del sistema. I compiti principali di questo modulo sono quelli di permettere lo scambio dei messaggi del gioco (le nuove parole inserite dai giocatori), la gestione dello stato condiviso e l'implementazione dei protocolli di gestione dei guasti di tipo crash.
+%Ogni peer ha il compito di gestire un particolare giocatore, eseguendo delle azioni opportune per ogni tipo di evento generato dal gioco.
+Ogni peer gestisce gli eventi generati dal giocatore locale e dai giocatori remoti, eseguendo di volta in volta le azioni opportune.
+
+Per gestire le comunicazioni con gli altri peer, il modulo è suddiviso in due sotto-moduli: uno che funge da client (chiamato \emph{client side}) e uno che funge da server (chiamato \emph{server side}). Il client side gestisce i messaggi in uscita (non è altro che un thread fornito di una coda di messaggi), mentre il server side gestice i messaggi in entrata ed esegue tutte le azioni opportune, in base al tipo di messaggio ed ai dati in esso contenuti. 
+Ad esempio, per gestire l'evento del giocatore locale che ha inserito una parola, un peer crea un messaggio specificando il peer destinatario e lo pone in uscita aggiungendolo semplicemente alla coda di messaggi in uscita del proprio client side; successivamente, tale messaggio verrà processato e inviato chiamando l'opportuna funzione del server side del peer destinatario.
 
 \subsection{Problemi affrontati}
 
