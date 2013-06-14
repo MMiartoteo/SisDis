@@ -47,7 +47,8 @@
 
 \begin{abstract}
 % (non più di dieci righe): riassume di cosa tratta la relazione.
-
+[----------------------- TODO ------------------------]
+\vspace*{50mm}
 \end{abstract}
 
 
@@ -154,7 +155,7 @@ Ad esempio, per gestire l'evento del giocatore locale che ha inserito una parola
 \subsection{Protocolli distribuiti}
 Nel seguito, descriveremo i protocolli di comunicazione e interazione distribuita facenti parte del modulo di comunicazione.
 
-\subsubsection{Inizializzazione della partita}
+\subsubsection*{Inizializzazione della partita}
 
 La procedura di inizializzazione della partita utilizza un server centrale ed è l'unica procedura del gioco che prevede componenti centralizzate. Tale scelta, oltre che essere prevista nelle specifiche, è un'importante semplificazione che elimina il bisogno di complicate procedure di discovery distribuite. Ma è anche un'assunzione realistica e molto usata in parecchi giochi commerciali.
 
@@ -164,7 +165,7 @@ Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni g
 
 
 
-\subsubsection{Gestione dei turni}
+\subsubsection*{Gestione dei turni}
 
 Il protocollo di gestione dei turni svolge molteplici funzionalità. Da un lato permette al detentore del turno attuale di inviare la parola scelta dall'utente agli altri giocatori partecipanti, da un altro permette di individuare eventuali guasti (di tipo crash) durante l'esecuzione del gioco.
 
@@ -180,7 +181,7 @@ I turni ruotano in senso orario, secondo l'ordine stabilito dal registrar al mom
 Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al turnHolder dal fatto che il messaggio Word da lui inviato gli sia tornato indietro (l'ultima comunicazione che fa arrivare il messaggio al turnHolder non ha scopi informativi, solo si acknowledgement). Ciò infatti significa due cose: che l'anello è chiuso e che tutti i peer ancora attivi hanno ricevuto la nuova parola. Il secondo ack è esplicito, ed è caratterizzato dal messaggio di WordAck inviato dal turnHolder solo se il giro del messaggio Word è stato completato. Tale messaggio sancisce la fine del turno attuale e indica che anche il turnHolder ha effettuato il cambio di turno con successo.
 
 
-\subsubsection{Gestione dei guasti}
+\subsubsection*{Gestione dei guasti}
 Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder. I crash vengono individuati mediante diversi timeout e relativi messaggi di acknowledgement. Essi vengono gestiti mediante ridondanza: i messaggi vengono re-inviati quando necessario. Il turnId viene utilizzato anche per ignorare messaggi relativi a turni precedenti.
 
 \paragraph{Crash di un peer generico}
@@ -200,7 +201,7 @@ Il primo caso, invece, è il più delicato. Il turnHolder potrebbe crashare prim
 
 
 
-\subsubsection{Elezione del turnHolder}
+\subsubsection*{Elezione del turnHolder}
 
 Come detto in precedenza, vi è un'analogia tra il concetto di leader e quello di turnHolder. In particolare, il leader è il gestore attuale del turno e ha il compito di inviare a tutti la nuova parola scelta dall'utente e stabilire il cambio del turno. A differenza dei leader più comuni, che cambiano solo quando crashano, il leader del nostro gioco deve cambiare ad ogni turno in modo circolare, ovvero in senso orario ad anello. Ciò significa che, a meno di crash, è prevedibile chi sarà il prossimo leader.
 
@@ -211,16 +212,16 @@ Questo semplice ragionamento suggerisce di utilizzare l'algoritmo \emph{Bully} s
 L'algoritmo Bully è tale da gestire anche i guasti eventuali durante l'elezione. Essi sono gestiti per mezzo di due timeout, settati entrambi da coloro che indicono l'elezione.
 
 
-\subsubsection{Terminazione della partita}
+\subsubsection*{Terminazione della partita}
 
 Per la terminazione della partita è necessario che tutti i peer siano d'accordo su un unico vincitore, coerentemente con le informazioni dei punteggi di tutti i giocatori e dei peer che hanno subito un guasto. La terminazione di una partita può essere decretata da quel peer che ha proposto una parola con punteggio negativo, a seguito di un intero ciclo di turni dove ogni peer ha a sua volta ottenuto un punteggio negativo. Tale peer, essendo il detentore del turno, può quindi decidere chi sia il vincitore ed inviare tale informazione a tutti gli altri nodi, direttamente utilizzando il messaggio di word, in modo che la decisione sia coerente con tutti gli altri. Questo calcola il vincitore sulla base dei punteggi dei giocatori, che i messaggi di word hanno garantito essere uguali per tutti i nodi. Ciò che non sappiamo con precisione istantanea sono invece le informazioni sui peer che hanno subito un guasto. Per questo motivo il turnHolder decide il vincitore sulla base delle informazioni che ha al momento dell'invio del messaggio di word. Se tale messaggio, dopo avere compiuto un giro attorno all'anello, dovesse rilevare altri morti, allora il turnHolder dovrebbe ricalcolare il vincitore, e se questo fosse diverso dovrebbe reinviare lo stesso messaggio di Word, cambiando solamente il vincitore. In tal modo gestiamo il caso in cui venga decretato come vincitore un peer che abbia poi subito un guasto. Da notare che, grazie alla gestione degli id dei messaggi di Word, gli ulteriori messaggi che vengono spediti vengono ignorati (ovvero non vengono aggiunte le parole nel tavolo di gioco, viene però cambiato il vincitore). Successivamente il messaggio di WordAck, che viene solitamente utilizzato per avanzare il turno, può essere visto come un commit, che conferma definitivamente il vincitore. Pertanto, alla ricezione di tale messaggio, il peer mostra a video il vincitore, decretando quindi la fine del gioco.
 
 \section{Aspetti implementativi}
 % dettagli sulle scelte implementative, ed architettura specifica implementata. Inserire almeno il diagramma delle classi e uno delle interazioni secondo lo standard UML.
 
-\subsection{Architettura}
+%\subsection{Architettura}
 
-\subsubsection{Modellazione del gioco}
+\subsection{Modellazione del gioco}
 
 Il gioco in sé viene rappresentato da poche classi: \texttt{GameTable}, \texttt{Word}, \texttt{Player} e \texttt{Dictionary}.
 
@@ -239,7 +240,7 @@ La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene infor
 
 In Figura~\ref{fig:class_diagram1} possiamo osservare il diagramma delle classi di tutta la parte di modellazione del gioco. Questa, come si può intuire, comprende solamente una piccola parte dell'intera applicazione. che corrisponde agli elementi che abbiamo cercato di descrivere in maniera approfondita. Da notare che anche il \texttt{Player} può generare un evento (che avviene al cambio del punteggio), ma questi vengono esclusivamente intercettati dal \texttt{GameTable} che a sua volta genera l'evento \texttt{playerPointsUpdate()}. Quest'ultimo serve solamente alla parte dell'interfaccia per aggiornare visivamente il punteggio dei giocatori.
 
-\subsubsection{Comunicazione}
+\subsection{Comunicazione}
 
 \begin{figure}
 	\centering
