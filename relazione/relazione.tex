@@ -203,17 +203,6 @@ Il primo caso, invece, è il più delicato. Il turnHolder potrebbe crashare prim
 
 
 
-
-
-
-%%%%%%%%%%%%%% QUESTA E' DA SPOSTARE
-%\subsubsection{Comunicazione}
-
-%Da notare, dalla descrizione della parte di comunicazione, che c'è un disaccoppiamento tra il peer e l'invio dei messaggi. Questo perché, per implementare il progetto, è stato utilizzato il paradigma di invocazione a metodo remoto, in particolare \textit{Java RMI}. Inviare un messaggio equivale pertanto ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario. Detto ciò è stato deciso di creare un thread separato (il client side) che si occupasse solo dell'invio dei messaggi, in modo da non bloccare l'intera applicazione per lunghi periodi (si pensi all'attesa causata da un peer che non risponde, oppure ad un messaggio che altro non è che una chiamata ricorsiva). In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
 \section{Aspetti implementativi}
 % dettagli sulle scelte implementative, ed architettura specifica implementata. Inserire almeno il diagramma delle classi e uno delle interazioni secondo lo standard UML.
 
@@ -223,19 +212,11 @@ Il primo caso, invece, è il più delicato. Il turnHolder potrebbe crashare prim
 
 Il gioco in sé viene rappresentato da poche classi: \texttt{GameTable}, \texttt{Word}, \texttt{Player} e \texttt{Dictionary}.
 
-La classe \texttt{Word} rappresenta una parola del gioco. Consiste di una semplice stringa, ma ha numerosi metodi utili per scomporla in sillabe e determinarne il valore in punteggi. Inoltre essa è serializzabile, poiché deve poter essere inviata lungo la rete.  
+La classe \texttt{Word} rappresenta una parola del gioco. Consiste di una semplice stringa, ma ha numerosi metodi utili per scomporla in sillabe e determinarne il valore in punteggi. Inoltre essa è serializzabile, poiché deve poter essere inviata lungo la rete. La classe \texttt{Dictionary} rappresenta un dizionario, e contiene semplici metodi per il lookup di una parola, mentre la classe \texttt{Player} rappresenta un giocatore, con un nickname, un punteggio, uno stato (attivo o non attivo).
 
-La classe \texttt{Dictionary} rappresenta un dizionario, e contiene semplici metodi per il lookup di una parola.
+La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene informazioni quali: la lista delle parole che sono state inserite, come anche la lista dei giocatori, ed il giocatore che detiene il turno. Inoltre ha dei metodi per modificare lo stato del gioco, come quello per determinare chi è il prossimo detentore del turno, o per inserire una nuova parola. Tale classe non ha un'idea del fatto di come viene controllato un giocatore; seguendo il design pattern chiamato \textit{Observer Pattern}, la classe è stata progettata per generare degli eventi, quali ad esempio l'inserimento di una nuova parola, il cambio del turno, o la terminazione del gioco. 
 
-La classe \texttt{Player} rappresenta un giocatore. Esso ha un nickname, un punteggio, uno stato (attivo o non attivo), ed altre informazioni necessarie per il gioco. Esso può essere controllato da un giocatore reale presente sullo stesso peer, da un agente che gioca automaticamente, oppure controllato un peer remoto.
-
-La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene informazioni quali: la lista delle parole che sono state inserite, come anche la lista dei giocatori, ed il giocatore che detiene il turno. Inoltre ha dei metodi per modificare lo stato del gioco, come quello per determinare chi è il prossimo detentore del turno, o per inserire una nuova parola. Tale classe non ha un'idea del fatto di come viene controllato un giocatore; seguendo il design pattern chiamato \textit{Observer Pattern}, la classe è stata progettata per generare degli eventi, quali ad esempio l'inserimento di una nuova parola, il cambio del turno, o la terminazione del gioco. Sono poi presenti diversi listener che rispondono in maniera passiva a questi eventi seguendo delle azioni opportune. Queste stesse entità che fungono anche da listener, possono comunque avere dei ruoli attivi, come ad esempio l'inserimento di nuove parole. 
-
-L'entità più semplice, chiamata \texttt{FakePlayer}, che rappresenta un agente che gioca automaticamente, consiste ad esempio in un semplice loop, che inserisce una parola, e che rimane in attesa fin tanto che il \texttt{GameTable} non genera un evento, in modo da segnalare che tale agente è il detentore del prossimo turno. 
-
-Al contrario, un giocatore reale ha tanti oggetti, che rappresentano varie componenti dell'interfaccia. Ognuno di essi può fungere anche da listener, in modo da poter aggiornare le varie informazioni che gli competono. Inoltre, l'interfaccia ha anche un ruolo attivo, poiché inserisce le parole che sono state scritte dall'utente, calcolando anche il tempo impiegato per farlo.
-
-Più complicato è invece un giocatore controllato da un peer remoto. Il \texttt{Peer}, che funge anche da listener, può reagire ad un evento, quale ad esempio l'inserimento di una nuova parola, mandando dei messaggi per informare anche agli altri peer di tale evento. Può poi inserire nuove parole sulla base dei messaggi ricevuti dagli altri peer, cambiare lo stato di un giocatore (ad esempio a causa di un crash), oppure decidere chi possederà il prossimo turno in base sullo stato degli altri peer.
+Sono poi presenti diversi listener che rispondono in maniera passiva a questi eventi seguendo delle azioni opportune. Queste stesse entità che fungono anche da listener, possono comunque avere dei ruoli attivi, come ad esempio l'inserimento di nuove parole. L'entità più semplice, chiamata \texttt{FakePlayer}, che rappresenta un agente che gioca automaticamente, consiste ad esempio in un semplice loop, che inserisce una parola, e che rimane in attesa fin tanto che il \texttt{GameTable} non genera un evento, in modo da segnalare che tale agente è il detentore del prossimo turno. Al contrario, un giocatore reale ha tanti oggetti, che rappresentano varie componenti dell'interfaccia. Ognuno di essi può fungere anche da listener, in modo da poter aggiornare le varie informazioni che gli competono. Questa ha anche un ruolo attivo, poiché inserisce le parole che sono state scritte dall'utente, calcolando anche il tempo impiegato per farlo. Anche il \texttt{Peer} funge da listener. Può reagire ad un evento come l'inserimento di una nuova parola, mandando dei messaggi per informare anche agli altri peer di tale evento, oppure può inserire nuove parole sulla base dei messaggi ricevuti dagli altri peer.
 
 \begin{figure}
 	\vspace*{-1in}
@@ -261,13 +242,15 @@ In figura \ref{fig:class_diagram1} possiamo osservare il diagramma delle classi 
 \end{figure}	
 
 
-Come abbiamo già discusso precedentemente, il \texttt{Peer} è un entità che controlla un determinato giocatore (\texttt{Player}). Esso, al momento della creazione di un gioco, si registra come listener per intercettare gli eventi del \texttt{GameTable}. Fatto ciò, ogni volta che l'utente locale ad esempio inserisce una parola, crea un messaggio di tipo \texttt{WordMsg} e lo aggiunge alla coda dei messaggi di uscita del \texttt{ClientSide} chiamando il metodo \texttt{send\_msg()}.
+I \texttt{Peer} è un entità che controlla un determinato giocatore (\texttt{Player}). Esso, al momento della creazione di un gioco, si registra come listener per intercettare gli eventi del \texttt{GameTable}. Fatto ciò, ogni volta che l'utente locale ad esempio inserisce una parola, crea un messaggio di tipo \texttt{WordMsg} e lo aggiunge alla coda dei messaggi di uscita del \texttt{ClientSide} chiamando il metodo \texttt{send\_msg()}.
 
 Il \texttt{ClientSide} è un thread con metodi e campi in più rispetto ad un normale thread, nasce e muore insieme al peer, provvedendo alla gestione dell'invio dei messaggi del peer. Si compone di una coda: è stato deciso di utilizzare la \texttt{BlockingQueue}, ma senza limitazioni nella dimensione, per fornire una coda che potesse essere utilizzata da più thread (il thread del peer e quello del \texttt{ClientSide}). Il metodo \texttt{send\_msg\_rmi(Msg)} altro non fa che ``eseguire'' il messaggio, raccogliendo tutti gli eventuali errori che possono essere generati da Java RMI. 
 
 Utilizziamo il termine ``eseguire'' poiché un messaggio, in generale, è in realtà una classe che contiene un metodo \texttt{execute()} che chiama il metodo remoto presente nel server side del peer destinatario. Ogni tipo di messaggio esegue quindi un metodo differente, e i parametri del messaggio vengono utilizzati come argomenti per i metodi che vengono richiamati. 
 
 Il \texttt{ServerSide} è invece una classe, istanziata solamente una volta per ogni peer, che costituisce l'insieme dei metodi che possono essere richiamati da ogni messaggio. Facendo un esempio, il metodo \texttt{execute()}, del messaggio di tipo \texttt{WordMsg}, esegue il metodo del \texttt{ServerSide} del destinatario chiamato \texttt{word()}, specificando come argomenti quelli propri del messaggio: chi lo ha generato (chi detiene il turno), la parola inserita, il tempo impiegato per inserire la parola, se esiste un vincitore (cioè la partita può terminare), e la lista dei peer morti che si sono accumulati lungo il percorso.
+
+C'è quindi un disaccoppiamento tra il peer e l'invio dei messaggi. Questo poiché, per implementare il progetto, è stato utilizzato \textit{Java RMI}, e di conseguenza inviare un messaggio equivale ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario. Detto ciò è stato deciso di creare un thread separato (il client side) che si occupasse solo dell'invio dei messaggi, in modo da non bloccare l'intera applicazione per lunghi periodi (si pensi all'attesa causata da un peer che non risponde, oppure ad un messaggio che altro non è che una chiamata ricorsiva). In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
 
 Nel seguente estratto, molto semplificato, del codice del \texttt{ClientSide} possiamo vedere quali siano le azioni base intraprese dal metodo \texttt{execute()} di un messaggio di tipo \texttt{WordMsg}.
 \begin{verbatim}
@@ -302,21 +285,22 @@ Per quanto riguarda invece l'implementazione dei timeout, è stata utilizzata la
 
 Ognuno di questi viene creato e distrutto in momenti differenti. Ad esempio \texttt{lastWordTask} viene creato al momento dell'invio di un messaggio di \textit{word}, e ricreato quando invece si riceve un nuovo messaggio.
 
-TODO: altro?
-
 \section{Valutazione}
 % confronto delle soluzioni proposte con soluzioni analoghe allo stato dell'arte.
 
-Il gioco che è stato implementato segue le caratteristiche del classico gioco che ha avuto tanto successo, chiamato \textit{Ruzzle}, versione virtuale del noto gioco \textit{Il Paroliere}. Quest'ultimo, molto semplice, si basa anch'esso sulla conoscenza approfondita del vocabolario italiano, viene giocato da più giocatori, e costituisce quindi una sfida da parte del giocatore che in caso di vittoria lo induce a credere di essere un buon conoscitore della lingua italiana, e di conseguenza aumenta lo stimolo da parte dello stesso. Allo stesso modo si è pensato quale potesse essere un gioco con le stesse caratteristiche, che potesse essere anche implementato come progetto per questo corso di Sistemi Distribuiti. Tale gioco è molto citato nei libri ed in giro per il Web, ma viene pressoché giocato senza l'ausilio di un computer, o comunque senza l'ausilio di un entità completamente automatica che controlli la validità delle parole (ad esempio si utilizzano dei forum con dei moderatori umani). Questo probabilmente perché è molto difficile riuscire a costruire un algoritmo che faccia una sillabazione perfetta, per via delle tante eccezioni che sono presenti. Per questo motivo è già stato un passo avanti riuscire ad creare qualcosa di innovativo in questo senso, riuscendo a superare tali difficoltà.
+Il gioco che è stato implementato segue le caratteristiche del classico gioco che ha avuto tanto successo, chiamato \textit{Ruzzle}, versione virtuale del noto gioco \textit{Il Paroliere}. Allo stesso modo si è pensato quale potesse essere un gioco con le stesse caratteristiche, che potesse essere anche implementato come progetto per questo corso di Sistemi Distribuiti. Tale gioco è molto citato nei libri ed in giro per il Web, ma viene pressoché giocato senza l'ausilio di un computer, o comunque senza l'ausilio di un entità completamente automatica che controlli la validità delle parole (ad esempio si utilizzano dei forum con dei moderatori umani). Questo probabilmente perché è molto difficile riuscire a costruire un algoritmo che faccia una sillabazione perfetta, per via delle tante eccezioni che sono presenti. Per questo motivo è già stato un passo avanti riuscire ad creare qualcosa di innovativo in questo senso, riuscendo a superare tali difficoltà.
+
+Il registrar è stato realizzato con HTTP, e questo è simile a ciò che viene fatto nei giochi commerciali, dove abbiamo un sito dedicato, ad esempio utilizzando Google App Engine, che svolge tale funzione. Da questo punto di vista quindi ci riteniamo coerenti con la nostra scelta, anche se ciò è significato complicare l'implementazione rispetto ad un implementazione in Java RMI, in modo da avere un architettura meno chiusa, e più facilmente estendibile.
 
 TODO: Valutazioni a livello di comunicazione?
 
 \section{Conclusioni}
 % commenti conclusivi su possibili miglioramenti di quanto discusso, e possibili linee di intervento futuro.
 
-TODO: ...
 
 Sarebbe interessante portare avanti questo progetto anche in ambiente mobile, dove sicuramente un gioco simile può avere successo. Per quanto riguarda la giocabilità ci sono diverse proposte e migliorie. Prima di tutto potrebbe essere più divertente creare dizionari divisi per sezioni, in modo da limitare l'inserimento delle parole solamente a quelle di una determinata categoria scelta all'inizio del gioco. Inoltre, sarebbe interessante, in seguito ad uno studio di usabilità decidere se prevedere casi di terminazione che potrebbero divertire di più i giocatori, come ad esempio la vittoria di un giocatore che realizza moltissimi punti con una sola parola. Poi potrebbe essere anche utile sfruttare tutta la parte già realizzata dei giocatori automatici per rimpiazzare i giocatori che hanno avuto un crash.
+
+Alcuni protocolli utilizzati per la parte di comunicazione potrebbero essere migliorati. Ad esempio si potrebbe considerare di far partire il gioco, nonostante l'inizializzazione sia fallita, dopo un certo numero di secondi, lasciando al gioco stesso il compito di dichiarare chi ha avuto un guasto e chi no. Ciò è stato tralasciato poiché le specifiche del progetto non prevedevano guasti che non fossero di tipo crash, ma sarebbe comunque utile, ai fini della giocabilità, migliorare questa parte. Inoltre, anche la parte che trova quali peer sono morti potrebbe essere migliorata, con un messaggio che gira continuamente nella rete. Tale approccio è comunque stato scartato poiché più difficile da gestire, ma potrebbe velocizzare la partita, dichiarando in maniera più rapida che chi detiene il turno ha subito un guasto.
 
 
 % Bibliography
