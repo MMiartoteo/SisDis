@@ -79,6 +79,15 @@ public class ServerSide implements ServerSideInterface {
 	public String ElectionSetTurnHolder(int newTurnHolder) {
 		synchronized (peer) {
 			assert peer.isReady();
+
+			if (peer.getTurnHolder().getOrd() != newTurnHolder) {
+				System.out.println("Stavo ancora aspettando un word ack, ma è cambiato il turno. Faccio come se l'avessi ricevuto, cancello lastWordTask.");
+				if (peer.lastWordTask != null) {
+					peer.lastWordTask.cancel();
+					peer.lastWordTask = null;
+				}
+			}
+
 			System.out.println(String.format("Ricevuto SetTurnHolder. Setto %d come turnHolder.", newTurnHolder));
 			gameTable.setTurnHolder(peer.peers.get(newTurnHolder).player);
 
