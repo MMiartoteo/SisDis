@@ -162,9 +162,9 @@ Il server centrale, chiamato \textit{registrar}, è un server HTTP che provvede 
 
 Al momento del raggiungimento delle $N$ richieste, il registrar manda, ad ogni giocatore, la lista degli utenti (e relativi peer) che parteciperanno alla partita. Tale lista $[p_1, p_2, .., p_N]$ è ordinata ed identica per tutti, stabilendo quindi quale sarà l'ordine con il quale avverranno i turni di gioco. Ogni lista di giocatori arriva ai vari peer in momenti differenti, e per questo motivo è necessario che tutti i peer siano a conoscenza del fatto che tutti gli altri l'abbiano già ricevuta prima di poter iniziare la partita. Se così non fosse il peer che detiene il turno, iniziando a giocare, potrebbe assumere falsamente che alcuni peer abbiano subito un guasto. Il peer che deve per primo iniziare a giocare (ha il turno), invia pertanto un messaggio di \textit{Hello}, attendendo che questo ritorni indietro. Nel caso in cui tale messaggio non dovesse ritornare (si utilizza un timeout), la partita viene annullata, per fare sì che se ne possa ricreare una nuova. 
 
-\subsubsection{Comunicazione}
 
-\subsection{Gestione dei turni}
+
+\subsubsection{Gestione dei turni}
 
 Il protocollo di gestione dei turni svolge molteplici funzionalità. Da un lato permette al detentore del turno attuale di inviare la parola scelta dall'utente agli altri giocatori partecipanti, da un altro permette di individuare eventuali guasti (di tipo crash) durante l'esecuzione del gioco.
 
@@ -179,7 +179,7 @@ I turni ruotano in senso orario, secondo l'ordine stabilito dal registrar al mom
 
 Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al turnHolder dal fatto che il messaggio Word da lui inviato gli sia tornato indietro. Ciò infatti significa due cose: che l'anello è chiuso e che tutti i peer ancora attivi hanno ricevuto la nuova parola. Il secondo ack è esplicito, ed è caratterizzato dal messaggio di WordAck inviato dal turnHolder solo se il giro del messaggio Word è stato completato. Tale messaggio sancisce la fine del turno attuale e indica che anche il turnHolder ha effettuato il cambio di turno con successo.
 
-\subsection{Gestione dei guasti}
+\subsubsection{Gestione dei guasti}
 Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder.
 
 \paragraph{Crash di un peer generico}
@@ -199,8 +199,15 @@ Il primo caso, invece, è il più delicato. Il turnHolder potrebbe crashare prim
 
 
 
-\subsection{Elezione del turnHolder}
+\subsubsection{Elezione del turnHolder}
 
+Come detto in precedenza, vi è un'analogia tra il concetto di leader e quello di turnHolder. In particolare, il leader deve cambiare ad ogni turno in modo circolare, ovvero in senso orario ad anello. Ciò significa che, a meno di crash, è prevedibile chi sarà il prossimo leader.
+
+Dato che ogni peer conosce gli identificativi di tutti gli altri peer, essi sanno anche chi sono i candidati leader nel momento in cui una nuova elezione deve essere eseguita. Supposto che il peer $j$ sia l'attuale leader, il peer $i$ sa che i potenziali candidati leader sono $j$, $j+1$, $\dots$, fino a $i-1$ (supponendo aritmetica modulo $N$). Se tutti loro non dovessero rispondere all'elezione, solo allora $i$ potrebbe capire di essere effettivamente lui il nuovo leader (e quindi il detentore del turno attuale). Nessun peer dopo $i$ può essere un candidato, in quanto $i$ stesso è ancora vivo.
+
+Questo semplice ragionamento suggerisce di utilizzare l'algoritmo \emph{Bully} studiato a lezione per la realizzazione dell'elezione del leader in ambiente distribuito. Infatti, in tale algoritmo si assume che tutti i peer sappiano gli identificativi di tutti gli alti peer e possano identificare univocamente i candidati leader. Quando contattato, colui che sa di essere il leader risponde con un messaggio \emph{SetTurnHolder} a tutti i peer che non sono possibili candidati, ovvero tutti i peer eccetto se stesso.
+
+L'algoritmo Bully è tale da gestire anche i guasti eventuali durante l'elezione. Essi sono gestiti per mezzo di due timeout, settati entrambi da coloro che indicono l'elezione.
 
 
 
