@@ -40,11 +40,11 @@ public class WordMsg extends Msg {
 	}
 	
 	private void sendToNext() throws CrashException {
-		if (timer != null) {
-			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, remainingTimeMilliseconds, winnerOrd, timer, timerTask, delay));
-		} else {
+//		if (timer != null) {
+//			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, remainingTimeMilliseconds, winnerOrd, timer, timerTask, delay));
+//		} else {
 			sourcePeer.send_msg(new WordMsg(sourcePeer, destPeer.getNextActivePeer(), id, word, remainingTimeMilliseconds, winnerOrd));//, msgOriginatorOrd));
-		}
+//		}
 	}
 	
 	public String execute() throws CrashException {
@@ -56,6 +56,7 @@ public class WordMsg extends Msg {
 			synchronized (sourcePeer) {
 
 				if (timer != null) {
+					//timerTask.cancel();
 					timer.schedule(timerTask, delay); // delay is in milliseconds
 				}
 

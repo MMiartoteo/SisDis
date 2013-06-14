@@ -33,6 +33,12 @@ public class ServerSide implements ServerSideInterface {
 		peer.setReady();
 		peer.starter.startGame();
 
+		System.out.println(String.format("Cancello timer di hello!"));
+		if (peer.helloTask != null) {
+			peer.helloTask.cancel();
+			peer.helloTask = null;
+		}
+
 		// Fai il forward se non sei tu il turnista
 		if (!peer.isTurnHolder()) {
 			System.out.println("Il peer attuale NON è il detentore del turno. Faccio forwarding.");
@@ -41,12 +47,7 @@ public class ServerSide implements ServerSideInterface {
 
 		// Altrimenti se sei il turnista vuol dire che è l'ack che è tornato indietro nell'anello
 		else {
-			System.out.println(String.format("HELLO è tornato indietro! Cancello il timer relativo."));
-			if (peer.helloTask != null) {
-				peer.helloTask.cancel();
-				peer.helloTask = null;
-			}
-
+			System.out.println(String.format("HELLO è tornato indietro!"));
 			/// DEBUG: Comincio elezione (poi non servirà nella versione finale), perché in realtà sono io il turnista!
 			peer.startTurnHolderElection();
 		}
@@ -214,8 +215,6 @@ public class ServerSide implements ServerSideInterface {
 			/// NOTA: TEORICAMENTE STA COSA NON DOVREBBE MAI SUCCEDERE...
 			else {
 				System.out.println("L'ack è vecchio, ignoro il messaggio.");
-				System.out.println("UN WordAck vecchio NON DOVREBBE MAI SUCCEDERE? FORSE...");
-				System.exit(-1);
 			}
 
 			// Inoltre, questo significa che il turnHolder non è morto

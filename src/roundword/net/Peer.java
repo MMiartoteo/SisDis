@@ -82,11 +82,19 @@ public class Peer implements GameTable.EventListener {
 		if (this.isTurnHolder()) {
 			sendHello();
 		} else {
-
+			if (helloTask != null) helloTask.cancel();
+			helloTask = new TimerTask() {
+				@Override
+				public void run() {
+					System.out.println("HELLO NON E' TORNATO INDIETRO!");
+					System.exit(-1);
+				}
+			};
+			long delay = 10*peers.size()*(NetConstants.T_trans+NetConstants.T_proc);
+			timer.schedule(helloTask, delay);
+			System.out.println(String.format("%s) Aspetto %s secondi", getOrd(), String.valueOf(delay/1000.0)));
 		}
 		
-		// Fai partire il timer per beccare la morte del turnHolder
-		rescheduleTurnHolderTimer();
 	}
 	
 	/* ############################## */
@@ -166,6 +174,10 @@ public class Peer implements GameTable.EventListener {
 		//DEBUG
 		for (byte b : crashedPeerOrds) {
 			System.out.println(String.format("MORTO: %s", b));
+		}
+
+		if (crashedPeerOrds.contains(this.getOrd())) {
+			gameTable.forceEndGame("La tua connessione è troppo lenta, sei stato buttato fuori il gioco!");
 		}
 
 		for (int i=(getOrd()+1)%peers.size(); i!=getOrd(); i=(i+1)%peers.size()) {
