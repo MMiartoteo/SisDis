@@ -65,12 +65,12 @@ Un gioco molto famoso tra i bambini di ogni età, ma giocato anche tra adulti se
 
 Non essendo a conoscenza del nome del gioco (nonostante lo abbiamo giocato sin da bambini), abbiamo deciso di chiamarlo \emph{RoundWord} per il presente progetto.
 
-\begin{figure}
-	\begin{center}
-		\includegraphics[scale=0.5]{imgs/screenshot.png}
-		\caption{Una screenshot del gioco dove Giacomo detiene il turno e pertanto deve inserire una parola. Notare anche che Marco si è ritirato, oppure ha avuto un crash.}
-	\end{center}
-\end{figure}
+%\begin{figure}
+%	\begin{center}
+%		\includegraphics[scale=0.5]{imgs/screenshot.png}
+%		\caption{Una screenshot del gioco dove Giacomo detiene il turno e pertanto deve inserire una parola. Notare %anche che Marco si è ritirato, oppure ha avuto un crash.}
+%	\end{center}
+%\end{figure}
 
 
 \subsection{Regole del gioco}
@@ -179,8 +179,9 @@ I turni ruotano in senso orario, secondo l'ordine stabilito dal registrar al mom
 
 Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al turnHolder dal fatto che il messaggio Word da lui inviato gli sia tornato indietro. Ciò infatti significa due cose: che l'anello è chiuso e che tutti i peer ancora attivi hanno ricevuto la nuova parola. Il secondo ack è esplicito, ed è caratterizzato dal messaggio di WordAck inviato dal turnHolder solo se il giro del messaggio Word è stato completato. Tale messaggio sancisce la fine del turno attuale e indica che anche il turnHolder ha effettuato il cambio di turno con successo.
 
+
 \subsubsection{Gestione dei guasti}
-Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder.
+Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder. I crash vengono individuati mediante diversi timeout e relativi messaggi di acknowledgement. Essi vengono gestiti mediante ridondanza: i messaggi vengono re-inviati quando necessario. Il turnId viene utilizzato anche per ignorare messaggi relativi a turni precedenti.
 
 \paragraph{Crash di un peer generico}
 Il primo caso è raffigurato in Figura~\ref{img:word}(b). Quando un forwarder (o il turnHolder) prova a contattare un peer che è crashato, l'eccezione generata (impossibilità di connettersi al nodo) fa sì che il peer si accorga dell'errore. Il peer allora proverà semplicemente a inviare il messaggio al primo peer attivo immediatamente successivo al peer crashato. Al messaggio Word verrà incorporata l'informazione sul peer morto, in modo tale che tutti i nodi ne siano a conoscenza.
@@ -201,7 +202,7 @@ Il primo caso, invece, è il più delicato. Il turnHolder potrebbe crashare prim
 
 \subsubsection{Elezione del turnHolder}
 
-Come detto in precedenza, vi è un'analogia tra il concetto di leader e quello di turnHolder. In particolare, il leader deve cambiare ad ogni turno in modo circolare, ovvero in senso orario ad anello. Ciò significa che, a meno di crash, è prevedibile chi sarà il prossimo leader.
+Come detto in precedenza, vi è un'analogia tra il concetto di leader e quello di turnHolder. In particolare, il leader è il gestore attuale del turno e ha il compito di inviare a tutti la nuova parola scelta dall'utente e stabilire il cambio del turno. A differenza dei leader più comuni, che cambiano solo quando crashano, il leader del nostro gioco deve cambiare ad ogni turno in modo circolare, ovvero in senso orario ad anello. Ciò significa che, a meno di crash, è prevedibile chi sarà il prossimo leader.
 
 Dato che ogni peer conosce gli identificativi di tutti gli altri peer, essi sanno anche chi sono i candidati leader nel momento in cui una nuova elezione deve essere eseguita. Supposto che il peer $j$ sia l'attuale leader, il peer $i$ sa che i potenziali candidati leader sono $j$, $j+1$, $\dots$, fino a $i-1$ (supponendo aritmetica modulo $N$). Se tutti loro non dovessero rispondere all'elezione, solo allora $i$ potrebbe capire di essere effettivamente lui il nuovo leader (e quindi il detentore del turno attuale). Nessun peer dopo $i$ può essere un candidato, in quanto $i$ stesso è ancora vivo.
 
@@ -295,11 +296,15 @@ Ognuno di questi viene creato e distrutto in momenti differenti. Ad esempio \tex
 \section{Valutazione}
 % confronto delle soluzioni proposte con soluzioni analoghe allo stato dell'arte.
 
-Il gioco che è stato implementato segue le caratteristiche del classico gioco che ha avuto tanto successo, chiamato \textit{Ruzzle}, versione virtuale del noto gioco \textit{Il Paroliere}. Allo stesso modo si è pensato quale potesse essere un gioco con le stesse caratteristiche, che potesse essere anche implementato come progetto per questo corso di Sistemi Distribuiti. Tale gioco è molto citato nei libri ed in giro per il Web, ma viene pressoché giocato senza l'ausilio di un computer, o comunque senza l'ausilio di un entità completamente automatica che controlli la validità delle parole (ad esempio si utilizzano dei forum con dei moderatori umani). Questo probabilmente perché è molto difficile riuscire a costruire un algoritmo che faccia una sillabazione perfetta, per via delle tante eccezioni che sono presenti. Per questo motivo è già stato un passo avanti riuscire ad creare qualcosa di innovativo in questo senso, riuscendo a superare tali difficoltà.
+Il sistema realizzato è un gioco di parole distribuito, senza componenti centralizzate dal momento della registrazione fino alla fine della partita. Ogni partecipante è un'entità simile alle altre (\emph{peer}) e un guasto (crash) di una qualunque di esse non pregiudica il funzionamento globale del sistema. I peer possono crashare e i crash vengono identificati e gestiti in maniera opportuna, permettendo ai partecipanti rimanenti di continuare a giocare. Una soluzione totalmente centralizzata sarebbe stata certamente molto più semplice da realizzare, ma avrebbe creato tutti i problemi tipici delle soluzioni non distribuite. In particolare, ci sarebbe stato un \emph{single point of failure}, e la presenza di possibili colli di bottiglia, rendendolo anche molto più sensibile ad attacchi di tipo DoS.
 
-Il registrar è stato realizzato con HTTP, e questo è simile a ciò che viene fatto nei giochi commerciali, dove abbiamo un sito dedicato, ad esempio utilizzando Google App Engine, che svolge tale funzione. Da questo punto di vista quindi ci riteniamo coerenti con la nostra scelta, anche se ciò è significato complicare l'implementazione rispetto ad un implementazione in Java RMI, in modo da avere un architettura meno chiusa, e più facilmente estendibile.
+La soluzione proposta è particolarmente efficiente per quanto riguarda la dimensione dei messaggi scambiati tra i peer nella rete. Infatti, una soluzione meno efficiente che era stata inizialmente valutata prevedeva l'invio di tutto lo stato condiviso dopo ogni azione. In altre parole, il turnHolder calcolerebbe il nuovo stato e lo invierebbe per intero ad ogni peer. Ogni messaggio quindi conterrebbe tutta la lista delle parole finora prodotte, la quale cresce nel tempo. Il nostro protocollo, invece, prevede di inviare solo gli ultimi update dello stato, e ogni peer ne calcola la nuova versione indipendentemente. In termini della dimensione dello stato, i nostri messaggi hanno dimensione O(1).
 
-TODO: Valutazioni a livello di comunicazione?
+%Il gioco che è stato implementato segue le caratteristiche del classico gioco che ha avuto tanto successo, chiamato \textit{Ruzzle}, versione virtuale del noto gioco \textit{Il Paroliere}. Allo stesso modo si è pensato quale potesse essere un gioco con le stesse caratteristiche, che potesse essere anche implementato come progetto per questo corso di Sistemi Distribuiti. Tale gioco è molto citato nei libri ed in giro per il Web, ma viene pressoché giocato senza l'ausilio di un computer, o comunque senza l'ausilio di un entità completamente automatica che controlli la validità delle parole (ad esempio si utilizzano dei forum con dei moderatori umani). Questo probabilmente perché è molto difficile riuscire a costruire un algoritmo che faccia una sillabazione perfetta, per via delle tante eccezioni che sono presenti. Per questo motivo è già stato un passo avanti riuscire ad creare qualcosa di innovativo in questo senso, riuscendo a superare tali difficoltà.
+
+Il nostro gioco è anche facilmente integrabile grazie alla sua architettura aperta ed estendibile. Il registrar è stato realizzato con HTTP (similmente a ciò che viene fatto i molti giochi commerciali), ed utilizza Java RMI per permettere di essere utilizzato in diverse architetture. Un porting su Android non sarebbe particolarmente complesso.
+
+%TODO: Valutazioni a livello di comunicazione?
 
 \section{Conclusioni}
 % commenti conclusivi su possibili miglioramenti di quanto discusso, e possibili linee di intervento futuro.
