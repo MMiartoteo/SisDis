@@ -140,7 +140,7 @@ La parte di modellazione del gioco racchiude a sua volta tutte le componenti che
 Questo modulo ignora il fatto che il gioco venga eseguito in rete o in locale, con utenti reali o intelligenze artificiali.
 Pertanto, esso fornisce solamente dei metodi per cambiare lo stato del gioco, e genera eventi per segnalare tali cambiamenti.
 
-Il controllore dei giocatori gestisce le azioni dei giocatori e ne riporta le scelte sul modello di gioco. Per semplicità (e per maggior divertimento) abbiamo previsto che il gioco possa essere giocato sia da utenti reali che da intelligenze artificiali (AI). Una semplice AI è stata anche realizzata nel corso del progetto. Il controllore può essere quindi di due tipi: una GUI, per chiedere e ricevere input dall'utente e fornirgli output, e una AI, che simula le azioni di un giocatore ``reale''.
+Il controllore dei giocatori gestisce le azioni dei giocatori e ne riporta le scelte sul modello di gioco. Per semplicità nel debugging (e per maggior divertimento) abbiamo previsto che il gioco possa essere giocato sia da utenti reali che da intelligenze artificiali (AI). Una semplice AI è stata anche realizzata nel corso del progetto. Il controllore può essere quindi di due tipi: una GUI, per chiedere e ricevere input dall'utente e fornirgli output, e una AI, che simula le azioni di un giocatore ``reale''.
 %possono essere di tre tipi: un'interfaccia grafica che comunica con il giocatore reale permettendogli di poter giocare, un peer remoto che interagisce sfruttando la parte di comunicazione, o un giocatore automatico (principalmente utilizzato per debug, ma che comunque non si esclude possa essere utilizzato come un rimpiazzo per i giocatori che hanno subito un guasto).
 
 Il modulo di comunicazione è la parte centrale del sistema distribuito, in quanto gestisce l'interazione tra i peer del sistema. I compiti principali di questo modulo sono quelli di permettere lo scambio dei messaggi del gioco (le nuove parole inserite dai giocatori), la gestione dello stato condiviso e l'implementazione dei protocolli di gestione dei guasti di tipo crash.
@@ -156,7 +156,7 @@ Nel seguito, descriveremo i protocolli di comunicazione e interazione distribuit
 
 \subsubsection{Inizializzazione della partita}
 
-La procedura di inizializzazione della partita utilizza un server centrala ed è l'unica procedura del gioco che prevede componenti centralizzate. Tale scelta, oltre che essere prevista nelle specifiche, è un'importante semplificazione che elimina il bisogno di complicate procedure di discovery distribuite. Ma è anche un'assunzione realistica e molto usata in parecchi giochi commerciali.
+La procedura di inizializzazione della partita utilizza un server centrale ed è l'unica procedura del gioco che prevede componenti centralizzate. Tale scelta, oltre che essere prevista nelle specifiche, è un'importante semplificazione che elimina il bisogno di complicate procedure di discovery distribuite. Ma è anche un'assunzione realistica e molto usata in parecchi giochi commerciali.
 
 Il server centrale, chiamato \textit{registrar}, è un server HTTP che provvede a raccogliere gli indirizzi IP e le porte dei vari peer che vogliono giocare, ed i nickname dei relativi giocatori. Tale server viene configurato in esecuzione per creare partite di $N$ giocatori, e quindi dà il via libera solo dopo che sono state fatte $N$ richieste proveniente da altrettanti giocatori differenti.
 
@@ -175,9 +175,9 @@ Il protocollo di gestione dei turni svolge molteplici funzionalità. Da un lato 
 \label{img:word}
 \end{figure}
 
-I turni ruotano in senso orario, secondo l'ordine stabilito dal registrar al momento dell'inizializzazione. Il peer corrente (denominato \emph{turnHolder}), dopo che il giocatore ha deciso la parola, deve inviarla a tutti gli altri peer. L'invio della parola procede ad anello, attraverso un messaggio \emph{Word}, come illustrato in Figura~\ref{img:word}(a). Il turnHolder invia infatti la parola solo al peer successivo. Quest'ultimo, sapendo di non essere il turnHolder, provvederà al semplice forward della parola al peer ancora successivo. Ogni turno è identificato in maniera univoca da un \emph{turnId}, fatto incrementare solo dal turnHolder al momento opportuno (creazione di una nuova parola). Ogni volta che un peer effettua un forward, però, deve attendere un ulteriore messaggio da parte del turnHolder, denominato \emph{WorkdAck}, prima di poter passare al turno di gioco successivo. Questo messaggio è necessario per catturare il guasto relativo al crash del turnHolder stesso dopo il completamento dell'anello. In Figura~\ref{img:word}(a) è evidente come il messaggio WorkAck non sia inviato anch'esso ad anello, ma sia inviato in sequenza direttamente ad ogni peer (una sorta di multicast).
+I turni ruotano in senso orario, secondo l'ordine stabilito dal registrar al momento dell'inizializzazione. Il peer corrente, denominato \emph{turnHolder}, deve inviare a tutti gli altri peer la parola scelta dal giocatore. L'invio della parola procede ad anello, attraverso un messaggio \emph{Word}, come illustrato in Figura~\ref{img:word}(a). Il turnHolder invia infatti la parola solo al peer successivo. Quest'ultimo, sapendo di non essere il turnHolder, provvederà al semplice forward della parola al peer ancora successivo, dopo aver memorizzato la parola inviatagli. Ogni turno è identificato in maniera univoca da un \emph{turnId}, fatto incrementare solo dal turnHolder al momento opportuno (creazione di una nuova parola). Ogni volta che un peer effettua un forward, però, deve attendere un ulteriore messaggio da parte del turnHolder, denominato \emph{WorkdAck}, prima di poter passare al turno di gioco successivo. Questo messaggio è necessario per catturare il guasto relativo al crash del turnHolder stesso dopo il completamento dell'anello. In Figura~\ref{img:word}(a) è evidente come il messaggio WorkAck non sia inviato anch'esso ad anello, ma sia inviato in sequenza direttamente ad ogni peer (una sorta di multicast).
 
-Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al turnHolder dal fatto che il messaggio Word da lui inviato gli sia tornato indietro. Ciò infatti significa due cose: che l'anello è chiuso e che tutti i peer ancora attivi hanno ricevuto la nuova parola. Il secondo ack è esplicito, ed è caratterizzato dal messaggio di WordAck inviato dal turnHolder solo se il giro del messaggio Word è stato completato. Tale messaggio sancisce la fine del turno attuale e indica che anche il turnHolder ha effettuato il cambio di turno con successo.
+Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al turnHolder dal fatto che il messaggio Word da lui inviato gli sia tornato indietro (l'ultima comunicazione che fa arrivare il messaggio al turnHolder non ha scopi informativi, solo si acknowledgement). Ciò infatti significa due cose: che l'anello è chiuso e che tutti i peer ancora attivi hanno ricevuto la nuova parola. Il secondo ack è esplicito, ed è caratterizzato dal messaggio di WordAck inviato dal turnHolder solo se il giro del messaggio Word è stato completato. Tale messaggio sancisce la fine del turno attuale e indica che anche il turnHolder ha effettuato il cambio di turno con successo.
 
 \subsubsection{Gestione dei guasti}
 Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder.
@@ -186,12 +186,12 @@ Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo dell
 Il primo caso è raffigurato in Figura~\ref{img:word}(b). Quando un forwarder (o il turnHolder) prova a contattare un peer che è crashato, l'eccezione generata (impossibilità di connettersi al nodo) fa sì che il peer si accorga dell'errore. Il peer allora proverà semplicemente a inviare il messaggio al primo peer attivo immediatamente successivo al peer crashato. Al messaggio Word verrà incorporata l'informazione sul peer morto, in modo tale che tutti i nodi ne siano a conoscenza.
 
 \paragraph{Crash di un forwarder}
-Se invece a crashare è un forwarder, dopo aver ricevuto la parola, ad accorgersene sarà il turnHolder, in quanto scatterà il primo timeout (\emph{timeout 1}). Tale timeout viene fatto partire dal turnHolder all'invio del messaggio Word, proprio per catturare il crash di nodi forwarder. Questo caso è illustrato in Figura~\ref{img:word}(c). Una volta scattato il timeout, il turnHolder invierà nuovamente il messaggio Word, con lo stesso turnId.
+Se invece a crashare è un forwarder, dopo aver ricevuto la parola, quest'ultima non verrà rispedita al peer successivo. In tal caso, ad accorgersene, sarà il turnHolder, in quanto scatterà il primo timeout (\emph{timeout 1}). Tale timeout viene fatto partire dal turnHolder all'invio del messaggio Word, proprio per catturare il crash di nodi forwarder. Questo caso è illustrato in Figura~\ref{img:word}(c). Una volta scattato il timeout, il turnHolder invierà nuovamente il messaggio Word, con lo stesso turnId.
 
 \paragraph{Crash del turnHolder}
 Infine, potrebbe essere il turnHoder stesso a crashare. Questo è il caso più delicato, ed anche il più difficile da gestire. Infatti, il turnHolder potrebbe crashare in vari momenti: (1) prima di avere inviato il messaggio Word, oppure (2) dopo averlo inviato, prima di aver ricevuto il messaggio indietro dall'anello, e infine (3) dopo aver ricevuto indietro il messaggio Word dall'anello.
 
-Il terzo caso è raffigurato in Figura~\ref{img:word}(d) ed è gestito attraverso un ulteriore timeout che tutti gli altri peer settano dopo aver ricevuto il messaggio Word dal turnHolder (o indirettamente, dai forwarder). I peer attendono un ulteriore acknowledgment dal turnHolder, denominato WordAck, prima di poter settare il cambio del turno. Questo ack è necessario per rispondere ai requisiti del progetto, ovvero per poter gestire almeno due guasti contemporanei di tipo crash. Se un peer non riceve tale messaggio entro il timeout, il turnHolder attuale viene considerato crashato ed è necessario stabilire chi è il detentore del turno attuale (attraverso un algoritmo simile all'elezione del leader).
+Il terzo caso è raffigurato in Figura~\ref{img:word}(d) ed è gestito attraverso un ulteriore timeout che tutti gli altri peer settano dopo aver ricevuto il messaggio Word dal turnHolder (o indirettamente, dai forwarder). I peer attendono un ulteriore acknowledgement dal turnHolder, denominato WordAck, prima di poter settare il cambio del turno. Questo ack è necessario per rispondere ai requisiti del progetto, ovvero per poter gestire almeno due guasti contemporanei di tipo crash. Se un peer non riceve tale messaggio entro il timeout, il turnHolder attuale viene considerato crashato ed è necessario stabilire chi è il detentore del turno attuale (attraverso un algoritmo simile all'elezione del leader).
 
 Il secondo caso è simile al terzo, in quanto i peer che hanno ricevuto il messaggio Word faranno partire il timeout per il messaggio di WordAck, il quale scatterà e il crash del turnHolder verrà catturata e gestita allo stesso modo.
 
@@ -209,6 +209,10 @@ Questo semplice ragionamento suggerisce di utilizzare l'algoritmo \emph{Bully} s
 
 L'algoritmo Bully è tale da gestire anche i guasti eventuali durante l'elezione. Essi sono gestiti per mezzo di due timeout, settati entrambi da coloro che indicono l'elezione.
 
+
+\subsubsection{Terminazione della partita}
+
+Per la terminazione della partita è necessario che tutti i peer siano d'accordo su un unico vincitore. A decretare che la partita può essere terminata è quel peer che ha scritto una parola con punteggio negativo, a seguito di un intero ciclo dove ogni peer ha avuto un punteggio negativo. Il peer quindi può inviare tale informazione 
 
 \section{Aspetti implementativi}
 % dettagli sulle scelte implementative, ed architettura specifica implementata. Inserire almeno il diagramma delle classi e uno delle interazioni secondo lo standard UML.
@@ -230,21 +234,19 @@ Sono poi presenti diversi listener che rispondono in maniera passiva a questi ev
 	\begin{center}
 		\hspace*{-0.5in}
 		\includegraphics[scale=0.95]{imgs/ClassDiagram1.pdf}
-		\label{fig:class_diagram1}
-		\caption{Il diagramma delle classi di tutta la parte di modellazione del gioco, escludendo quindi tutte le classi per far partire il gioco, le classi di comunicazione, le classi per i giocatori automatici, e le classi per l'interfaccia con l'utente.}
+		\caption{Il diagramma delle classi di tutta la parte di modellazione del gioco, escludendo quindi tutte le classi per far partire il gioco, le classi di comunicazione, le classi per i giocatori automatici, e le classi per l'interfaccia con l'utente.}\label{fig:class_diagram1}
 	\end{center}
 \end{figure}
 
-In figura \ref{fig:class_diagram1} possiamo osservare il diagramma delle classi di tutta la parte di modellazione del gioco. Questa, come si può intuire, comprende solamente una piccola parte dell'intera applicazione. che corrisponde agli elementi che abbiamo cercato di descrivere in maniera approfondita. Da notare che anche il \texttt{Player} può generare un evento (che avviene al cambio del punteggio), ma questi vengono esclusivamente intercettati dal \texttt{GameTable} che a sua volta genera l'evento \texttt{playerPointsUpdate()}. Quest'ultimo serve solamente alla parte dell'interfaccia per aggiornare visivamente il punteggio dei giocatori.
+In Figura~\ref{fig:class_diagram1} possiamo osservare il diagramma delle classi di tutta la parte di modellazione del gioco. Questa, come si può intuire, comprende solamente una piccola parte dell'intera applicazione. che corrisponde agli elementi che abbiamo cercato di descrivere in maniera approfondita. Da notare che anche il \texttt{Player} può generare un evento (che avviene al cambio del punteggio), ma questi vengono esclusivamente intercettati dal \texttt{GameTable} che a sua volta genera l'evento \texttt{playerPointsUpdate()}. Quest'ultimo serve solamente alla parte dell'interfaccia per aggiornare visivamente il punteggio dei giocatori.
 
 \subsubsection{Comunicazione}
 
 \begin{figure}
 	\begin{center}
 		\hspace*{-0.2in}
-		\includegraphics[scale=0.55]{imgs/Sequence1.pdf}
-		\label{fig:sequence1}
-		\caption{}
+		\includegraphics[scale=0.55]{imgs/Sequence1.pdf}		
+		\caption{}\label{fig:sequence1}
 	\end{center}
 \end{figure}	
 
@@ -266,15 +268,14 @@ Nel seguente estratto, molto semplificato, del codice del \texttt{ClientSide} po
 	response = stub.word(id, word, time, winnerId, crashedPeer);
 \end{verbatim}
 
-In figura \ref{fig:sequence1} possiamo osservare il comportamento della parte di comunicazione, messo in relazione con tutta la parte di modellazione del gioco. Le classi dell'interfaccia mostrate nel diagramma non sono state menzionate poiché inutili ai fini del progetto di sistemi distribuiti, possiamo solamente dire che il \texttt{GamePanel} è una componente dell'interfaccia che si occupa di inserire le parole da parte dell'utente.
+In Figura~\ref{fig:sequence1} possiamo osservare il comportamento della parte di comunicazione, messo in relazione con tutta la parte di modellazione del gioco. Le classi dell'interfaccia mostrate nel diagramma non sono state menzionate poiché inutili ai fini del progetto di sistemi distribuiti, possiamo solamente dire che il \texttt{GamePanel} è una componente dell'interfaccia che si occupa di inserire le parole da parte dell'utente.
 
 \begin{figure}
 	\vspace*{-0.5in}
 	\begin{center}
 		\hspace*{-0.45in}
 		\includegraphics[scale=0.75]{imgs/ClassDiagram2.pdf}
-		\label{fig:class_diagram2}
-		\caption{Il diagramma delle classi di tutta la parte di comunicazione del gioco. Da notare \texttt{ServerSideInterface} che estende la classe \texttt{Remote}, e quindi viene solamente utilizzata per Java RMI, in modo che i client side dei vari peer possano chiamare in remoto i metodi del \texttt{ServerSide}.}
+		\caption{Il diagramma delle classi di tutta la parte di comunicazione del gioco. Da notare \texttt{ServerSideInterface} che estende la classe \texttt{Remote}, e quindi viene solamente utilizzata per Java RMI, in modo che i client side dei vari peer possano chiamare in remoto i metodi del \texttt{ServerSide}.}\label{fig:class_diagram2}
 	\end{center}
 \end{figure}
 
