@@ -10,7 +10,7 @@
 % Steps to compile: latex, bibtex, latex latex
 %
 %\documentclass[prodmode,acmtap]{acmlarge}
-\documentclass[10.5pt]{article}
+\documentclass[9pt]{article}
 
 \addtolength{\voffset}{-50pt}
 \addtolength{\hoffset}{-50pt}
@@ -23,7 +23,7 @@
 \usepackage{makeidx}
 \usepackage{graphicx}
 
-\linespread{1.1}
+\linespread{1}
 
 % Package to generate and customize Algorithm as per ACM style
 %\usepackage[ruled]{algorithm2e}
@@ -41,19 +41,25 @@
 
 
 \begin{document}
-%\large
 
 \maketitle
 
 \begin{abstract}
 % (non più di dieci righe): riassume di cosa tratta la relazione.
-[----------------------- TODO ------------------------]
-\vspace*{50mm}
+
+La presente relazione tratta della realizzazione del progetto per il corso di Sistemi Distribuiti. E' stato progettato e implementato un famoso gioco di parole, in cui i giocatori devono scrivere una parola che sia collegata alla precedente parola per mezzo di sillabe comuni (l'ultima sillaba della parola precedente e la prima sillaba della nuova parola).
+
+Il sistema distribuito realizzato permette ad un numero arbitrario di giocatori di giocare tra loro senza l'ausilio di componenti centralizzate (eccetto il registrar per l'inizio della partita). Ciò fa sì che i guasti crash dei giocatori possano essere efficacemente individuati e gestiti, e che la partita possa continuare senza eccezioni anche nel caso in cui tutti i giocatori eccetto uno crashano.
+
+La presente relazione descrive le tecniche utilizzate, e ne valuta i vantaggi e gli svantaggi, senza escludere le difficoltà incontrate e ciò che abbiamo imparato da questa esperienza formativa.
+
+
 \end{abstract}
 
 
 \tableofcontents
 
+\newpage
 \section{Introduzione}
 % in cui si inquadra il problema affrontato, chiarendo gli obiettivi, riassumendo lo stato dell'arte, e descrivendo la struttura della relazione.
 
@@ -107,11 +113,11 @@ Un giocatore può ritirarsi in qualunque momento. In quel caso, il gioco continu
 
 L'obiettivo principale del presente progetto è la realizzazione del gioco in un ambiente distribuito, in cui varie entità distribuite (che chiameremo \emph{peer}, vista la loro intrinseca natura client/server) comunicano tra loro attraverso una rete asincrona, non affidabile, come quella di Internet. In questo tipo di contesto sono necessari coordinazione tra i peer e gestione di stati condivisi. Infatti, lo stato del gioco, composto di elementi che devono essere condivisi tra i vari peer in maniera coerente, non può risiedere in un unico peer che funge da nodo centrale.
 
-Sono state fatte delle semplificazioni per non dovere affrontare errori difficili da risolvere, che sono le stesse riportate dalle specifiche del progetto: per prima cosa si assume di avere delle comunicazioni affidabili (ovvero non è possibile che si guastino), ed i processi possono avere solamente guasti di tipo crash. Ciò significa che assumiamo sempre che un peer che non riusciamo a contattare, per un certo periodo di tempo, sia un peer che ha subito un crash, piuttosto che un peer che non riusciamo a contattare per via di un fallimento della rete, o per via di una temporanea indisponibilità del peer stesso. 
+Sono state fatte delle semplificazioni importanti per evitare alcuni degli problemi più difficili da affrontare, tutte riportate dalle specifiche del progetto. Per prima cosa si assume di avere delle comunicazioni affidabili, che i processi possono avere solamente guasti di tipo crash e che il tempo possa essere usato per catturare i peer crashati. Ciò significa che assumiamo sempre che un peer che non riusciamo a contattare per un certo periodo di tempo sia un peer che ha subito un crash, escludendo fallimenti della rete o temporanee indisponibilità del peer stesso (per lenti o crashati sono indistinguibili). 
 
-Alcuni problemi correlati a queste assunzioni sono comunque stati risolti. Si pensi ad esempio che un peer che precedentemente dichiarato crashato, poiché lento o per ritardi di comunicazione, torna a comunicare con i peer della rete, viene comunque ignorato: il giocatore vedrà un messaggio che lo avverte del fatto che la propria connessione è troppo lenta e che quindi è stato cacciato fuori la partita, come avviene in molti giochi commerciali.
+Alcuni problemi correlati a queste assunzioni sono comunque stati risolti. Ad esempio, un peer che, precedentemente dichiarato crashato, tornasse a comunicare con i peer della rete, verrebbe comunque ignorato: il giocatore vedrà comparire un messaggio che lo avverte del fatto che è stato escludo dalla partita per connessione troppo lenta (come avviene in molti giochi commerciali).
 
-Inoltre, secondo le specifiche, come paradigma di comunicazione, è stato utilizzato remote invocation, in particolare il Remote Method Invocation (RMI) di Java. Ciò fornisce un modo semplice ed ad alto livello per comunicare tra i vari peer, che ha semplificato molto l'implementazione delle comunicazioni tra di essi, in quanto tale middleware permette di mascherare l'eterogeneità tra le varie macchine. Ciononostante non è sufficiente da solo per fornire tutte le funzionalità di un ambiente distribuito, come la coordinazione, la gestione degli errori e del tempo.
+Inoltre, secondo le specifiche, il paradigma di comunicazione utilizzato è quello di \emph{remote invocation}, in particolare il \emph{Remote Method Invocation} (RMI) di Java. Ciò fornisce un modo semplice ed ad alto livello per comunicare tra i vari peer, che ha semplificato molto l'implementazione delle comunicazioni tra di essi, in quanto tale middleware permette di mascherare l'eterogeneità tra le varie macchine. Ciononostante non è sufficiente da solo per fornire tutte le funzionalità di un ambiente distribuito, come la coordinazione, la gestione degli errori e del tempo. Tali sono quindi gli obiettivi principali del presente progetto.
 
 \section{Aspetti progettuali}
 % in cui si illustra il progetto svolto; in particolare si discutono i problemi specifici affrontati, le soluzioni valutate e proposte, e l'architettura astratta del sistema sviluppato.
@@ -130,14 +136,14 @@ Interpretare questo gioco nell'ambito dei sistemi distribuiti non è particolarm
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.6]{imgs/ArchitetturaAstratta.pdf}
+\includegraphics[scale=0.6]{imgs/ArchitetturaAstratta.png}
 \caption{Architettura astratta del sistema}
 \label{img:architettura-astratta}
 \end{figure}
 
 Il sistema, a livello astratto, è composto da tre componenti principali ben distinte tra loro: (1) il \emph{modello del gioco}, (2) il \emph{controllore dei giocatori} e (3) il \emph{modulo di comunicazione}. Le tre componenti sono rappresentate in Figura~\ref{img:architettura-astratta}.
 
-La parte di modellazione del gioco racchiude a sua volta tutte le componenti che modellano il gioco, come ad esempio il tavolo di gioco, i giocatori e la gestione delle parole del dizionario.
+La parte di modellazione del gioco comprende tutte le componenti del gioco stesso, come ad esempio il tavolo di gioco, i giocatori e la gestione delle parole del dizionario.
 Questo modulo ignora il fatto che il gioco venga eseguito in rete o in locale, con utenti reali o intelligenze artificiali.
 Pertanto, esso fornisce solamente dei metodi per cambiare lo stato del gioco, e genera eventi per segnalare tali cambiamenti.
 
@@ -182,7 +188,7 @@ Questo protocollo prevede quindi due ack. Il primo è implicitamente fornito al 
 
 
 \subsubsection*{Gestione dei guasti}
-Questo protocollo è resistente tre tipi di guasti: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder. I crash vengono individuati mediante diversi timeout e relativi messaggi di acknowledgement. Essi vengono gestiti mediante ridondanza: i messaggi vengono re-inviati quando necessario. Il turnId viene utilizzato anche per ignorare messaggi relativi a turni precedenti.
+Questo protocollo è resistente a tre tipi di guasti crash: (1) il crash di un nodo della rete che non stia attivamente partecipando ad una comunicazione, (2) il crash di un forwarder del messaggio Word e (3) il crash del turnHolder. I crash vengono individuati mediante diversi timeout e relativi messaggi di acknowledgement. Essi vengono gestiti mediante ridondanza: i messaggi vengono re-inviati quando necessario. Il turnId viene utilizzato anche per ignorare messaggi relativi a turni precedenti.
 
 \paragraph{Crash di un peer generico}
 Il primo caso è raffigurato in Figura~\ref{img:word}(b). Quando un forwarder (o il turnHolder) prova a contattare un peer che è crashato, l'eccezione generata (impossibilità di connettersi al nodo) fa sì che il peer si accorga dell'errore. Il peer allora proverà semplicemente a inviare il messaggio al primo peer attivo immediatamente successivo al peer crashato. Al messaggio Word verrà incorporata l'informazione sul peer morto, in modo tale che tutti i nodi ne siano a conoscenza.
@@ -193,7 +199,7 @@ Se invece a crashare è un forwarder, dopo aver ricevuto la parola, quest'ultima
 \paragraph{Crash del turnHolder}
 Infine, potrebbe essere il turnHoder stesso a crashare. Questo è il caso più delicato, ed anche il più difficile da gestire. Infatti, il turnHolder potrebbe crashare in vari momenti: (1) prima di avere inviato il messaggio Word, oppure (2) dopo averlo inviato, prima di aver ricevuto il messaggio indietro dall'anello, e infine (3) dopo aver ricevuto indietro il messaggio Word dall'anello.
 
-Il terzo caso è raffigurato in Figura~\ref{img:word}(d) ed è gestito attraverso un ulteriore timeout che tutti gli altri peer settano dopo aver ricevuto il messaggio Word dal turnHolder (o indirettamente, dai forwarder). I peer attendono un ulteriore acknowledgement dal turnHolder, denominato WordAck, prima di poter settare il cambio del turno. Questo ack è necessario per rispondere ai requisiti del progetto, ovvero per poter gestire almeno due guasti contemporanei di tipo crash. Se un peer non riceve tale messaggio entro il timeout, il turnHolder attuale viene considerato crashato ed è necessario stabilire chi è il detentore del turno attuale (attraverso un algoritmo simile all'elezione del leader).
+Il terzo caso è raffigurato in Figura~\ref{img:word}(d) ed è gestito attraverso un ulteriore timeout (\emph{timeout 2}) che tutti gli altri peer settano dopo aver ricevuto il messaggio Word dal turnHolder (o indirettamente, dai forwarder). I peer attendono un ulteriore acknowledgement dal turnHolder, denominato WordAck, prima di poter settare il cambio del turno. Questo ack è necessario per rispondere ai requisiti del progetto, ovvero per poter gestire almeno due guasti contemporanei di tipo crash. Se un peer non riceve tale messaggio entro il timeout, il turnHolder attuale viene considerato crashato ed è necessario stabilire chi è il detentore del turno attuale (attraverso un algoritmo simile all'elezione del leader che descriveremo successivamente).
 
 Il secondo caso è simile al terzo, in quanto i peer che hanno ricevuto il messaggio Word faranno partire il timeout per il messaggio di WordAck, il quale scatterà e il crash del turnHolder verrà catturata e gestita allo stesso modo.
 
@@ -207,14 +213,18 @@ Come detto in precedenza, vi è un'analogia tra il concetto di leader e quello d
 
 Dato che ogni peer conosce gli identificativi di tutti gli altri peer, essi sanno anche chi sono i candidati leader nel momento in cui una nuova elezione deve essere eseguita. Supposto che il peer $j$ sia l'attuale leader, il peer $i$ sa che i potenziali candidati leader sono $j$, $j+1$, $\dots$, fino a $i-1$ (supponendo aritmetica modulo $N$). Se tutti loro non dovessero rispondere all'elezione, solo allora $i$ potrebbe capire di essere effettivamente lui il nuovo leader (e quindi il detentore del turno attuale). Nessun peer dopo $i$ può essere un candidato, in quanto $i$ stesso è ancora vivo.
 
-Questo semplice ragionamento suggerisce di utilizzare l'algoritmo \emph{Bully} studiato a lezione per la realizzazione dell'elezione del leader in ambiente distribuito. Infatti, in tale algoritmo si assume che tutti i peer sappiano gli identificativi di tutti gli alti peer e possano identificare univocamente i candidati leader. Quando contattato, colui che sa di essere il leader risponde con un messaggio \emph{SetTurnHolder} a tutti i peer che non sono possibili candidati, ovvero tutti i peer eccetto se stesso.
+Questo semplice ragionamento suggerisce di utilizzare l'algoritmo \emph{Bully} studiato a lezione per la realizzazione dell'elezione del leader (turnHolder) in ambiente distribuito. Infatti, in tale algoritmo si assume che tutti i peer sappiano gli identificativi di tutti gli alti peer e possano identificare univocamente i candidati leader. Quando contattato, colui che sa di essere il leader risponde con un messaggio \emph{SetTurnHolder} a tutti i peer che non sono possibili candidati, ovvero tutti i peer eccetto se stesso.
 
-L'algoritmo Bully è tale da gestire anche i guasti eventuali durante l'elezione. Essi sono gestiti per mezzo di due timeout, settati entrambi da coloro che indicono l'elezione.
+L'algoritmo Bully è tale da gestire anche i guasti eventuali durante l'elezione, a differenza dell'altro algoritmo studiato, ovvero quello ad anello. I guasti sono gestiti per mezzo di due timeout, settati entrambi da coloro che vogliono indire l'elezione, in due momenti differenti. L'algoritmo del Bully assume anche che le connessioni siano affidabili (assunzione presente nel nostro caso) e che il sistema sia sincrono, ovvero si possano usare timeout per gestire i guasti, tutte caratteristiche che lo rendono adatto al nostro contesto particolare.
 
 
 \subsubsection*{Terminazione della partita}
 
-Per la terminazione della partita è necessario che tutti i peer siano d'accordo su un unico vincitore, coerentemente con le informazioni dei punteggi di tutti i giocatori e dei peer che hanno subito un guasto. La terminazione di una partita può essere decretata da quel peer che ha proposto una parola con punteggio negativo, a seguito di un intero ciclo di turni dove ogni peer ha a sua volta ottenuto un punteggio negativo. Tale peer, essendo il detentore del turno, può quindi decidere chi sia il vincitore ed inviare tale informazione a tutti gli altri nodi, direttamente utilizzando il messaggio di word, in modo che la decisione sia coerente con tutti gli altri. Questo calcola il vincitore sulla base dei punteggi dei giocatori, che i messaggi di word hanno garantito essere uguali per tutti i nodi. Ciò che non sappiamo con precisione istantanea sono invece le informazioni sui peer che hanno subito un guasto. Per questo motivo il turnHolder decide il vincitore sulla base delle informazioni che ha al momento dell'invio del messaggio di word. Se tale messaggio, dopo avere compiuto un giro attorno all'anello, dovesse rilevare altri morti, allora il turnHolder dovrebbe ricalcolare il vincitore, e se questo fosse diverso dovrebbe reinviare lo stesso messaggio di Word, cambiando solamente il vincitore. In tal modo gestiamo il caso in cui venga decretato come vincitore un peer che abbia poi subito un guasto. Da notare che, grazie alla gestione degli id dei messaggi di Word, gli ulteriori messaggi che vengono spediti vengono ignorati (ovvero non vengono aggiunte le parole nel tavolo di gioco, viene però cambiato il vincitore). Successivamente il messaggio di WordAck, che viene solitamente utilizzato per avanzare il turno, può essere visto come un commit, che conferma definitivamente il vincitore. Pertanto, alla ricezione di tale messaggio, il peer mostra a video il vincitore, decretando quindi la fine del gioco.
+Per la terminazione della partita è necessario che tutti i peer siano d'accordo su un unico vincitore, coerentemente con le informazioni dei punteggi di tutti i giocatori e dei peer che hanno subito un guasto. La terminazione di una partita può essere decretata da quel peer che ha proposto una parola con punteggio negativo, a seguito di un intero ciclo di turni dove ogni peer ha a sua volta ottenuto un punteggio negativo. Tale peer, essendo il detentore del turno, può quindi decidere chi sia il vincitore ed inviare tale informazione a tutti gli altri nodi, direttamente riutilizzando il messaggio di Word (per semplicità, nel messaggio Word vi è un campo extra per l'invio del vincitore), in modo che la decisione sia coerente con tutti gli altri. Questi calcola il vincitore sulla base dei punteggi dei giocatori, che i messaggi di Word hanno garantito essere uguali per tutti i nodi.
+
+Ciò che non sappiamo con precisione istantanea sono invece le informazioni sui peer che hanno subito o stanno subendo un guasto. Per questo motivo è il turnHolder a decidere il vincitore sulla base delle informazioni che ha al momento dell'invio del messaggio di Word. Se tale messaggio, dopo avere compiuto un giro attorno all'anello, dovesse rilevare altri peer crashati, allora il turnHolder dovrebbe ricalcolare il vincitore, e se questo fosse diverso dovrebbe reinviare un nuovo messaggio di Word con il nuovo vincitore. In tal modo gestiamo il caso in cui venga decretato come vincitore un peer che abbia poi subito un guasto.
+
+Da notare inoltre che, grazie alla gestione dei turnId nei messaggi di Word, gli ulteriori messaggi che vengono spediti vengono ignorati (ovvero non vengono aggiunte le parole nel tavolo di gioco, viene però cambiato il vincitore). Successivamente il messaggio di WordAck, che viene solitamente utilizzato per avanzare il turno, può essere visto come un \emph{commit}, che conferma definitivamente il vincitore e sancisce la fine della partita. Pertanto, alla ricezione di tale messaggio, il programma mostra a video il vincitore e termina il gioco.
 
 \section{Aspetti implementativi}
 % dettagli sulle scelte implementative, ed architettura specifica implementata. Inserire almeno il diagramma delle classi e uno delle interazioni secondo lo standard UML.
@@ -225,9 +235,10 @@ Per la terminazione della partita è necessario che tutti i peer siano d'accordo
 
 Il gioco in sé viene rappresentato da poche classi: \texttt{GameTable}, \texttt{Word}, \texttt{Player} e \texttt{Dictionary}.
 
-La classe \texttt{Word} rappresenta una parola del gioco. Consiste di una semplice stringa, ma ha numerosi metodi utili per scomporla in sillabe e determinarne il valore in punteggi. Inoltre essa è serializzabile, poiché deve poter essere inviata lungo la rete. La classe \texttt{Dictionary} rappresenta un dizionario, e contiene semplici metodi per il lookup di una parola, mentre la classe \texttt{Player} rappresenta un giocatore, con un nickname, un punteggio, uno stato (attivo o non attivo).
+La classe \texttt{Word} rappresenta una parola del gioco ed è serializzabile, per poter essere inviata via RMI. La classe \texttt{Dictionary} rappresenta un dizionario, e contiene semplici metodi per il lookup di una parola, mentre la classe \texttt{Player} rappresenta un giocatore, con un nickname, un punteggio, uno stato (attivo o non attivo).
+%Consiste di una semplice stringa, ma ha numerosi metodi utili per scomporla in sillabe e determinarne il valore in punteggi. Inoltre essa è serializzabile, poiché deve poter essere inviata lungo la rete. La classe \texttt{Dictionary} rappresenta un dizionario, e contiene semplici metodi per il lookup di una parola, mentre la classe \texttt{Player} rappresenta un giocatore, con un nickname, un punteggio, uno stato (attivo o non attivo).
 
-La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene informazioni quali: la lista delle parole che sono state inserite, come anche la lista dei giocatori, ed il giocatore che detiene il turno. Inoltre ha dei metodi per modificare lo stato del gioco, come quello per determinare chi è il prossimo detentore del turno, o per inserire una nuova parola. Tale classe non ha un'idea del fatto di come viene controllato un giocatore; seguendo il design pattern chiamato \textit{Observer Pattern}, la classe è stata progettata per generare degli eventi, quali ad esempio l'inserimento di una nuova parola, il cambio del turno, o la terminazione del gioco. Sono poi presenti diversi listener che rispondono in maniera passiva a questi eventi seguendo delle azioni opportune, come il \texttt{Peer} che all'inserimento di una nuova parola manda dei messaggi per informare anche agli altri peer di tale evento.
+La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene informazioni quali: la lista delle parole che sono state inserite, la lista dei giocatori, ed il giocatore che detiene il turno. Inoltre ha dei metodi per modificare lo stato del gioco, per settare il prossimo detentore del turno, o per inserire una nuova parola. Tale classe non ha un'idea del fatto di come viene controllato un giocatore; seguendo il design pattern chiamato \textit{Observer Pattern}, la classe è stata progettata per generare degli eventi, quali ad esempio l'inserimento di una nuova parola, il cambio del turno, o la terminazione del gioco. Sono poi presenti diversi listener che rispondono in maniera passiva a questi eventi seguendo delle azioni opportune, come il \texttt{Peer} che all'inserimento di una nuova parola manda dei messaggi per informare anche agli altri peer di tale evento.
 
 \begin{figure}
 	\centering
@@ -238,7 +249,7 @@ La classe \texttt{GameTable} rappresenta il tavolo di gioco. Essa contiene infor
 		\label{fig:class_diagram1}
 \end{figure}
 
-In Figura~\ref{fig:class_diagram1} possiamo osservare il diagramma delle classi di tutta la parte di modellazione del gioco. Questa, come si può intuire, comprende solamente una piccola parte dell'intera applicazione. che corrisponde agli elementi che abbiamo cercato di descrivere in maniera approfondita. Da notare che anche il \texttt{Player} può generare un evento (che avviene al cambio del punteggio), ma questi vengono esclusivamente intercettati dal \texttt{GameTable} che a sua volta genera l'evento \texttt{playerPointsUpdate()}. Quest'ultimo serve solamente alla parte dell'interfaccia per aggiornare visivamente il punteggio dei giocatori.
+In Figura~\ref{fig:class_diagram1} possiamo osservare il diagramma delle classi di tutta la parte di modellazione del gioco. Questa, come si può intuire, comprende solamente una piccola parte dell'intera applicazione. che corrisponde agli elementi che abbiamo cercato di descrivere più nel dettaglio. Da notare che anche il \texttt{Player} può generare un evento (che avviene al cambio del punteggio), ma questi vengono esclusivamente intercettati dal \texttt{GameTable} che a sua volta genera l'evento \texttt{playerPointsUpdate()}. Quest'ultimo serve solamente alla parte dell'interfaccia per aggiornare visivamente il punteggio dei giocatori.
 
 \subsection{Comunicazione}
 
@@ -246,29 +257,31 @@ In Figura~\ref{fig:class_diagram1} possiamo osservare il diagramma delle classi 
 	\centering
 %		\hspace*{-0.2in}
 		\includegraphics[scale=0.51]{imgs/Sequence1.pdf}		
-		\caption{}
+		\caption{Esempio di un peer che riceve una Word da un altro peer e la comunica al GameTable. Successivamente, il WordAck fa cambiare il turno, permettendo al giocatore locale di giocare ed inserire una nuova parola. Tale parola viene inviata al peer successivo.}
 		\label{fig:sequence1}
 \end{figure}	
 
 
-I \texttt{Peer} è un entità che controlla un determinato giocatore (\texttt{Player}). Esso, al momento della creazione di un gioco, si registra come listener per intercettare gli eventi del \texttt{GameTable}. Fatto ciò, ogni volta che l'utente locale ad esempio inserisce una parola, crea un messaggio di tipo \texttt{WordMsg} e lo aggiunge alla coda dei messaggi di uscita del \texttt{ClientSide} chiamando il metodo \texttt{send\_msg()}.
+Il \texttt{Peer} è la classe che gestisce tutte le comunicazioni nella rete e gli eventi relativi. Vi un \texttt{Peer} per ogni giocatore (\texttt{Player}). Esso, al momento della creazione di un gioco, si registra come listener per intercettare gli eventi del \texttt{GameTable}. Fatto ciò, ogni volta che l'utente locale inserisce una parola, crea un messaggio di tipo \texttt{WordMsg} e lo aggiunge alla coda dei messaggi di uscita del \texttt{ClientSide} chiamando il metodo \texttt{send\_msg()}.
 
-Il \texttt{ClientSide} è un thread con metodi e campi in più rispetto ad un normale thread, nasce e muore insieme al peer, provvedendo alla gestione dell'invio dei messaggi del peer. Si compone di una coda: è stato deciso di utilizzare la \texttt{BlockingQueue}, ma senza limitazioni nella dimensione, per fornire una coda che potesse essere utilizzata da più thread (il thread del peer e quello del \texttt{ClientSide}). Il metodo \texttt{send\_msg\_rmi(Msg)} altro non fa che ``eseguire'' il messaggio, raccogliendo tutti gli eventuali errori che possono essere generati da Java RMI. 
+Il \texttt{ClientSide} è un thread esteso, che nasce e muore insieme al peer, e provvede alla gestione dell'invio dei messaggi del peer. Contiene una coda di tipo \texttt{BlockingQueue} per i messaggi in uscita, senza limitazioni nella dimensione. Il metodo \texttt{send\_msg\_rmi(Msg)} altro non fa che ``eseguire'' il messaggio, raccogliendo tutti gli eventuali errori che possono essere generati da Java RMI. 
 
-Utilizziamo il termine ``eseguire'' poiché un messaggio, in generale, è in realtà una classe che contiene un metodo \texttt{execute()} che chiama il metodo remoto presente nel server side del peer destinatario. Ogni tipo di messaggio esegue quindi un metodo differente, e i parametri del messaggio vengono utilizzati come argomenti per i metodi che vengono richiamati. 
+Utilizziamo il termine ``eseguire'' poiché un messaggio è in realtà un oggetto di una classe contenente un metodo \texttt{execute()}, che chiama il metodo remoto presente nel server side del peer destinatario. Ogni tipo di messaggio esegue quindi un metodo \texttt{execute()} differente, e i parametri del messaggio vengono utilizzati come argomenti per i metodi che vengono richiamati. 
 
-Il \texttt{ServerSide} è invece una classe, istanziata solamente una volta per ogni peer, che costituisce l'insieme dei metodi che possono essere richiamati da ogni messaggio. Facendo un esempio, il metodo \texttt{execute()}, del messaggio di tipo \texttt{WordMsg}, esegue il metodo del \texttt{ServerSide} del destinatario chiamato \texttt{word()}, specificando come argomenti quelli propri del messaggio: chi lo ha generato (chi detiene il turno), la parola inserita, il tempo impiegato per inserire la parola, se esiste un vincitore (cioè la partita può terminare), e la lista dei peer morti che si sono accumulati lungo il percorso.
-
-C'è quindi un disaccoppiamento tra il peer e l'invio dei messaggi. Questo poiché, per implementare il progetto, è stato utilizzato \textit{Java RMI}, e di conseguenza inviare un messaggio equivale ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario. Detto ciò è stato deciso di creare un thread separato (il client side) che si occupasse solo dell'invio dei messaggi, in modo da non bloccare l'intera applicazione per lunghi periodi (si pensi all'attesa causata da un peer che non risponde, oppure ad un messaggio che altro non è che una chiamata ricorsiva). In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
-
-Nel seguente estratto, molto semplificato, del codice del \texttt{ClientSide} possiamo vedere quali siano le azioni base intraprese dal metodo \texttt{execute()} di un messaggio di tipo \texttt{WordMsg}.
+Il \texttt{ServerSide} è invece una classe, istanziata solamente una volta per ogni peer, che costituisce l'insieme dei metodi che possono essere richiamati da ogni messaggio. Per esempio, il metodo \texttt{execute()} del messaggio di tipo \texttt{WordMsg} esegue il metodo del \texttt{ServerSide} del destinatario chiamato \texttt{word()}, specificando come argomenti quelli propri del messaggio: chi lo ha generato (chi detiene il turno), la parola inserita, il tempo impiegato per inserire la parola, se esiste un vincitore (cioè la partita può terminare), e la lista dei peer morti che si sono accumulati lungo il percorso.
+Il seguente estratto di codice esemplifica meglio quanto appena detto e mostra le azioni intraprese dal client side per l'invio del messaggio Word via Java RMI:
 \begin{verbatim}
 	registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
 	stub = registry.lookup("ServerSide");
 	response = stub.word(id, word, time, winnerId, crashedPeer);
 \end{verbatim}
 
-In Figura~\ref{fig:sequence1} possiamo osservare il comportamento della parte di comunicazione, messo in relazione con tutta la parte di modellazione del gioco. Le classi dell'interfaccia mostrate nel diagramma non sono state menzionate poiché inutili ai fini del progetto di sistemi distribuiti, possiamo solamente dire che il \texttt{GamePanel} è una componente dell'interfaccia che si occupa di inserire le parole da parte dell'utente.
+%C'è quindi un disaccoppiamento tra il peer e l'invio dei messaggi. Questo poiché, per implementare il progetto, è stato utilizzato \textit{Java RMI}, e di conseguenza inviare un messaggio equivale ad eseguire una funzione in un oggetto remoto: nel nostro caso è il client side ad eseguire la funzione nel server side del destinatario.
+Da notare che il client side è stato posto su un thread separato per evitare loop di attesa infinita (si pensi all'attesa causata da un peer che non risponde, oppure a messaggi corrispondenti a chiamate ricorsive come i messaggi di Word ad anello).
+%In tal modo, il peer che deve solamente fare un forward a $P_2$ del messaggio proveniente da un peer $P_1$, all'interno del metodo nel server side (invocato da $P_1$), creerà un messaggio analogo a quello generato da $P_1$, cambiando solamente il destinatario, ed incodandolo al proprio client side, con il risultato che il client side di $P_1$ termina immediatamente, senza aspettare che $P_2$ riceva il messaggio. 
+Quindi, il \texttt{ClientSide} ed il \texttt{ServerSide} vengono eseguiti in thread differenti. Per questo motivo è stato molto importante gestire la concorrenza, sopratutto quando vengono modificati i campi del \texttt{Peer}. Sono stati utilizzati i meccanismi di locking messi a disposizione da Java, per garantire che nessun thread potesse compiere delle operazioni contemporaneamente sul peer. Questa decisione non è limitante in termini di efficienza, poiché la mutua esclusione è stata forzata in piccole porzioni di codice che modificano o leggono i valori del peer.
+
+In Figura~\ref{fig:sequence1} mostriamo il diagramma di interazione tra il modulo di comunicazione e quello di modellazione del gioco. Le classi dell'interfaccia mostrate nel diagramma non sono state menzionate poiché inutili ai fini del progetto di sistemi distribuiti. Notiamo solamente che il \texttt{GamePanel} è una componente dell'interfaccia che si occupa di inserire le parole da parte dell'utente.
 
 \begin{figure}
 	\centering
@@ -279,19 +292,18 @@ In Figura~\ref{fig:sequence1} possiamo osservare il comportamento della parte di
 		\label{fig:class_diagram2}
 \end{figure}
 
-Il \texttt{ClientSide} ed il \texttt{ServerSide}, come anche il \texttt{Peer} vengono eseguiti in thread differenti. Detto ciò è stato molto importante gestire la concorrenza, sopratutto quando vengono modificati i campi del \texttt{Peer}. In particolare sono stati utilizzati i meccanismi di locking messi a disposizione da Java, per garantire che nessun thread potesse compiere delle operazioni contemporaneamente sul peer. Questa decisione non è limitante in termini di efficienza, poiché tali sono stati fatti in modo da non comprendere i ritardi di trasmissione della rete, ma solamente in modo da comprendere solamente le piccole porzioni che modificano o leggono i valori del peer.
-
-Per quanto riguarda invece l'implementazione dei timeout, è stata utilizzata la classe messa a disposizione da Java, chiamata \texttt{Timer}. Questa, memorizzata all'interno del \texttt{Peer}, provvede ad eseguire determinate task dopo un certo periodo di tempo. Tali task (chiamati da Java \texttt{TimerTask}) possono comunque essere annullati, ad esempio in seguito ad una ricezione di un messaggio. Ogni task viene comunque memorizzato all'interno del \texttt{Peer} stesso, in modo che ogni metodo (del \texttt{Peer}, \texttt{ClientSide} o \texttt{ServerSide}) possa crearli, e salvandoli abbiamo la possibilità (anche da parte di altri metodi) di poterli annullare. I task utilizzati sono i seguenti:
-
+I timeout sono stati realizzati per mezzo della classe di Java chiamata \texttt{Timer}. Un timer, memorizzato all'interno del \texttt{Peer}, si occupa di eseguire determinati \texttt{TimerTask} dopo un certo periodo di tempo (timeout). Questi task vengono annullati in seguito ad eventi opportuni, e sono quindi memorizzati anch'essi all'interno del \texttt{Peer}.
+%Ogni task viene comunque memorizzato all'interno del \texttt{Peer} stesso, in modo che ogni metodo (del \texttt{Peer}, \texttt{ClientSide} o \texttt{ServerSide}) possa crearli, e salvandoli abbiamo la possibilità (anche da parte di altri metodi) di poterli annullare.
+I task utilizzati sono i seguenti:
 \begin{itemize}
-\item \texttt{helloTask}: per catturare il fatto che il messaggio \textit{hello} non è ritornato indietro.
-\item \texttt{lastWordTask}: per catturare la morte dei forwarder del messaggio \textit{word}.
+\item \texttt{helloTask}: per catturare il fatto che il messaggio \textit{Hello} non è tornato indietro.
+\item \texttt{lastWordTask}: per catturare la morte dei forwarder del messaggio \textit{Word}.
 \item \texttt{lastElectionTask}: per catturare la morte del peer che detiene il turno attuale.
 \item \texttt{firstPhaseElectionTask}: per catturare la morte dei peer candidati durante l'elezione.
 \item \texttt{secondPhaseElectionTask}: per catturare la morte del peer eletto nella seconda fase dell'elezione.
 \end{itemize}
 
-Ognuno di questi viene creato e distrutto in momenti differenti. Ad esempio \texttt{lastWordTask} viene creato al momento dell'invio di un messaggio di \textit{word}, e ricreato quando invece si riceve un nuovo messaggio.
+Ognuno di questi viene creato e distrutto in momenti differenti. Ad esempio \texttt{lastWordTask} viene creato al momento dell'invio di un messaggio di \textit{Word}, e ricreato quando invece si riceve un nuovo messaggio.
 
 \section{Valutazione}
 % confronto delle soluzioni proposte con soluzioni analoghe allo stato dell'arte.
@@ -306,15 +318,19 @@ Il nostro gioco è anche facilmente integrabile grazie alla sua architettura ape
 
 %TODO: Valutazioni a livello di comunicazione?
 
-\section{Conclusioni}
+\section{Conclusioni e possibili sviluppi futuri}
 % commenti conclusivi su possibili miglioramenti di quanto discusso, e possibili linee di intervento futuro.
 
+Le sfide poste dal presente progetto sono state molteplici. Da puri problemi di tipo implementativo, come la gestione dei thread e delle parti client e server all'interno dei peer, e dell'invio dei messaggi via RMI, a problemi più tipici dei sistemi distribuiti. Il requisito di dover gestire almeno due guasti di tipo crash ci ha costretto a riflettere molto approfonditamente sul problema del numero degli acknowledgement per i nostri protocolli di cambio turno. Aver utilizzato un'architettura naturalmente ad anello ha semplificato moltissimo la gestione del primo guasto, in quanto l'acknowledgement è implicito alla chiusura dell'anello. Il multicast invece ha semplificato la gestione del secondo ack, in quanto un ulteriore giro dell'anello avrebbe complicato ulteriormente le cose.
+Ancora, è stato interessante riuscire ad applicare il concetto di leader al nostro caso particolare. Con la nostra definizione di leader equivalente al detentore attuale del turno è stato possibile adattare l'algoritmo di elezione del Bully ed inserirlo in maniera efficace all'interno del nostro protocollo.
 
-Sarebbe interessante portare avanti questo progetto anche in ambiente mobile, dove sicuramente un gioco simile può avere successo. Per quanto riguarda la giocabilità ci sono diverse proposte e migliorie. Prima di tutto potrebbe essere più divertente creare dizionari divisi per sezioni, in modo da limitare l'inserimento delle parole solamente a quelle di una determinata categoria scelta all'inizio del gioco. Inoltre, sarebbe interessante, in seguito ad uno studio di usabilità decidere se prevedere casi di terminazione che potrebbero divertire di più i giocatori, come ad esempio la vittoria di un giocatore che realizza moltissimi punti con una sola parola. Poi potrebbe essere anche utile sfruttare tutta la parte già realizzata dei giocatori automatici per rimpiazzare i giocatori che hanno avuto un crash.
+Ci riteniamo molto soddisfatti di aver realizzato questo sistema distribuito, toccando con mano i concetti teorici visti a lezione. D'altra parte è stato anche molto affascinante poter utilizzare un paradigma così potente come RMI, che permette una progettazione ed una stesura del codice molto chiara ed efficace.
 
-Alcuni protocolli utilizzati per la parte di comunicazione potrebbero essere migliorati. Ad esempio si potrebbe considerare di far partire il gioco, nonostante l'inizializzazione sia fallita, dopo un certo numero di secondi, lasciando al gioco stesso il compito di dichiarare chi ha avuto un guasto e chi no. Ciò è stato tralasciato poiché le specifiche del progetto non prevedevano guasti che non fossero di tipo crash, ma sarebbe comunque utile, ai fini della giocabilità, migliorare questa parte. Inoltre, anche la parte che trova quali peer sono morti potrebbe essere migliorata, con un messaggio che gira continuamente nella rete. Tale approccio è comunque stato scartato poiché più difficile da gestire, ma potrebbe velocizzare la partita, dichiarando in maniera più rapida che chi detiene il turno ha subito un guasto.
+Sarebbe interessante portare avanti questo progetto anche in ambiente mobile, dove sicuramente un gioco simile può avere successo. Per quanto riguarda la giocabilità, abbiamo pensato a diverse proposte e migliorie. Prima di tutto potrebbe essere più divertente creare dizionari divisi per sezioni, in modo da limitare l'inserimento delle parole solamente a quelle di una determinata categoria scelta all'inizio del gioco. Inoltre, sarebbe interessante, in seguito ad uno studio di usabilità, decidere se prevedere casi di terminazione differenti, come ad esempio la vittoria di un giocatore che realizza moltissimi punti con una sola parola. Potrebbe anche essere utile sfruttare i giocatori automatici (AI) per rimpiazzare i giocatori che hanno subito un crash.
 
-Ci riteniamo comunque soddisfatti di aver realizzato questo sistema distribuito, toccando con mano i concetti teorici visti a lezione. D'altra parte è stato anche molto affascinante poter utilizzare un paradigma così potente, che permette una progettazione ed una stesura del codice molto chiara ed efficace.
+Alcuni protocolli utilizzati per la parte di comunicazione potrebbero essere migliorati. Ad esempio si potrebbe considerare di far partire il gioco anche se l'inizializzazione fallisce dopo un certo numero di secondi, lasciando al gioco stesso il compito di dichiarare chi ha avuto un guasto e chi no. Ciò è stato tralasciato poiché le specifiche del progetto non prevedevano guasti che non fossero di tipo crash. Inoltre, il discovery dei peer crashati potrebbe essere velocizzato, attraverso un messaggio che gira continuamente nella rete. Tale approccio è comunque stato scartato poiché più difficile da gestire.
+
+
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}
