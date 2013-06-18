@@ -171,12 +171,15 @@ public class ServerSide implements ServerSideInterface {
 						peer.lastWordTask = null;
 					}
 
-					if (winnerOrd != -1 && somethingChange) {
+					if (peer.iAmAlone()) {
+						System.out.println("Sono rimasto da solo, mi setto come vincitore senza inviare niente a nessuno.");
+						gameTable.setWinner(peer.player);
+						gameTable.finishTheGame();
+					} else if (winnerOrd != -1 && somethingChange) {
 						/* Nel caso in cui sia un messaggio di vittoria e questo ritorna, ma facendo il giro qualcuno è morto
 						* ed io non lo sapevo, allora reinvio il messaggio word, in modo che venga calcolato il nuovo vincitore */
 						System.out.println("Reinvio il messaggio di word di fine gioco, perché qualcuno è morto durante la consegna.");
 						peer.sendWord(word, remainingTimeMilliseconds);
-
 					} else {
 						System.out.println("E invio Ack finale a tutti i peer per segnare il cambio turno (e per il sec. guasto).");
 						peer.sendWordAck();
@@ -220,14 +223,12 @@ public class ServerSide implements ServerSideInterface {
 				peer.nextTurn();
 			}
 
-			// E' l'ack di un turno vecchio, ERRORE GRAVE!
-			/// NOTA: TEORICAMENTE STA COSA NON DOVREBBE MAI SUCCEDERE...
+			// E' l'ack di un turno vecchio, lo ignoro
 			else {
 				System.out.println("L'ack è vecchio, ignoro il messaggio.");
 			}
 
 			// Inoltre, questo significa che il turnHolder non è morto
-			/// NOTA: Questo può essere un po' ridondante visto che c'è già il timer lastWordTask.. togliere lastWordtask forse?
 			peer.rescheduleTurnHolderTimer();
 
 		}

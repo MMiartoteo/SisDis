@@ -191,7 +191,6 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		if (isPlaying) {
 			isPlaying = false;
 			txtWord.setEnabled(false);
-			//TODO: feedback visuale se la parola fa errore (non è presente nel dizionario, o non è conforme alla parola precedente, ecc...)
 			gameTable.addWord(timeoutElapsed ? null : new Word(txtWord.getText()), timePanel.endTimer(), true);
 			txtWord.setText("");
 		}

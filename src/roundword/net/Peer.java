@@ -114,7 +114,7 @@ public class Peer implements GameTable.EventListener {
 				rescheduleTurnHolderTimer();
 			}
 		};
-		timer.schedule(lastElectionTask, 10000); /// TODO <--- metti delay corretto!
+		timer.schedule(lastElectionTask, peers.size() * peers.size() * (NetConstants.T_trans+NetConstants.T_proc) + NetConstants.T_extratime);
 	}
 	
 	public boolean isActive() {
@@ -147,7 +147,6 @@ public class Peer implements GameTable.EventListener {
 	
 	public synchronized Peer getNextActivePeer() {
 		for (int i=(getOrd()+1)%peers.size(); ; i=(i+1)%peers.size()) {
-			assert i!=getOrd(); // Significherebbe che non ci sono più altri peer attivi in giro...
 			Peer p = peers.get(i);
 			if (p.isActive()) {
 				return p;
@@ -191,6 +190,14 @@ public class Peer implements GameTable.EventListener {
 		}
 
 		return somethingChanged;
+	}
+
+	public synchronized boolean iAmAlone() {
+		System.out.print("iAmAlone?");
+		boolean ris = true;
+		for (Peer p : peers) if (p != this && p.isActive()) ris = false;
+		System.out.println(" " + ris);
+		return ris;
 	}
 	
 	
@@ -345,8 +352,18 @@ public class Peer implements GameTable.EventListener {
 	/* ---------------------- */
 	protected synchronized void startTurnHolderElection() {
 		System.out.println(String.format("START ELECTION. Il turno attualmente è di %d", gameTable.getTurnHolder().getOrd()));
+
+		if (iAmAlone()) {
+			System.out.println("Sono rimasto da solo setto me stesso come vincitore");
+			if (!gameTable.isGameFinished()) {
+				gameTable.setWinner(this.player);
+				gameTable.finishTheGame();
+			}
+			return;
+		}
+
 		if (electionActive) {
-			System.out.println("ATTENZIONE!! ELEZIONE ERA GIA' IN CORSO. IGNORO startTurnHolderElection()");
+			System.out.println("Elezione già in corso, ignoro startTurnHolderElection()");
 			return;
 		}
 		
@@ -380,8 +397,20 @@ public class Peer implements GameTable.EventListener {
 					firstPhaseElectionTask = new TimerTask() {
 						@Override
 						public void run() {
+
+							System.out.println("Timer ElectionInit1 scaduto!");
+
+							/* Questo è il caso in cui io sono il coordinatore, ma alla fine sono rimasto da solo,
+							* quindi posso far subito terminare la partita. */
+							if (iAmAlone()) {
+								System.out.println("Sono rimasto da solo, termino la partita");
+								gameTable.setWinner(player);
+								gameTable.finishTheGame();
+								return;
+							}
+
 							// Se scade, devi settare te stesso come coordinatore e dirlo a quelli dopo di te.
-							System.out.println("Timer ElectionInit1 scaduto! Setto me come TurnHolder e lo dico a tutti.");
+							System.out.println("Setto me come TurnHolder e lo dico a tutti.");
 							gameTable.setTurnHolder(player);
 
 							if (gameTable.isGameFinished()) {
@@ -395,7 +424,7 @@ public class Peer implements GameTable.EventListener {
 					};
 					timer.schedule(firstPhaseElectionTask, delay);
 				} else {
-					System.out.println("** ATTENZIONE! 'firstPhaseElectionTask' era già non null... E' possibile?!");
+					System.out.println("** ATTENZIONE! 'firstPhaseElectionTask' era già non null...");
 				}
 				/// NOTA: qui sarebbe meglio schedulare il timer task solo
 				/// dopo aver spedito almeno il primo messaggio.

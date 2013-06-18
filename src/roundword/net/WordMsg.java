@@ -2,6 +2,7 @@ package roundword.net;
 import roundword.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -51,7 +52,7 @@ public class WordMsg extends Msg {
 		try {
 			Registry registry = LocateRegistry.getRegistry(destPeer.IPaddr, destPeer.serverPortno);
 			ServerSideInterface stub = (ServerSideInterface) registry.lookup("ServerSide");
-			String response;
+			Set<Byte> crashedOrds;
 
 			synchronized (sourcePeer) {
 
@@ -60,11 +61,11 @@ public class WordMsg extends Msg {
 					timer.schedule(timerTask, delay); // delay is in milliseconds
 				}
 
-				response = stub.word(id, word, remainingTimeMilliseconds, winnerOrd, sourcePeer.getCrashedPeerOrds());
-
+				crashedOrds = sourcePeer.getCrashedPeerOrds();
 			}
 
-			return response;
+			return stub.word(id, word, remainingTimeMilliseconds, winnerOrd, crashedOrds);
+
 		} catch (java.rmi.ConnectException e) {
 			// Prova a inviare a quello dopo ancora...
 			System.out.println("Msg Word Fallito. QUESTO PEER E' MORTO! Provo a inviare al Peer dopo.");

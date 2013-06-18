@@ -159,6 +159,8 @@ public class GameTable implements Player.EventListener {
 	public void setTurnHolder(Player turnHolder) {
 		Player oldTurnHolder = this.turnHolder;
 
+		System.out.println("Chiamata a setTurnHolder");
+
 
 		if (this.turnHolder == turnHolder) return;
 		if (turnHolder == null) throw new NullPointerException("turnHolder is null");

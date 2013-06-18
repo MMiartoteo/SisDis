@@ -4,12 +4,6 @@ import java.rmi.registry.Registry;
 
 public class ElectionSetTurnHolderMsg extends Msg {
 
-
-	//TODO: duplicati?
-	public static final int T_trans = 200; // milliseconds
-	public static final int T_proc  = 200; // milliseconds
-	public static final int T = 2*T_trans + T_proc;
-	
 	int turnHolder;
 	
 	public ElectionSetTurnHolderMsg(Peer sourcePeer, Peer destPeer, int turnHolder) {
