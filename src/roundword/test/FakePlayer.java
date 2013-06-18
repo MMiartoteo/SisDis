@@ -91,7 +91,7 @@ public class FakePlayer extends Thread implements GameTable.EventListener {
 			word di ritorno comincia a mandare gli ack a tutti, compreso se stesso, dove chiama la finishGame, e quindi
 			terminerà. In questo modo però gli altri nodi devono risvegliarsi e mandare il messaggio di word.
 		 */
-		System.exit(0);
+		//System.exit(0);
 		deadThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
