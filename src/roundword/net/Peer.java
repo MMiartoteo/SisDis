@@ -114,6 +114,7 @@ public class Peer implements GameTable.EventListener {
 				rescheduleTurnHolderTimer();
 			}
 		};
+
 		timer.schedule(lastElectionTask, peers.size() * peers.size() * (NetConstants.T_trans+NetConstants.T_proc) + NetConstants.T_extratime);
 	}
 	
