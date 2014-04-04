@@ -83,7 +83,7 @@ public class Starter {
 		 * */
 		String response = null;
 		while (true) {
-			if (eventListener != null) eventListener.messageUpdate("Connessione in corso...");
+			if (eventListener != null) eventListener.messageUpdate("Attempting connection to the registrar...");
 
 			HttpURLConnection connection = null;
 			try {
@@ -103,8 +103,8 @@ public class Starter {
 				response = sb.toString();
 				if (eventListener != null) eventListener.messageUpdate(response);
 			} catch (java.net.ConnectException e) {
-				System.out.println("Impossibile contattare il registrar.");
-				if (eventListener != null) eventListener.gameFailedToStart("Impossibile contattare il registrar.");
+				System.out.println("Impossible to connect to the registrar.");
+				if (eventListener != null) eventListener.gameFailedToStart("Impossible to contact the registrar.");
 				return;
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -117,13 +117,13 @@ public class Starter {
 				connection.disconnect();
 				if (response != null) {
 					if (response.split("\n")[0].equals("nickname-present")) {
-						if (eventListener != null) eventListener.gameFailedToStart(String.format("Il nickname %s è già stato scelto.", player_name));
+						if (eventListener != null) eventListener.gameFailedToStart(String.format("The nickname %s is already taken.", player_name));
 						return;
 					} else if (response.split("\n")[0].equals("start")) {
 						break;
 					} else if (response.split("\n")[0].equals("wait")) {
 						int neededPlayers = Integer.valueOf(response.split("\n")[1]);
-						if (eventListener != null) eventListener.messageUpdate(String.format(neededPlayers > 1 ? "In attesa di altri %d giocatori" : "In attesa di un altro giocatore", neededPlayers));
+						if (eventListener != null) eventListener.messageUpdate(String.format(neededPlayers > 1 ? "Waiting for %d more players" : "Waiting for one more player", neededPlayers));
 					}
 				}
 			}
@@ -168,9 +168,9 @@ public class Starter {
 			}
 		}
 		if (localPlayer == null || p == null) {
-			System.out.println("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
+			System.out.println("The local player/peer is not in the list of players received by the registrar! You couldn't enter this game! Please, try again");
 			if (eventListener != null) {
-				eventListener.gameFailedToStart("Il player/peer locale non è presente nella lista riportata dal registrar! Sei rimasto fuori dal gioco!");
+				eventListener.gameFailedToStart("The local player/peer is not in the list of players received by the registrar! You couldn't enter this game! Please, try again");
 			}
 			return;
 		}

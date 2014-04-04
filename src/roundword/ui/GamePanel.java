@@ -98,7 +98,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		wordPanel.setBackground(UIConstants.BackgroundColor);
 		add(wordPanel);
 
-		JLabel lblInformazioniGiocatore = new JLabel("La tua parola");
+		JLabel lblInformazioniGiocatore = new JLabel("Your word");
 		lblInformazioniGiocatore.setForeground(UIConstants.TextInfoColor);
 		lblInformazioniGiocatore.setFont(UIConstants.TextInfoFont);
 		wordPanel.add(lblInformazioniGiocatore);
@@ -125,7 +125,7 @@ public class GamePanel extends JPanel implements GameTable.EventListener {
 		((AbstractDocument) txtWord.getDocument()).setDocumentFilter(new UppercaseDocumentFilter());
 		wordPanel.add(txtWord);
 
-		JLabel lblInformazioniGiocatore2 = new JLabel("Le ultime parole");
+		JLabel lblInformazioniGiocatore2 = new JLabel("Last words");
 		lblInformazioniGiocatore2.setForeground(UIConstants.TextInfoColor);
 		lblInformazioniGiocatore2.setFont(UIConstants.TextInfoFont);
 		add(lblInformazioniGiocatore2);

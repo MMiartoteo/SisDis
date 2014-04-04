@@ -32,7 +32,7 @@ public class PlayerInfoPanel extends JPanel implements GameTable.EventListener {
 		setBackground(UIConstants.InfoBarBackgroundColor);
 		setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblInformazioniGiocatore = new JLabel("Informazioni Giocatore");
+		JLabel lblInformazioniGiocatore = new JLabel("Player Info");
 		lblInformazioniGiocatore.setForeground(UIConstants.TextInfoColor);
 		lblInformazioniGiocatore.setFont(UIConstants.TextInfoFont);
 		add(lblInformazioniGiocatore, BorderLayout.NORTH);

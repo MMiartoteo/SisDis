@@ -87,7 +87,7 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 		lblMessages.setBorder(new EmptyBorder(0, 5, 0, 00));
 		controlsBar.add(lblMessages, BorderLayout.WEST);
 
-		JButton btnExit = new JButton("Esci");
+		JButton btnExit = new JButton("Quit");
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent actionEvent) {
 				exit();
@@ -113,29 +113,29 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 	public void newWordAdded(Player p, Word w, long milliseconds, WordAddedState state) {
 		if (p == gameTable.getLocalPlayer()) {
 			if (state == WordAddedState.TIMEOUT_ELAPSED) {
-				lblMessages.setText("<html><div style=\"width: 1000\">Non sei riuscito ad inserire una parola</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\">You weren't able to insert a word</div></html>");
 			} else if (state == WordAddedState.NO_IN_DICTIONARY) {
-				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito una parola sconosciuta</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\">You inserted an unknown word</div></html>");
 			} else if (state == WordAddedState.SYLLABE_INCORRECT) {
-				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito una parola che non iniziava con l'ultima sillaba della precedente</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\">You inserted a word which doesn't start with the last syllabe of the previous word</div></html>");
 			} else if (state == WordAddedState.PREVIOUSLY_ADDED) {
-				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito una parola già precedentemente inserita</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\">The word you inserted has been already inserted</div></html>");
 			} else if (state == WordAddedState.OK) {
-				lblMessages.setText("<html><div style=\"width: 1000\">Hai inserito la parola: " + w + "</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\">You inserted the word: " + w + "</div></html>");
 			} else {
 				assert(false);
 			}
 		} else {
 			if (state == WordAddedState.TIMEOUT_ELAPSED) {
-				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> non è riuscito ad inserire una parola</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> wasn't able to insert a word</div></html>");
 			} else if (state == WordAddedState.NO_IN_DICTIONARY) {
-				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito una parola sconosciuta</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> inserted an unknown word</div></html>");
 			} else if (state == WordAddedState.SYLLABE_INCORRECT) {
-				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito una parola che non iniziava con l'ultima sillaba della precedente</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> inserted a word which doesn't start with the last syllabe of the previous word</div></html>");
 			} else if (state == WordAddedState.PREVIOUSLY_ADDED) {
-				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito una parola già precedentemente inserita</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> inserted a word that has been previously inserted</div></html>");
 			} else if (state == WordAddedState.OK) {
-				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> ha inserito la parola: " + w + "</div></html>");
+				lblMessages.setText("<html><div style=\"width: 1000\"><b>" + p + "</b> inserted the word: " + w + "</div></html>");
 			} else {
 				assert(false);
 			}
@@ -161,14 +161,14 @@ public class GameFrame extends JFrame implements GameTable.EventListener {
 				String wStr = "<div style=\"font-size: 40px\">";
 
 				if (winnerPlayer == gameTable.getLocalPlayer()) {
-					wStr += "Hai vinto!</div>";
+					wStr += "You win!</div>";
 				} else {
-					wStr += "Hai perso!</div><br/><div style=\"font-size: 20px\"> Il vincitore è: <b>"
+					wStr += "You lose!</div><br/><div style=\"font-size: 20px\"> The winner is: <b>"
 							+ winnerPlayer.toString() + "</b></div>";
 				}
 
 				JOptionPane.showMessageDialog(c,
-						"<html><div style=\"font-size: 20px; text-align:center\">Gioco terminato<br/>" + wStr + "</div></html>",
+						"<html><div style=\"font-size: 20px; text-align:center\">Game over<br/>" + wStr + "</div></html>",
 						"", JOptionPane.PLAIN_MESSAGE);
 
 				//Exit

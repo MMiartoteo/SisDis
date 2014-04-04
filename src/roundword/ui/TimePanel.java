@@ -37,7 +37,7 @@ public class TimePanel extends JPanel {
 		add(container);
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 		
-		JLabel lblTimeLabel = new JLabel("Tempo");
+		JLabel lblTimeLabel = new JLabel("Time");
 		container.add(lblTimeLabel);
 		lblTimeLabel.setForeground(UIConstants.TextInfoColor);
 		lblTimeLabel.setFont(UIConstants.TextInfoFont);

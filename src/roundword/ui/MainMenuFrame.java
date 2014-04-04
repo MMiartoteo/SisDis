@@ -69,7 +69,7 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 		panelForm.add(txtNickname);
 		txtNickname.setColumns(10);
 		
-		JLabel portLabel = new JLabel("Porta:");
+		JLabel portLabel = new JLabel("Your Port:");
 		panelForm.add(portLabel);
 		
 		txtPort = new JTextField();
@@ -77,7 +77,7 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 		panelForm.add(txtPort);
 		txtPort.setColumns(10);
 		
-		JLabel registrarURLLabel = new JLabel("URL Registrar: ");
+		JLabel registrarURLLabel = new JLabel("Registrar URL: ");
 		panelForm.add(registrarURLLabel);
 		
 		txtRegistrarURL = new JTextField();
@@ -100,7 +100,7 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 		buttonsPanel.setBackground(UIConstants.BackgroundColor);
 		statusBarPanel.add(buttonsPanel, BorderLayout.EAST);
 
-		btnExit = new JButton("Esci");
+		btnExit = new JButton("Quit");
 		btnExit.addActionListener(this);
 		buttonsPanel.add(btnExit);
 
@@ -131,26 +131,26 @@ public class MainMenuFrame extends JFrame implements Starter.EventListener, Acti
 	public void actionPerformed(ActionEvent actionEvent) {
 		if (actionEvent.getSource() == btnStartGame) {
 			if (txtNickname.getText().length() == 0) {
-				messagesLabel.setText("Inserisci un nickname");
+				messagesLabel.setText("Insert a nickname");
 				return;
 			} else {
 				Constants.nickName = txtNickname.getText();
 			}
 
 			if (txtPort.getText().length() == 0) {
-				messagesLabel.setText("Inserisci un numero di porta");
+				messagesLabel.setText("Insert a port number");
 				return;
 			} else {
 				try {
 					Constants.portNumber = Integer.valueOf(txtPort.getText());
 				} catch (Exception ex) {
-					messagesLabel.setText("Inserisci un numero di porta valido");
+					messagesLabel.setText("Insert a valid port number");
 					return;
 				}
 			}
 
 			if (txtRegistrarURL.getText().length() == 0) {
-				messagesLabel.setText("Inserisci l'URL del registrar");
+				messagesLabel.setText("Insert the registrar's URL");
 				return;
 			} else {
 				Constants.registrarURL = txtRegistrarURL.getText();
